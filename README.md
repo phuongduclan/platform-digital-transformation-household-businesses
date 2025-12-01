@@ -1,0 +1,1 @@
+A platform that supports the digital transformation of household businesses, built with Python Clean Architecture, MySQL/PostgreSQL, Redis, Flutter mobile app, and NextJS web client. Includes AI features such as RAG with ChromaDB, OpenAI/Gemini LLM, and Speech-to-Text.
