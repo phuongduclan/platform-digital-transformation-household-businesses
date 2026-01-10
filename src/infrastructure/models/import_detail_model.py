@@ -10,5 +10,5 @@ class ImportDetail(Base):
     product_id=Column(Integer,ForeignKey("products.id"),nullable=False)
     unit_id=Column(Integer, ForeignKey("units.id"),nullable=False)
     quantity=Column(Integer,nullable=False)
-    # Chi tiết nhập kho
+    # Đã cập nhật tên file  
    
