@@ -1,7 +1,7 @@
 from domain.models.iuser_repository import IUserRepository
 from domain.models.user import User
 from typing import List, Optional
-from infrastructure.models import User as UserModel
+from infrastructure.models.user_model import UserModel
 from infrastructure.databases.mssql import session
 from sqlalchemy import func, or_
 
@@ -18,7 +18,7 @@ class UserRepository(IUserRepository):
             user_model = UserModel(
                 household_id=user.household_id,
                 role_id=user.role_id,
-                user_name=user.user_name,
+                username=user.username, # Renamed from user_name
                 password=user.password,
                 email=user.email,
                 description=user.description,
@@ -54,8 +54,8 @@ class UserRepository(IUserRepository):
                 user_model.household_id = user.household_id
             if user.role_id is not None:
                 user_model.role_id = user.role_id
-            if user.user_name is not None:
-                user_model.user_name = user.user_name
+            if user.username is not None:
+                user_model.username = user.username
             if user.password is not None:
                 user_model.password = user.password
             if user.email is not None:

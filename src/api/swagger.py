@@ -1,7 +1,12 @@
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.flask import FlaskPlugin
+from api.schemas.auth import LoginUserRequestSchema, LoginUserResponseSchema, RigisterUserRequestSchema, RigisterUserResponseSchema
 from api.schemas.todo import TodoRequestSchema, TodoResponseSchema
+# HEAD Imports
+from api.schemas.invoice import InvoiceRequestSchema, InvoiceResponseSchema, InvoiceWithDetailsSchema
+from api.schemas.invoice_detail import InvoiceDetailRequestSchema, InvoiceDetailResponseSchema
+# Main Imports
 from api.schemas.user import UserRequestSchema, UserResponseSchema, UserUpdateSchema
 from api.schemas.role import RoleRequestSchema, RoleResponseSchema, RoleUpdateSchema
 from api.schemas.function import FunctionRequestSchema, FunctionResponseSchema, FunctionUpdateSchema
@@ -32,21 +37,36 @@ spec.options = {"security": [{"Bearer": []}]}
 spec.components.schema("TodoRequest", schema=TodoRequestSchema)
 spec.components.schema("TodoResponse", schema=TodoResponseSchema)
 
-# User schemas
+# Auth schemas
+spec.components.schema("LoginUserRequest", schema= LoginUserRequestSchema)
+spec.components.schema("LoginUserResponse", schema= LoginUserResponseSchema)
+spec.components.schema("RigisterUserRequest", schema= RigisterUserRequestSchema)
+spec.components.schema("RigisterUserResponse", schema= RigisterUserResponseSchema)
+
+# Invoice schemas (HEAD)
+spec.components.schema("InvoiceRequest", schema=InvoiceRequestSchema)
+spec.components.schema("InvoiceResponse", schema=InvoiceResponseSchema)
+spec.components.schema("InvoiceWithDetails", schema=InvoiceWithDetailsSchema)
+
+# Invoice Detail schemas (HEAD)
+spec.components.schema("InvoiceDetailRequest", schema=InvoiceDetailRequestSchema)
+spec.components.schema("InvoiceDetailResponse", schema=InvoiceDetailResponseSchema)
+
+# User schemas (Main)
 spec.components.schema("UserRequest", schema=UserRequestSchema)
 spec.components.schema("UserResponse", schema=UserResponseSchema)
 spec.components.schema("UserUpdate", schema=UserUpdateSchema)
 
-# Role schemas
+# Role schemas (Main)
 spec.components.schema("RoleRequest", schema=RoleRequestSchema)
 spec.components.schema("RoleResponse", schema=RoleResponseSchema)
 spec.components.schema("RoleUpdate", schema=RoleUpdateSchema)
 
-# Function schemas
+# Function schemas (Main)
 spec.components.schema("FunctionRequest", schema=FunctionRequestSchema)
 spec.components.schema("FunctionResponse", schema=FunctionResponseSchema)
 spec.components.schema("FunctionUpdate", schema=FunctionUpdateSchema)
 
-# RoleFunction schemas
+# RoleFunction schemas (Main)
 spec.components.schema("RoleFunctionRequest", schema=RoleFunctionRequestSchema)
 spec.components.schema("RoleFunctionResponse", schema=RoleFunctionResponseSchema)

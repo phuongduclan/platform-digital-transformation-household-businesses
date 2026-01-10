@@ -1,5 +1,20 @@
 # Configuration settings for the Flask application
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
+class FactoryConfig:
+    """Factory to get configuration based on environment."""
+    @staticmethod
+    def get_config(env: str):
+        if env == 'development':
+            return DevelopmentConfig
+        elif env == 'testing':
+            return TestingConfig
+        elif env == 'production':
+            return ProductionConfig
+        else:
+            return Config
 
 class Config:
     """Base configuration."""
@@ -28,7 +43,6 @@ class ProductionConfig(Config):
     """Production configuration."""
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
         'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
-
 
 class SwaggerConfig:
     """Swagger configuration."""
