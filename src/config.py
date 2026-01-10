@@ -28,7 +28,8 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
-    DATABASE_URI = os.environ.get('POSTGREE_DATABASE_URL')
+    # Use SQLite as fallback if PostgreSQL URL not set
+    DATABASE_URI = os.environ.get('POSTGREE_DATABASE_URL') or 'sqlite:///default.db'
 
 
 class TestingConfig(Config):
