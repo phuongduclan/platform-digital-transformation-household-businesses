@@ -1,39 +1,29 @@
 from flask import Flask, jsonify
-# from api.routes import register_routes
-from api.swagger import spec
-from api.controllers.todo_controller import bp as todo_bp
-from api.controllers.auth_controller import auth_bp as auth_bp
-from api.controllers.invoice_controller import owner_invoice_bp, employee_invoice_bp, draft_order_bp
-from api.controllers.invoice_detail_controller import invoice_detail_bp
-from api.middleware import middleware
-from api.responses import success_response
-from infrastructure.databases import init_db
-from config import Config
+from src.api.swagger import spec
+from src.api.middleware import middleware
+from src.infrastructure.databases import init_db
+from src.config import Config
 from flasgger import Swagger
-from config import SwaggerConfig
+from src.config import SwaggerConfig
 from flask_swagger_ui import get_swaggerui_blueprint
+from src.api.routes import register_routes
 
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object(Config)
     Swagger(app)
-    # Đăng ký blueprint trước
-    app.register_blueprint(todo_bp)
-    app.register_blueprint(auth_bp)
     
-    # Invoice blueprints
-    app.register_blueprint(owner_invoice_bp)
-    app.register_blueprint(employee_invoice_bp)
-    app.register_blueprint(draft_order_bp)
-    app.register_blueprint(invoice_detail_bp)
-    # register_routes(app)
+    # Register all routes via helper function
+    register_routes(app)
+
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
     API_URL = '/swagger.json'
     swaggerui_blueprint = get_swaggerui_blueprint(
         SWAGGER_URL,
         API_URL,
-        config={'app_name': "Todo API"}
+        config={'app_name': "BizFlow API"}
     )
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
@@ -45,11 +35,13 @@ def create_app():
     # Register middleware
     middleware(app)
 
-    # Register routes
+    # Register routes for Swagger
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
-            # Thêm các endpoint khác nếu cần
-            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.', 'owner_invoice.', 'employee_invoice.', 'draft_order.', 'invoice_detail.')):
+            # Include all prefixes from both HEAD and Main
+            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.', 
+                                       'owner_invoice.', 'employee_invoice.', 'draft_order.', 'invoice_detail.',
+                                       'admin_', 'owner_')):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)
@@ -94,7 +86,7 @@ def create_app():
             """
             return styled_html
         except Exception as e:
-            return f"Error loading guide: {{str(e)}}", 500
+            return f"Error loading guide: {str(e)}", 500
 
     return app
 

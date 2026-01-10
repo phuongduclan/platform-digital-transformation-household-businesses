@@ -1,4 +1,4 @@
-# Architecture
+# Flask Clean Architecture
 
 ```bash
     ├── migrations

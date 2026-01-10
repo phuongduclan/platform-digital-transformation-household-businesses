@@ -1,17 +1,22 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from .auth import Auth
+from .user import User
+
 class IAuthRepository(ABC):
     @abstractmethod
-    def login(self, auth: Auth) -> Auth:
+    def get_user_by_username(self, username: str) -> Optional[User]:
         pass
 
     @abstractmethod
-    def register(self, auth: Auth) -> Optional[Auth]:
+    def get_user_by_id(self, user_id: int) -> Optional[User]:
         pass
 
     @abstractmethod
-    def remember_password(self) -> Optional[Auth]:
+    def register(self, user: User) -> Optional[User]:
+        pass
+
+    @abstractmethod
+    def remember_password(self) -> Optional[User]:
         pass
 
     @abstractmethod

@@ -1,75 +1,81 @@
 from domain.models.iauth_repository import IAuthRepository
-from domain.models.auth import Auth
-from infrastructure.databases import Base
+from domain.models.user import User
 from typing import List, Optional
-from dotenv import load_dotenv
-import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from config import Config
-from sqlalchemy import Column, Integer, String, DateTime
-from infrastructure.databases.factory_database import FactoryDatabase as db_factory
-from infrastructure.databases.mssql import session
 from sqlalchemy.orm import Session
-from infrastructure.models.auth.auth_user_model import AuthUserModel
 from infrastructure.models.user_model import UserModel
-load_dotenv()
-
+from infrastructure.databases.mssql import session
 
 class AuthRepository(IAuthRepository):
     def __init__(self, session: Session = session):
-        self._users = []
-        self._id_counter = 1
-        self.session = db_factory.get_database('POSTGREE').session
+        self.session = session
     
-    def login(self, auth: Auth) -> Auth:
-        # Implement login logic here
-        # For demonstration, we will just return the auth object
-        selfed_user = self.session.query(AuthUserModel).filter_by(
-            username=auth.username,
-            password_hash=auth.password
-        ).first()
-        if not selfed_user:
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        user_model = self.session.query(UserModel).filter_by(username=username).first()
+        if not user_model:
             return None
-        auth.id = selfed_user.id
-        return auth
-   
-    def register(self, auth: Auth) -> Optional[Auth]:
-        # Implement registration logic here
-        # For demonstration, we will just return the auth object
+        # Map UserModel to Domain User
+        return User(
+            id=user_model.id,
+            username=user_model.username,
+            password=user_model.password,
+            email=user_model.email,
+            household_id=user_model.household_id,
+            role_id=user_model.role_id,
+            status=user_model.status,
+            description=user_model.description,
+            created_by=user_model.created_by,
+            updated_by=user_model.updated_by,
+            created_at=user_model.created_at,
+            updated_at=user_model.updated_at
+        )
+
+    def get_user_by_id(self, user_id: int) -> Optional[User]:
+        user_model = self.session.query(UserModel).filter_by(id=user_id).first()
+        if not user_model:
+            return None
+        return User(
+            id=user_model.id,
+            username=user_model.username,
+            password=user_model.password,
+            email=user_model.email,
+            household_id=user_model.household_id,
+            role_id=user_model.role_id,
+            status=user_model.status,
+            description=user_model.description,
+            created_by=user_model.created_by,
+            updated_by=user_model.updated_by,
+            created_at=user_model.created_at,
+            updated_at=user_model.updated_at
+        )
+
+    def register(self, user: User) -> Optional[User]:
         try:
-            new_user = AuthUserModel(
-                username=auth.username,
-                password_hash=auth.password,
-                email=auth.email
+            new_user = UserModel(
+                username=user.username,
+                password=user.password,
+                email=user.email,
+                role_id=user.role_id if user.role_id else 2, # Default to Employee if not set? Or check logic.
+                household_id=user.household_id,
+                status=user.status or 'ACTIVE'
             )
             self.session.add(new_user)
             self.session.commit()
             self.session.refresh(new_user)
-            auth.id = new_user.id
-            return auth
+            user.id = new_user.id
+            return user
         except Exception as e:
             self.session.rollback()
-            return None
-        finally:
-            self.session.close()
-        return auth
-    def remember_password(self) -> Optional[Auth]:
-        # Implement remember password logic here
+            raise e # Let Service handle or return None?
+        
+    def remember_password(self) -> Optional[User]:
         return None
+        
     def look_account(self, Id: int) -> bool:
-        # Implement look account logic here
         return True
+        
     def un_look_account(self, course_id: int) -> None:
-        # Implement un-look account logic here
         pass
+        
     def check_exist(self, username: str) -> bool:
-        # Implement check exist logic here
-        existing_user = self.session.query(AuthUserModel).filter_by(username = username).first()
-        if existing_user:
-            return True
-        return False
-    
-
-    
-
+        existing_user = self.session.query(UserModel).filter_by(username=username).first()
+        return True if existing_user else False

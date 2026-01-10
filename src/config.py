@@ -1,5 +1,4 @@
 # Configuration settings for the Flask application
-
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -22,46 +21,29 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a_default_secret_key'
     DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true', '1']
     TESTING = os.environ.get('TESTING', 'False').lower() in ['true', '1']
-    DATABASE_URI = os.environ.get('DATABASE_URI') or 'mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/DemoFlaskApi'
+    DATABASE_URI = os.environ.get('DATABASE_URI') or \
+        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
     CORS_HEADERS = 'Content-Type'
+
 
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
-    # Use SQLite as fallback if PostgreSQL URL not set
-    DATABASE_URI = os.environ.get('POSTGREE_DATABASE_URL') or 'sqlite:///default.db'
-
+    DATABASE_URI = os.environ.get('DATABASE_URI') or \
+        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
 
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
-    DATABASE_URI = os.environ.get('DATABASE_URI') or 'mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/DemoFlaskApi'
+    DATABASE_URI = os.environ.get('DATABASE_URI') or \
+        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
 
 
 class ProductionConfig(Config):
     """Production configuration."""
-    DATABASE_URI = os.environ.get('DATABASE_URI') or 'mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/DemoFlaskApi'
+    DATABASE_URI = os.environ.get('DATABASE_URI') or \
+        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
 
-    
-template = {
-    "swagger": "2.0",
-    "info": {
-        "title": "Todo API",
-        "description": "API for managing todos",
-        "version": "1.0.0"
-    },
-    "basePath": "/",
-    "schemes": [
-        "http",
-        "https"
-    ],
-    "consumes": [
-        "application/json"
-    ],
-    "produces": [
-        "application/json"
-    ]
-}
 class SwaggerConfig:
     """Swagger configuration."""
     template = {
@@ -72,16 +54,9 @@ class SwaggerConfig:
             "version": "1.0.0"
         },
         "basePath": "/",
-        "schemes": [
-            "http",
-            "https"
-        ],
-        "consumes": [
-            "application/json"
-        ],
-        "produces": [
-            "application/json"
-        ]
+        "schemes": ["http", "https"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"]
     }
 
     swagger_config = {

@@ -7,4 +7,4 @@ Base = declarative_base()
 # OOP : object oriented programming
 
 # ERD --> class relational
-# Lập trinhf hướng đối tượng (logic) mapping class -> table (database)
+# Lập trình hướng đối tượng (logic) mapping class -> table (database)

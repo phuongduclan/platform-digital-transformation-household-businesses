@@ -93,4 +93,3 @@ class TodoRepository(ITodoRepository):
             raise ValueError('Todo not found')
         finally:
             self.session.close()
-

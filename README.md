@@ -45,7 +45,7 @@
 ## Infrastructure Layer
 
 ## Download source code (CMD)
-    git clone https://github.com/ChienNguyensrdn/Flask-CleanArchitecture.git
+    git clone https://github.com/phuongduclan/platform-digital-transformation-household-businesses.git
 ## Kiểm tra đã cài python đã cài đặt trên máy chưa
     python --version
 ## Run app
@@ -68,8 +68,7 @@
      		pip install -r requirements.txt
    - Bước 4: Chạy mã xử lý dữ liệu
      ## Run:
-    		python app.py
-
+    	python app.py
 
      Truy câp http://localhost:6868/docs
      Truy câp http://localhost:9999/docs
@@ -84,13 +83,12 @@
     
     # SQL Server settings
     DB_USER=sa
-    DB_PASSWORD=Aa@123456
+    DB_PASSWORD=%40Bina0608
     DB_HOST=127.0.0.1
     DB_PORT=1433
-    DB_NAME=FlaskApiDB
-    
-    
-    DATABASE_URI = "mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/FlaskApiDB"
+    DB_NAME=database_name
+
+    DATABASE_URI="mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/database_name"
 
 ## pull image MS SQL server 
     
@@ -99,7 +97,7 @@
     ```
 ## Install MS SQL server in docker 
     ```bash
-    docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Aa123456" -p 1433:1433 --name sql1 --hostname sql1 -d  mcr.microsoft.com/mssql/server:2025-latest
+    docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=@Bina0608" -p 1433:1433 --name sql_server -hostname sql_server -d mcr.microsoft.com/mssql/server:2025-latest
     ```
 ## Test connect SQL server 
 
