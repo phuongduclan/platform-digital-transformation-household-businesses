@@ -10,6 +10,15 @@ from api.controllers.subscription_plan_controller import admin_bp as admin_subsc
 from api.controllers.subscription_controller import admin_bp as admin_subscription_bp, owner_bp as owner_subscription_bp
 from api.controllers.registration_controller import bp as public_registration_bp
 
+# Invoice blueprints (from main branch)
+try:
+    from api.controllers.invoice_controller import owner_bp as owner_invoice_bp, employee_bp as employee_invoice_bp
+    from api.controllers.draft_order_controller import bp as draft_order_bp
+    from api.controllers.invoice_detail_controller import bp as invoice_detail_bp
+    HAS_INVOICE_CONTROLLERS = True
+except ImportError:
+    HAS_INVOICE_CONTROLLERS = False
+
 def register_routes(app):
     # Todo (sample module)
     app.register_blueprint(todo_bp)
@@ -17,11 +26,20 @@ def register_routes(app):
     # Auth
     app.register_blueprint(auth_bp)
     
-    # Admin endpoints
+    # Invoice Blueprints (from main branch)
+    if HAS_INVOICE_CONTROLLERS:
+        app.register_blueprint(owner_invoice_bp)
+        app.register_blueprint(employee_invoice_bp)
+        app.register_blueprint(draft_order_bp)
+        app.register_blueprint(invoice_detail_bp)
+    
+    # Admin/User Blueprints
     app.register_blueprint(admin_users_bp)
     app.register_blueprint(admin_roles_bp)
     app.register_blueprint(admin_functions_bp)
     app.register_blueprint(admin_role_functions_bp)
+    
+    # Admin endpoints
     app.register_blueprint(admin_subscription_plan_bp)
     app.register_blueprint(admin_subscription_bp)
     
