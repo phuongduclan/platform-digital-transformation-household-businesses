@@ -32,5 +32,5 @@ class IInventoryRepository(ABC):
         pass
 
     @abstractmethod
-    def update(self, inventory: Inventory) -> Inventory:
+    def update(self, inventory: Inventory, household_id: int = None) -> Inventory:
         pass

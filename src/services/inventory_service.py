@@ -44,7 +44,13 @@ class InventoryService:
         """
         Owner chỉ được điều chỉnh quantity nếu cần.
         """
-        # Lấy inventory từ id (cần thêm method get_by_id vào repository nếu cần)
-        # Tạm thời dùng update trực tiếp
-        inventory = Inventory(id=inventory_id, quantity=quantity)
-        return self.repository.update(inventory)
+        # Lấy inventory từ id trước để verify household_id
+        # Tạm thời dùng get_by_product_and_warehouse, nhưng cần method get_by_id
+        # Hoặc lấy từ list và filter
+        inventory_list = self.repository.list(household_id)
+        inventory = next((inv for inv in inventory_list if inv.id == inventory_id), None)
+        if not inventory:
+            raise ValueError('Inventory not found')
+        
+        inventory.quantity = quantity
+        return self.repository.update(inventory, household_id)

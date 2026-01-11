@@ -106,9 +106,12 @@ class InventoryRepository(IInventoryRepository):
             self.session.rollback()
             raise ValueError(f'Error decreasing inventory quantity: {str(e)}')
 
-    def update(self, inventory: Inventory) -> Inventory:
+    def update(self, inventory: Inventory, household_id: int = None) -> Inventory:
         try:
-            inventory_model = self.session.query(InventoryModel).filter_by(id=inventory.id).first()
+            query = self.session.query(InventoryModel).filter_by(id=inventory.id)
+            if household_id is not None:
+                query = query.join(Warehouse).filter(Warehouse.household_id == household_id)
+            inventory_model = query.first()
             if not inventory_model:
                 raise ValueError('Inventory not found')
 
