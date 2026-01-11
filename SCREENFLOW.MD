@@ -191,22 +191,25 @@ screens/
 │   │   ├── InventoryListScreen.tsx           # F106: manage_inventory (List)
 │   │   │                                     # - GET /api/owner/inventory
 │   │   │                                     # - Hiển thị tất cả inventory (tự động cập nhật từ import/export)
-│   │   │                                     # - Filter: warehouse_id, product_id
+│   │   │                                     # - Filter: warehouse_id, product_id, unit_id
+│   │   │                                     # - KHÔNG được: Create, Delete thủ công (tự động cập nhật)
 │   │   │
 │   │   ├── InventoryDetailScreen.tsx         # F106: manage_inventory (Detail)
 │   │   │                                     # - GET /api/owner/inventory/<product_id>/<warehouse_id>
-│   │   │                                     # - Hiển thị inventory của 1 product tại 1 warehouse
+│   │   │                                     # - Query params: unit_id (optional)
+│   │   │                                     # - Hiển thị inventory của 1 product tại 1 warehouse (và unit nếu có)
 │   │   │
 │   │   └── InventoryEditScreen.tsx           # F106: manage_inventory (Update)
 │   │                                         # - PUT /api/owner/inventory/<id>
 │   │                                         # - Owner chỉ được điều chỉnh quantity nếu cần
-│   │                                         # - KHÔNG được tạo thủ công (tự động cập nhật từ import/export)
+│   │                                         # - KHÔNG được: Create, Delete thủ công (tự động cập nhật từ import/export)
 │   │
 │   ├── import-receipts/
-│   │   ├── ImportReceiptListScreen.tsx       # F108: manage_import_receipts (List)
+│   │   ├── ImportReceiptListScreen.tsx       # F108: manage_import_receipts (List - Read-only)
 │   │   │                                     # - GET /api/owner/import-receipts
 │   │   │                                     # - Hiển thị tất cả import receipts (tự động tạo từ invoice confirm)
 │   │   │                                     # - Filter: warehouse_id, date range
+│   │   │                                     # - KHÔNG được: Create, Delete thủ công (tự động tạo khi invoice confirm)
 │   │   │
 │   │   ├── ImportReceiptDetailScreen.tsx     # F108: manage_import_receipts (Detail)
 │   │   │                                     # - GET /api/owner/import-receipts/<id>
@@ -216,7 +219,7 @@ screens/
 │   │   └── ImportReceiptEditScreen.tsx       # F108: manage_import_receipts (Update)
 │   │                                         # - PUT /api/owner/import-receipts/<id>
 │   │                                         # - Owner chỉ được điều chỉnh (warehouse_id, import_date, details)
-│   │                                         # - KHÔNG được tạo thủ công (tự động tạo khi invoice confirm)
+│   │                                         # - KHÔNG được: Create, Delete thủ công (tự động tạo khi invoice confirm)
 │   │
 │   ├── import-details/
 │   │   ├── ImportDetailListScreen.tsx        # List details của import receipt
@@ -227,10 +230,11 @@ screens/
 │   │                                         # - Owner chỉ được điều chỉnh (product_id, unit_id, quantity)
 │   │
 │   ├── export-receipts/
-│   │   ├── ExportReceiptListScreen.tsx       # F118: manage_export_receipts (List)
+│   │   ├── ExportReceiptListScreen.tsx       # F118: manage_export_receipts (List - Read-only)
 │   │   │                                     # - GET /api/owner/export-receipts
 │   │   │                                     # - Hiển thị tất cả export receipts (tự động tạo từ invoice confirm)
 │   │   │                                     # - Filter: warehouse_id, date range
+│   │   │                                     # - KHÔNG được: Create, Delete thủ công (tự động tạo khi invoice confirm)
 │   │   │
 │   │   ├── ExportReceiptDetailScreen.tsx     # F118: manage_export_receipts (Detail)
 │   │   │                                     # - GET /api/owner/export-receipts/<id>
@@ -240,7 +244,7 @@ screens/
 │   │   └── ExportReceiptEditScreen.tsx       # F118: manage_export_receipts (Update)
 │   │                                         # - PUT /api/owner/export-receipts/<id>
 │   │                                         # - Owner chỉ được điều chỉnh (warehouse_id, export_date, reason, details)
-│   │                                         # - KHÔNG được tạo thủ công (tự động tạo khi invoice confirm)
+│   │                                         # - KHÔNG được: Create, Delete thủ công (tự động tạo khi invoice confirm)
 │   │
 │   ├── export-details/
 │   │   ├── ExportDetailListScreen.tsx        # List details của export receipt
@@ -252,11 +256,25 @@ screens/
 │   │
 │   ├── customers/
 │   │   ├── CustomerListScreen.tsx            # F109: manage_customers (List)
+│   │   │                                     # - GET /api/owner/customers
+│   │   │                                     # - Filter: status (Active, Inactive)
+│   │   │
 │   │   ├── CustomerDetailScreen.tsx          # F109: manage_customers (Detail)
+│   │   │                                     # - GET /api/owner/customers/<id>
+│   │   │
 │   │   ├── CustomerCreateScreen.tsx          # F109: manage_customers (Create)
+│   │   │                                     # - POST /api/owner/customers
+│   │   │
 │   │   ├── CustomerEditScreen.tsx            # F109: manage_customers (Update)
-│   │   ├── CustomerHistoryScreen.tsx         # View purchase history
-│   │   └── CustomerDebtScreen.tsx            # View outstanding debt
+│   │   │                                     # - PUT /api/owner/customers/<id>
+│   │   │
+│   │   ├── CustomerHistoryScreen.tsx         # F109: Get customer purchase history
+│   │   │                                     # - GET /api/owner/customers/<id>/history
+│   │   │                                     # - Hiển thị tất cả invoices có customer_id
+│   │   │
+│   │   └── CustomerDebtScreen.tsx            # F109: Get customer outstanding debt
+│   │                                         # - GET /api/owner/customers/<id>/debt
+│   │                                         # - Hiển thị debt records và balance hiện tại
 │   │
 │   ├── sellers/
 │   │   ├── SellerListScreen.tsx              # F110: manage_sellers (List)
@@ -267,7 +285,7 @@ screens/
 │   ├── invoices/
 │   │   ├── InvoiceListScreen.tsx             # F111: manage_all_invoices (List)
 │   │   │                                     # - GET /api/owner/invoices (filter by status)
-│   │   │                                     # - Hiển thị tất cả invoices của household
+│   │   │                                     # - Hiển thị tất cả invoices của household (không phân biệt ai tạo)
 │   │   │                                     # - Filter: status (Draft, Confirm, Delete), date range
 │   │   │
 │   │   ├── InvoiceCreateScreen.tsx           # F111: manage_all_invoices (Create)
@@ -276,6 +294,7 @@ screens/
 │   │   │                                     # - Form: customer_id, seller_id, invoice_type, description
 │   │   │                                     # - Details: product_id, unit_id, quantity, price, vat, discount
 │   │   │                                     # - Tự động tính: total_amount, vat_total, discount_total
+│   │   │                                     # - Phải có ít nhất 1 detail
 │   │   │
 │   │   ├── InvoiceDetailScreen.tsx           # F111: manage_all_invoices (Detail)
 │   │   │                                     # - GET /api/owner/invoices/<id>
@@ -287,11 +306,18 @@ screens/
 │   │   │
 │   │   ├── InvoiceConfirmScreen.tsx          # F111: Confirm invoice
 │   │   │                                     # - PUT /api/owner/invoices/<id>/confirm
-│   │   │                                     # - Bất kỳ ai trong household đều có thể confirm
+│   │   │                                     # - Bất kỳ ai trong household đều có thể confirm, không cần là người tạo
 │   │   │                                     # - **Tự động tạo ImportReceipt/ExportReceipt**:
-│   │   │                                     #   + Nếu có seller_id → Tạo ImportReceipt
-│   │   │                                     #   + Nếu có customer_id → Tạo ExportReceipt
-│   │   │                                     # - **Tự động cập nhật Inventory** từ ImportReceipt/ExportReceipt
+│   │   │                                     #   + Nếu invoice có seller_id (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails
+│   │   │                                     #   + Nếu invoice KHÔNG có seller_id (hóa đơn bán, dù có customer_id hay không) → Tự động tạo ExportReceipt + ExportDetails
+│   │   │                                     # - **Tự động cập nhật Inventory**:
+│   │   │                                     #   + ImportReceipt → Tăng inventory quantity
+│   │   │                                     #   + ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước)
+│   │   │                                     # - **Tự động tạo DebtRecord** (nếu invoice có customer_id != null và invoice_type = 'UNPAID')
+│   │   │                                     # - **Tự động tạo AccountingLedger**:
+│   │   │                                     #   + Hóa đơn mua → Ghi Chi
+│   │   │                                     #   + Hóa đơn bán PAID → Ghi Thu
+│   │   │                                     #   + Hóa đơn bán UNPAID → KHÔNG tạo AccountingLedger (chưa có thu, chỉ tạo DebtRecord)
 │   │   │
 │   │   └── InvoicePrintScreen.tsx           # F111: Print invoice
 │   │                                         # - GET /api/owner/invoices/<id>/print
@@ -312,33 +338,79 @@ screens/
 │   │
 │   ├── payments/
 │   │   ├── PaymentListScreen.tsx             # F112: manage_payments (List)
+│   │   │                                     # - GET /api/owner/payments
+│   │   │                                     # - Filter: invoice_id, customer_id, from_date, to_date
+│   │   │
 │   │   ├── PaymentDetailScreen.tsx           # F112: manage_payments (Detail)
+│   │   │                                     # - GET /api/owner/payments/<id>
+│   │   │
 │   │   ├── PaymentCreateScreen.tsx           # F112: manage_payments (Create)
+│   │   │                                     # - POST /api/owner/payments
+│   │   │                                     # - Tạo Payment cho hóa đơn bán (invoice_id phải là hóa đơn bán, customer_id != null)
+│   │   │                                     # - Kiểm tra invoice đã confirm chưa (phải confirm mới được thanh toán)
+│   │   │                                     # - **Tự động tạo DebtRecord** (nếu có customer_id)
+│   │   │                                     # - **Tự động tạo AccountingLedger** (ghi Thu)
+│   │   │                                     # - Transaction: Payment + DebtRecord + AccountingLedger trong 1 transaction
+│   │   │
 │   │   └── PaymentEditScreen.tsx             # F112: manage_payments (Update)
+│   │                                         # - PUT /api/owner/payments/<id>
+│   │                                         # - Chỉ được update khi payment status='Draft'
+│   │                                         # - Cập nhật DebtRecord và AccountingLedger tương ứng
 │   │
 │   ├── payment-methods/
-│   │   ├── PaymentMethodListScreen.tsx       # F113: manage_payment_methods (List)
-│   │   ├── PaymentMethodDetailScreen.tsx     # F113: manage_payment_methods (Detail)
-│   │   ├── PaymentMethodCreateScreen.tsx     # F113: manage_payment_methods (Create)
-│   │   └── PaymentMethodEditScreen.tsx       # F113: manage_payment_methods (Update)
+│   │   ├── PaymentMethodListScreen.tsx       # F113: manage_payment_methods (List - Read-only)
+│   │   │                                     # - GET /api/owner/payment-methods
+│   │   │                                     # - Owner chỉ xem danh sách PaymentMethod có sẵn (status='Active')
+│   │   │                                     # - KHÔNG được: Create, Update, Delete (Admin quản lý)
+│   │   │
+│   │   └── PaymentMethodDetailScreen.tsx     # F113: manage_payment_methods (Detail - Read-only)
+│   │                                         # - GET /api/owner/payment-methods/<id>
 │   │
 │   ├── debt-records/
-│   │   ├── DebtRecordListScreen.tsx          # F114: manage_debt_records (List)
-│   │   ├── DebtRecordDetailScreen.tsx        # F114: manage_debt_records (Detail)
-│   │   ├── DebtRecordCreateScreen.tsx        # F114: manage_debt_records (Create)
-│   │   └── DebtRecordEditScreen.tsx          # F114: manage_debt_records (Update)
+│   │   ├── DebtRecordListScreen.tsx          # F114: manage_debt_records (List - Read-only)
+│   │   │                                     # - GET /api/owner/debt-records
+│   │   │                                     # - Hiển thị tất cả debt records (tự động tạo khi Invoice confirm UNPAID hoặc Payment tạo)
+│   │   │                                     # - Filter: customer_id, from_date, to_date
+│   │   │                                     # - KHÔNG được: Create, Update, Delete thủ công (tự động tạo)
+│   │   │
+│   │   ├── DebtRecordDetailScreen.tsx        # F114: manage_debt_records (Detail - Read-only)
+│   │   │                                     # - GET /api/owner/debt-records/<id>
+│   │   │
+│   │   └── CustomerDebtScreen.tsx            # F114: Get customer debt records
+│   │                                         # - GET /api/owner/debt-records/customer/<customer_id>
+│   │                                         # - Hiển thị tất cả debt records của 1 customer, tính balance hiện tại
 │   │
 │   ├── reports/
 │   │   ├── ReportDashboardScreen.tsx         # F115: view_household_reports
-│   │   ├── DailyRevenueReportScreen.tsx      # Daily revenue report
-│   │   ├── MonthlyRevenueReportScreen.tsx    # Monthly revenue report
-│   │   ├── OutstandingDebtReportScreen.tsx   # Outstanding debt report
-│   │   └── BestSellersReportScreen.tsx       # Top-selling products
+│   │   │                                     # - Dashboard tổng hợp các báo cáo
+│   │   │
+│   │   ├── DailyRevenueReportScreen.tsx      # F117: Daily revenue report
+│   │   │                                     # - GET /api/owner/reports/daily-revenue?date=...
+│   │   │                                     # - Tính tổng credit_amount trong ngày (chỉ hóa đơn bán đã thanh toán)
+│   │   │
+│   │   ├── MonthlyRevenueReportScreen.tsx    # F117: Monthly revenue report
+│   │   │                                     # - GET /api/owner/reports/monthly-revenue?month=...&year=...
+│   │   │                                     # - Tính tổng credit_amount trong tháng
+│   │   │
+│   │   ├── OutstandingDebtReportScreen.tsx   # F117: Outstanding debt report
+│   │   │                                     # - GET /api/owner/reports/outstanding-debt
+│   │   │                                     # - Hiển thị danh sách khách hàng có nợ (balance > 0)
+│   │   │
+│   │   └── BestSellersReportScreen.tsx       # Top-selling products (optional)
 │   │
 │   └── accounting/
 │       ├── AccountingLedgerListScreen.tsx    # F116: view_accounting_ledgers
-│       ├── AccountingLedgerExportScreen.tsx  # F117: export_reports (Excel)
+│       │                                     # - GET /api/owner/accounting-ledgers
+│       │                                     # - Hiển thị tất cả accounting ledgers (tự động tạo khi Invoice confirm hoặc Payment tạo)
+│       │                                     # - Filter: from_date, to_date, movement_type (Thu/Chi)
+│       │                                     # - KHÔNG được: Create, Update, Delete thủ công (tự động tạo)
+│       │
+│       ├── AccountingLedgerExportScreen.tsx   # F117: export_reports (Excel)
+│       │                                     # - GET /api/owner/accounting-ledgers/export?format=excel&from_date=...&to_date=...
+│       │                                     # - Export reports theo thông tư 88/2021/TT-BTC
+│       │
 │       └── AccountingLedgerDetailScreen.tsx  # View detail
+│                                             # - GET /api/owner/accounting-ledgers/<id>
 ```
 
 **Lưu ý:** Owner có tất cả chức năng của Employee (xem phần Employee bên dưới)
@@ -367,30 +439,42 @@ screens/
 │   │
 │   ├── inventory/
 │   │   ├── InventoryListScreen.tsx           # F203: view_inventory (Read-only)
+│   │   │                                     # - GET /api/employee/inventory
+│   │   │                                     # - Filter: warehouse_id, product_id, unit_id
+│   │   │
 │   │   └── InventoryDetailScreen.tsx         # F203: Check stock by product/warehouse
+│   │                                         # - GET /api/employee/inventory/<product_id>/<warehouse_id>
+│   │                                         # - Query params: unit_id (optional)
 │   │
 │   ├── customers/
 │   │   ├── CustomerListScreen.tsx            # F205: view_customers (Read-only)
+│   │   │                                     # - GET /api/employee/customers
+│   │   │                                     # - Filter: status (Active, Inactive)
+│   │   │
 │   │   ├── CustomerDetailScreen.tsx          # F205: view_customers (Read-only)
+│   │   │                                     # - GET /api/employee/customers/<id>
+│   │   │
 │   │   └── CustomerDebtScreen.tsx            # F206: view_customer_debt
+│   │                                         # - GET /api/employee/customers/<id>/debt
+│   │                                         # - Hiển thị debt records và balance hiện tại
 │   │
 │   ├── invoices/
 │   │   ├── InvoiceListScreen.tsx            # F208: view_invoices
 │   │   │                                     # - GET /api/employee/invoices (filter by status)
-│   │   │                                     # - Hiển thị tất cả invoices của household
+│   │   │                                     # - Hiển thị tất cả invoices của household (không phân biệt ai tạo)
 │   │   │                                     # - Filter: status='Draft' để xem draft orders từ AI
-│   │   │                                     # - Không phân biệt ai tạo, chỉ filter theo household_id
+│   │   │                                     # - Filter: status='Confirm' để xem invoices đã confirm
 │   │   │
 │   │   ├── InvoiceCreateScreen.tsx          # F207: create_sales_invoice
 │   │   │                                     # - POST /api/employee/invoices
 │   │   │                                     # - Tạo invoice + details trong 1 request (transaction)
 │   │   │                                     # - Search products (F201)
-│   │   │                                     # - Add to cart (details)
+│   │   │                                     # - Add to cart (details: product_id, unit_id, quantity, price, vat, discount)
 │   │   │                                     # - Select customer (optional) (F205)
 │   │   │                                     # - Check customer debt (F206)
-│   │   │                                     # - Record debt if on credit (F212)
 │   │   │                                     # - Tự động tính: total_amount, vat_total, discount_total
 │   │   │                                     # - Status: 'Draft' (mặc định)
+│   │   │                                     # - Phải có ít nhất 1 detail
 │   │   │
 │   │   ├── InvoiceDetailScreen.tsx          # F208: View invoice detail
 │   │   │                                     # - GET /api/employee/invoices/<id>
@@ -402,14 +486,18 @@ screens/
 │   │   │
 │   │   ├── InvoiceConfirmScreen.tsx         # F210: confirm_invoice
 │   │   │                                     # - PUT /api/employee/invoices/<id>/confirm
-│   │   │                                     # - Bất kỳ ai trong household đều có thể confirm
-│   │   │                                     # - Không cần là người tạo
+│   │   │                                     # - Bất kỳ ai trong household đều có thể confirm, không cần là người tạo
 │   │   │                                     # - **Tự động tạo ImportReceipt/ExportReceipt**:
-│   │   │                                     #   + Nếu có seller_id → Tạo ImportReceipt
-│   │   │                                     #   + Nếu có customer_id → Tạo ExportReceipt
-│   │   │                                     # - **Tự động cập nhật Inventory** từ ImportReceipt/ExportReceipt
-│   │   │                                     # - Auto create debt record (if on credit)
-│   │   │                                     # - Auto update accounting ledger
+│   │   │                                     #   + Nếu invoice có seller_id (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails
+│   │   │                                     #   + Nếu invoice KHÔNG có seller_id (hóa đơn bán, dù có customer_id hay không) → Tự động tạo ExportReceipt + ExportDetails
+│   │   │                                     # - **Tự động cập nhật Inventory**:
+│   │   │                                     #   + ImportReceipt → Tăng inventory quantity
+│   │   │                                     #   + ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước)
+│   │   │                                     # - **Tự động tạo DebtRecord** (nếu invoice có customer_id != null và invoice_type = 'UNPAID')
+│   │   │                                     # - **Tự động tạo AccountingLedger**:
+│   │   │                                     #   + Hóa đơn mua → Ghi Chi
+│   │   │                                     #   + Hóa đơn bán PAID → Ghi Thu
+│   │   │                                     #   + Hóa đơn bán UNPAID → KHÔNG tạo AccountingLedger (chưa có thu, chỉ tạo DebtRecord)
 │   │   │
 │   │   └── InvoicePrintScreen.tsx           # Print invoice
 │   │                                         # - GET /api/employee/invoices/<id>/print
@@ -430,11 +518,29 @@ screens/
 │   │
 │   ├── payments/
 │   │   ├── PaymentCreateScreen.tsx           # F211: record_payment
+│   │   │                                     # - POST /api/employee/payments
+│   │   │                                     # - Tạo Payment cho hóa đơn bán (invoice_id phải là hóa đơn bán, customer_id != null)
+│   │   │                                     # - Kiểm tra invoice đã confirm chưa (phải confirm mới được thanh toán)
+│   │   │                                     # - **Tự động tạo DebtRecord** (nếu có customer_id)
+│   │   │                                     # - **Tự động tạo AccountingLedger** (ghi Thu)
+│   │   │                                     # - Transaction: Payment + DebtRecord + AccountingLedger trong 1 transaction
+│   │   │
 │   │   └── PaymentDetailScreen.tsx           # F211: view payment
+│   │                                         # - GET /api/employee/payments/<id>
 │   │
 │   ├── debt-records/
-│   │   ├── DebtRecordCreateScreen.tsx        # F212: record_debt
-│   │   └── DebtRecordDetailScreen.tsx        # F212: view debt record
+│   │   ├── DebtRecordListScreen.tsx          # F212: record_debt (List - Read-only)
+│   │   │                                     # - GET /api/employee/debt-records
+│   │   │                                     # - Hiển thị tất cả debt records (tự động tạo khi Invoice confirm UNPAID hoặc Payment tạo)
+│   │   │                                     # - Filter: customer_id
+│   │   │                                     # - KHÔNG được: Create, Update, Delete thủ công (tự động tạo)
+│   │   │
+│   │   ├── DebtRecordDetailScreen.tsx        # F212: view debt record
+│   │   │                                     # - GET /api/employee/debt-records/<id>
+│   │   │
+│   │   └── CustomerDebtScreen.tsx            # F212: Get customer debt records
+│   │                                         # - GET /api/employee/debt-records/customer/<customer_id>
+│   │                                         # - Hiển thị tất cả debt records của 1 customer, tính balance hiện tại
 │   │
 │   └── print/
 │       └── InvoicePrintScreen.tsx            # Print sales orders
@@ -761,12 +867,12 @@ EmployeeHomeScreen
 3. InvoiceDetailScreen
    ├── GET /api/owner/invoices/<id>
    ├── Xem thông tin invoice
-   ├── Link đến ImportReceipt (nếu có seller_id) hoặc ExportReceipt (nếu có customer_id)
+   ├── Link đến ImportReceipt (nếu có seller_id) hoặc ExportReceipt (nếu không có seller_id)
    └── Button: "Xem phiếu nhập/xuất"
    ↓
 4. ImportReceiptDetailScreen / ExportReceiptDetailScreen (F108/F118)
    ├── GET /api/owner/import-receipts/<id> hoặc /api/owner/export-receipts/<id>
-   ├── Hiển thị thông tin phiếu nhập/xuất (tự động tạo từ invoice)
+   ├── Hiển thị thông tin phiếu nhập/xuất (tự động tạo từ invoice confirm)
    ├── Hiển thị details (tự động tạo từ invoice details)
    └── Button: "Điều chỉnh" → ImportReceiptEditScreen / ExportReceiptEditScreen
    ↓
@@ -777,10 +883,35 @@ EmployeeHomeScreen
    ↓
 6. InventoryListScreen (F106)
    ├── GET /api/owner/inventory
+   ├── Filter: warehouse_id, product_id, unit_id
    ├── Xem inventory đã được tự động cập nhật
    └── Inventory tự động cập nhật từ ImportReceipt/ExportReceipt
 
 **Lưu ý**: Owner KHÔNG tạo ImportReceipt/ExportReceipt thủ công. Chúng được tự động tạo khi invoice confirm.
+```
+
+### Flow 5: Employee ghi nhận thanh toán
+```
+1. EmployeeHomeScreen
+   ↓
+2. PaymentCreateScreen (employee/payments/)
+   ├── Select Invoice (phải là hóa đơn bán, customer_id != null)
+   ├── Check invoice đã confirm chưa (phải confirm mới được thanh toán)
+   ├── Select Payment Method (F113 - read-only list)
+   ├── Enter amount
+   ├── POST /api/employee/payments
+   │   └── Tạo Payment
+   │   └── **Tự động tạo DebtRecord** (nếu có customer_id):
+   │       └── Ghi trả: payment_id, credit_amount, invoice_id = null
+   │       └── Tính balance = balance trước đó - credit_amount
+   │   └── **Tự động tạo AccountingLedger**:
+   │       └── Ghi Thu: credit_amount = payment.amount
+   │       └── Description: "Thu từ {customer_name} - Hóa đơn #{invoice_id}"
+   │   └── Transaction: Payment + DebtRecord + AccountingLedger trong 1 transaction
+   ↓
+3. PaymentDetailScreen
+   └── GET /api/employee/payments/<id>
+   └── Xem thông tin payment đã tạo
 ```
 
 ---
@@ -806,7 +937,35 @@ EmployeeHomeScreen
    - **KHÔNG được**: Create subscription (Owner tự đăng ký), Update plan_id (Owner tự upgrade), Delete subscription, Activate subscription
    - Owner tự quản lý subscription: GET /api/owner/subscription (xem), PUT /api/owner/subscription (upgrade plan_id)
 
-2. **Owner có tất cả chức năng của Employee** - Owner có thể tạo order, confirm invoice, etc.
+2. **Owner có tất cả chức năng của Employee** - Owner có thể tạo order, confirm invoice, record payment, etc.
+
+3. **PaymentMethod (F113)** - Owner chỉ xem (read-only), Admin quản lý CRUD:
+   - Owner: GET /api/owner/payment-methods (chỉ xem danh sách active)
+   - Admin: CRUD tại /api/admin/payment-methods
+
+4. **DebtRecord (F114, F212)** - Tự động tạo, không được tạo thủ công:
+   - Tự động tạo khi Invoice confirm (nếu customer_id != null và invoice_type = 'UNPAID')
+   - Tự động tạo khi Payment được tạo (ghi trả nợ)
+   - Owner và Employee chỉ xem (read-only)
+
+5. **AccountingLedger (F116, F117)** - Tự động tạo, không được tạo thủ công:
+   - Tự động tạo khi Invoice confirm:
+     * Hóa đơn mua → Ghi Chi
+     * Hóa đơn bán PAID → Ghi Thu
+     * Hóa đơn bán UNPAID → KHÔNG tạo (chưa có thu, chỉ tạo DebtRecord)
+   - Tự động tạo khi Payment được tạo (ghi Thu)
+   - Owner chỉ xem và export reports
+
+6. **ImportReceipt/ExportReceipt (F108, F118)** - Tự động tạo, không được tạo thủ công:
+   - Tự động tạo khi Invoice confirm:
+     * Invoice có seller_id → ImportReceipt
+     * Invoice không có seller_id → ExportReceipt
+   - Owner chỉ xem và điều chỉnh (R, U)
+
+7. **Inventory (F106, F203)** - Tự động cập nhật, không được tạo thủ công:
+   - Tự động cập nhật khi ImportReceipt/ExportReceipt được tạo
+   - Owner chỉ xem và điều chỉnh quantity (R, U)
+   - Employee chỉ xem (R)
 
 2. **Real-time Notifications** - Dùng WebSocket hoặc polling để hiển thị draft orders từ AI
 
