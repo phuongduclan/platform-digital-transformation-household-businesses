@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from infrastructure.databases.base import Base
 from datetime import datetime
 
-class User(Base):
+class UserModel(Base):
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
     

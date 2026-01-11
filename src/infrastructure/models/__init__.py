@@ -9,8 +9,8 @@ from .household_model import Household
 from .import_detail_model import ImportDetail
 from .import_receipt_model import ImportReceipt
 from .inventory_model import Inventory
-from .invoice_detail_model import InvoiceDetail
-from .invoice_model import Invoice
+from .invoice_detail_model import InvoiceDetailModel as InvoiceDetail
+from .invoice_model import InvoiceModel as Invoice
 from .payment_model import Payment
 from .paymentmethod_model import PaymentMethod
 from .product_model import Product
@@ -21,7 +21,7 @@ from .subscription_model import Subscription
 from .subscriptionplan_model import SubscriptionPlan
 from .todo_model import TodoModel
 from .unit_model import Unit
-from .user_model import User
+from .user_model import UserModel as User
 from .warehouse_model import Warehouse
 
 __all__ = [

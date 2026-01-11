@@ -140,23 +140,28 @@ def get_current_user():
         return jsonify({'error': 'Missing token'}), 401
     
     try:
-        token = auth_header.split(' ')[1]
-        
-        # Business logic được xử lý ở Application Layer (AuthService)
+        # Làm sạch token (loại bỏ Bearer)
+        token = auth_header
+        if auth_header.lower().startswith('bearer '):
+            token = auth_header[7:].strip()
+            
         payload = auth_service.decode_token(token)
         user_id = payload['user_id']
         
         user = auth_service.get_user_by_id(user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404
-        
+            
         return jsonify({
             'id': user.id,
-            'user_name': user.user_name,
+            'username': user.username,
+            'email': user.email,
             'role_id': user.role_id,
             'household_id': user.household_id,
-            'email': user.email if hasattr(user, 'email') else None
+            'status': user.status
         }), 200
+        
     except ValueError as e:
-        # Business rule violation từ service (token expired/invalid)
         return jsonify({'error': str(e)}), 401
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500

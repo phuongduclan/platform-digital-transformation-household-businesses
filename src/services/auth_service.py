@@ -1,8 +1,9 @@
-"""
-Auth Service - Business logic cho authentication
-"""
+from typing import Optional
 from infrastructure.databases.mssql import session
 from infrastructure.models import User as UserModel, Role
+from services.subscription_service import SubscriptionService
+from werkzeug.security import check_password_hash, generate_password_hash
+import jwt
 from datetime import datetime, timedelta
 import jwt
 from flask import current_app
@@ -62,6 +63,7 @@ class AuthService:
         """
         payload = {
             'user_id': user.id,
+            'username': user.user_name,
             'role_id': user.role_id,
             'household_id': user.household_id,  # None nếu Admin
             'exp': datetime.utcnow() + timedelta(hours=24)

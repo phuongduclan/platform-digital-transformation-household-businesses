@@ -3,7 +3,8 @@ import os
 
 class Config:
     """Base configuration."""
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'a_default_secret_key'
+    # Cố định SECRET_KEY để tránh lỗi Token bị hết hạn hoặc sai lệch khi môi trường thay đổi
+    SECRET_KEY = 'member5_invoice_secure_key_2026'
     DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true', '1']
     TESTING = os.environ.get('TESTING', 'False').lower() in ['true', '1']
     DATABASE_URI = os.environ.get('DATABASE_URI') or \

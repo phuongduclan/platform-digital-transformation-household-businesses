@@ -27,9 +27,16 @@ def decode_jwt_middleware():
         return
     
     auth_header = request.headers.get('Authorization')
-    if auth_header and auth_header.startswith('Bearer '):
+    if auth_header:
         try:
-            token = auth_header.split(' ')[1]
+            # Loại bỏ prefix 'Bearer ' một cách triệt để
+            token = auth_header
+            if auth_header.lower().startswith('bearer '):
+                token = auth_header[7:].strip()
+            
+            if not token:
+                raise jwt.InvalidTokenError("Token is empty")
+            
             payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
             g.user_id = payload.get('user_id')
             g.role_id = payload.get('role_id')

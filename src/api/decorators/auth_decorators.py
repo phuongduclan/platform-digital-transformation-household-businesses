@@ -35,26 +35,24 @@ def require_permission(function_code, methods=None):
             if not auth_header:
                 return jsonify({'error': 'Missing token', 'debug': 'No Authorization header found'}), 401
             
-            # Swagger UI có thể gửi token không có "Bearer " prefix
-            if auth_header.startswith('Bearer '):
-                token = auth_header.split(' ')[1]
-            else:
-                # Nếu không có "Bearer ", thử dùng trực tiếp
-                token = auth_header
-                auth_header = f'Bearer {token}'
+            # Loại bỏ prefix 'Bearer ' một cách triệt để
+            token = auth_header
+            if auth_header.lower().startswith('bearer '):
+                token = auth_header[7:].strip()
             
             if not token:
-                return jsonify({'error': 'Missing token', 'debug': 'Token is empty'}), 401
+                return jsonify({'error': 'Missing token', 'debug': 'Token is empty after cleaning'}), 401
             
             try:
                 payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
                 user_id = payload.get('user_id')
+                username = payload.get('username')
                 role_id = payload.get('role_id')
                 household_id = payload.get('household_id')
             except jwt.ExpiredSignatureError:
-                return jsonify({'error': 'Token expired'}), 401
-            except jwt.InvalidTokenError:
-                return jsonify({'error': 'Invalid token'}), 401
+                return jsonify({'error': 'Token expired', 'debug': 'Signature has expired'}), 401
+            except jwt.InvalidTokenError as e:
+                return jsonify({'error': 'Invalid token', 'debug': str(e)}), 401
             
             # 2. Check user có tồn tại và active không
             user = session.query(User).filter_by(id=user_id).first()
@@ -87,9 +85,39 @@ def require_permission(function_code, methods=None):
             
             # 5. Lưu thông tin vào g (Flask context) để dùng trong controller
             g.user_id = user_id
+            g.username = username
             g.role_id = role_id
             g.household_id = household_id
             
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+def login_required(f):
+    """
+    Simple decorator to require a valid JWT token
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'Missing token'}), 401
+        
+        # Loại bỏ prefix 'Bearer ' một cách triệt để
+        token = auth_header
+        if auth_header.lower().startswith('bearer '):
+            token = auth_header[7:].strip()
+        
+        try:
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+            g.user_id = payload.get('user_id')
+            g.username = payload.get('username')
+            g.role_id = payload.get('role_id')
+            g.household_id = payload.get('household_id')
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Invalid token'}), 401
+            
+        return f(*args, **kwargs)
+    return decorated_function

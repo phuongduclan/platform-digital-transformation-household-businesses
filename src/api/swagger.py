@@ -8,9 +8,9 @@ from api.schemas.function import FunctionRequestSchema, FunctionResponseSchema, 
 from api.schemas.role_function import RoleFunctionRequestSchema, RoleFunctionResponseSchema
 
 spec = APISpec(
-    title="BizFlow API",
+    title='Member 5: Invoice Module',
     version="1.0.0",
-    openapi_version="3.0.2",
+    openapi_version='2.0',
     plugins=[FlaskPlugin(), MarshmallowPlugin()],
 )
 
@@ -28,25 +28,31 @@ spec.components.security_scheme(
 # Thêm security mặc định cho tất cả endpoints (trừ login)
 spec.options = {"security": [{"Bearer": []}]}
 
-# Đăng ký schema để tự động sinh model
+# Common schemas
 spec.components.schema("TodoRequest", schema=TodoRequestSchema)
 spec.components.schema("TodoResponse", schema=TodoResponseSchema)
 
-# User schemas
+# User / Admin schemas
 spec.components.schema("UserRequest", schema=UserRequestSchema)
 spec.components.schema("UserResponse", schema=UserResponseSchema)
 spec.components.schema("UserUpdate", schema=UserUpdateSchema)
-
-# Role schemas
 spec.components.schema("RoleRequest", schema=RoleRequestSchema)
 spec.components.schema("RoleResponse", schema=RoleResponseSchema)
 spec.components.schema("RoleUpdate", schema=RoleUpdateSchema)
-
-# Function schemas
 spec.components.schema("FunctionRequest", schema=FunctionRequestSchema)
 spec.components.schema("FunctionResponse", schema=FunctionResponseSchema)
 spec.components.schema("FunctionUpdate", schema=FunctionUpdateSchema)
-
-# RoleFunction schemas
 spec.components.schema("RoleFunctionRequest", schema=RoleFunctionRequestSchema)
 spec.components.schema("RoleFunctionResponse", schema=RoleFunctionResponseSchema)
+
+# Auth schemas (Not explicitly defined in this branch, using User schemas or inline)
+# Removed invalid imports
+
+# Invoice schemas (Member 5)
+from api.schemas.invoice import InvoiceRequestSchema, InvoiceResponseSchema, InvoiceWithDetailsSchema
+from api.schemas.invoice_detail import InvoiceDetailRequestSchema, InvoiceDetailResponseSchema
+spec.components.schema("InvoiceRequest", schema=InvoiceRequestSchema)
+spec.components.schema("InvoiceResponse", schema=InvoiceResponseSchema)
+spec.components.schema("InvoiceWithDetails", schema=InvoiceWithDetailsSchema)
+spec.components.schema("InvoiceDetailRequest", schema=InvoiceDetailRequestSchema)
+spec.components.schema("InvoiceDetailResponse", schema=InvoiceDetailResponseSchema)
