@@ -1,8 +1,17 @@
 from flask import Blueprint, request, g, jsonify
 from services.invoice_service import InvoiceService
 from services.invoice_detail_service import InvoiceDetailService
+from services.import_receipt_service import ImportReceiptService
+from services.export_receipt_service import ExportReceiptService
+from services.inventory_service import InventoryService
 from infrastructure.repositories.invoice_repository import InvoiceRepository
 from infrastructure.repositories.invoice_detail_repository import InvoiceDetailRepository
+from infrastructure.repositories.import_receipt_repository import ImportReceiptRepository
+from infrastructure.repositories.export_receipt_repository import ExportReceiptRepository
+from infrastructure.repositories.inventory_repository import InventoryRepository
+from infrastructure.repositories.import_detail_repository import ImportDetailRepository
+from infrastructure.repositories.export_detail_repository import ExportDetailRepository
+from infrastructure.repositories.warehouse_repository import WarehouseRepository
 from api.decorators.auth_decorators import require_permission
 from api.schemas.invoice import (
     InvoiceWithDetailsRequestSchema, InvoiceUpdateSchema,
@@ -41,6 +50,18 @@ invoice_repository = InvoiceRepository()
 invoice_detail_repository = InvoiceDetailRepository()
 invoice_service = InvoiceService(invoice_repository, invoice_detail_repository)
 invoice_detail_service = InvoiceDetailService(invoice_detail_repository, invoice_repository)
+
+# Initialize import/export/inventory services for auto-creation
+import_receipt_repository = ImportReceiptRepository()
+import_detail_repository = ImportDetailRepository()
+export_receipt_repository = ExportReceiptRepository()
+export_detail_repository = ExportDetailRepository()
+inventory_repository = InventoryRepository()
+warehouse_repository = WarehouseRepository()
+
+import_receipt_service = ImportReceiptService(import_receipt_repository, import_detail_repository)
+export_receipt_service = ExportReceiptService(export_receipt_repository, export_detail_repository)
+inventory_service = InventoryService(inventory_repository)
 
 # =====================================================
 # HELPER FUNCTIONS
@@ -342,7 +363,13 @@ def owner_confirm_invoice(invoice_id):
           description: Not found
     """
     try:
-        invoice = invoice_service.confirm_invoice(invoice_id, g.household_id, g.user_id)
+        invoice = invoice_service.confirm_invoice(
+            invoice_id, g.household_id, g.user_id,
+            import_receipt_service=import_receipt_service,
+            export_receipt_service=export_receipt_service,
+            inventory_service=inventory_service,
+            warehouse_repository=warehouse_repository
+        )
         return jsonify(invoice_to_dict(invoice)), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -660,7 +687,13 @@ def employee_confirm_invoice(invoice_id):
           description: Not found
     """
     try:
-        invoice = invoice_service.confirm_invoice(invoice_id, g.household_id, g.user_id)
+        invoice = invoice_service.confirm_invoice(
+            invoice_id, g.household_id, g.user_id,
+            import_receipt_service=import_receipt_service,
+            export_receipt_service=export_receipt_service,
+            inventory_service=inventory_service,
+            warehouse_repository=warehouse_repository
+        )
         return jsonify(invoice_to_dict(invoice)), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400

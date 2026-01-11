@@ -183,10 +183,17 @@ class InvoiceService:
 
         self.repository.delete(invoice_id, household_id)
 
-    def confirm_invoice(self, invoice_id: int, household_id: int, updated_by: str = None) -> Invoice:
+    def confirm_invoice(self, invoice_id: int, household_id: int, updated_by: str = None,
+                       import_receipt_service=None, export_receipt_service=None,
+                       inventory_service=None, warehouse_repository=None) -> Invoice:
         """
         Confirm invoice: chuyển status từ 'Draft' → 'Confirm'
         Bất kỳ ai trong household đều có thể confirm, không cần là người tạo
+        
+        Tự động tạo ImportReceipt/ExportReceipt và cập nhật inventory:
+        - Nếu invoice có seller_id (hóa đơn mua) → Tự động tạo ImportReceipt + tăng inventory
+        - Nếu invoice KHÔNG có seller_id (hóa đơn bán, dù có customer_id hay không - kể cả khách vãng lai) 
+          → Tự động tạo ExportReceipt + giảm inventory
         """
         invoice = self.repository.get_by_id(invoice_id, household_id)
         if not invoice:
@@ -195,7 +202,112 @@ class InvoiceService:
         if invoice.status != 'Draft':
             raise ValueError('Only Draft invoices can be confirmed')
 
-        invoice.updated_by = updated_by
-        invoice.updated_at = datetime.utcnow()
+        # Lấy session từ repository để quản lý transaction
+        db_session = getattr(self.repository, 'session', None)
+        if not db_session:
+            raise ValueError("Repository must have a session attribute")
 
-        return self.repository.confirm(invoice_id, household_id, updated_by)
+        try:
+            # Confirm invoice (chuyển status sang 'Confirm')
+            invoice.updated_by = updated_by
+            invoice.updated_at = datetime.utcnow()
+            invoice = self.repository.confirm(invoice_id, household_id, updated_by)
+
+            # Lấy invoice details
+            invoice_details = self.invoice_detail_repository.list_by_invoice_id(invoice_id, household_id)
+            
+            # Lấy warehouse đầu tiên của household (hoặc có thể truyền warehouse_id từ invoice nếu có)
+            warehouse_id = None
+            if warehouse_repository:
+                warehouses = warehouse_repository.list(household_id)
+                if warehouses and len(warehouses) > 0:
+                    warehouse_id = warehouses[0].id
+                else:
+                    raise ValueError(f'No warehouse found for household_id={household_id}')
+
+            if warehouse_id:
+                # Chuẩn bị details cho import/export receipt
+                details = []
+                for detail in invoice_details:
+                    details.append({
+                        'product_id': detail.product_id,
+                        'unit_id': detail.unit_id,
+                        'quantity': detail.quantity
+                    })
+
+                # Tự động tạo ImportReceipt nếu có seller_id (hóa đơn mua)
+                if invoice.seller_id:
+                    if import_receipt_service and inventory_service:
+                        # Đảm bảo repositories dùng cùng session
+                        import_receipt_service.repository.session = db_session
+                        if hasattr(import_receipt_service, 'import_detail_repository'):
+                            import_receipt_service.import_detail_repository.session = db_session
+                        inventory_service.repository.session = db_session
+                        
+                        # Tạo ImportReceipt
+                        import_receipt = import_receipt_service.create_import_receipt_with_details(
+                            warehouse_id=warehouse_id,
+                            invoice_id=invoice_id,
+                            details=details
+                        )
+                        
+                        # Tự động tăng inventory cho từng product
+                        for detail in invoice_details:
+                            inventory_service.increase_inventory(
+                                product_id=detail.product_id,
+                                unit_id=detail.unit_id,
+                                warehouse_id=warehouse_id,
+                                quantity=detail.quantity,
+                                household_id=household_id
+                            )
+
+                # Tự động tạo ExportReceipt nếu KHÔNG có seller_id (hóa đơn bán)
+                # Bao gồm cả trường hợp customer_id = null (bán cho khách vãng lai)
+                if not invoice.seller_id:
+                    if export_receipt_service and inventory_service:
+                        # Đảm bảo repositories dùng cùng session
+                        export_receipt_service.repository.session = db_session
+                        if hasattr(export_receipt_service, 'export_detail_repository'):
+                            export_receipt_service.export_detail_repository.session = db_session
+                        inventory_service.repository.session = db_session
+                        
+                        # Kiểm tra inventory đủ số lượng trước khi tạo ExportReceipt
+                        for detail in invoice_details:
+                            existing_inventory = inventory_service.get_inventory(
+                                product_id=detail.product_id,
+                                warehouse_id=warehouse_id,
+                                household_id=household_id,
+                                unit_id=detail.unit_id
+                            )
+                            if not existing_inventory or existing_inventory.quantity < detail.quantity:
+                                raise ValueError(
+                                    f'Insufficient inventory for product_id={detail.product_id}. '
+                                    f'Available: {existing_inventory.quantity if existing_inventory else 0}, '
+                                    f'Required: {detail.quantity}'
+                                )
+                        
+                        # Tạo ExportReceipt
+                        export_receipt = export_receipt_service.create_export_receipt_with_details(
+                            warehouse_id=warehouse_id,
+                            invoice_id=invoice_id,
+                            reason="Xuất bán hàng",
+                            details=details
+                        )
+                        
+                        # Tự động giảm inventory cho từng product
+                        for detail in invoice_details:
+                            inventory_service.decrease_inventory(
+                                product_id=detail.product_id,
+                                unit_id=detail.unit_id,
+                                warehouse_id=warehouse_id,
+                                quantity=detail.quantity,
+                                household_id=household_id
+                            )
+
+            # Commit transaction
+            db_session.commit()
+            return invoice
+
+        except Exception as e:
+            db_session.rollback()
+            raise ValueError(f'Error confirming invoice: {str(e)}')

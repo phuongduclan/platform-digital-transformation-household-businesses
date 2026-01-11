@@ -591,6 +591,13 @@ Build an application (mobile and/or web) that supports the following core functi
 - `PUT /api/owner/invoices/<id>/confirm` - Confirm invoice (Owner only)
   - **Business Logic**: Chỉ được confirm khi status='Draft' → chuyển sang 'Confirm'
   - **Bất kỳ ai trong household đều có thể confirm**, không cần là người tạo
+  - **Tự động tạo ImportReceipt/ExportReceipt**:
+    - Nếu invoice có `seller_id` (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+    - Nếu invoice KHÔNG có `seller_id` (hóa đơn bán, dù có `customer_id` hay không - kể cả khách vãng lai) → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+    - ImportReceipt/ExportReceipt được tạo với status='Confirm' và tự động cập nhật inventory
+  - **Tự động cập nhật Inventory**:
+    - ImportReceipt → Tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
+    - ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước, nếu không đủ → trả lỗi và không confirm invoice)
 - `GET /api/owner/invoices/<id>/details` - Get invoice details (Owner only)
 - `GET /api/owner/invoices/<id>/print` - Print invoice (Owner only)
   - **Business Logic**: Trả về invoice + tất cả details để in
@@ -612,6 +619,13 @@ Build an application (mobile and/or web) that supports the following core functi
 - `PUT /api/employee/invoices/<id>/confirm` - Confirm invoice (Employee only)
   - **Business Logic**: Chỉ được confirm khi status='Draft' → chuyển sang 'Confirm'
   - **Bất kỳ ai trong household đều có thể confirm**, không cần là người tạo
+  - **Tự động tạo ImportReceipt/ExportReceipt**:
+    - Nếu invoice có `seller_id` (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+    - Nếu invoice KHÔNG có `seller_id` (hóa đơn bán, dù có `customer_id` hay không - kể cả khách vãng lai) → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+    - ImportReceipt/ExportReceipt được tạo với status='Confirm' và tự động cập nhật inventory
+  - **Tự động cập nhật Inventory**:
+    - ImportReceipt → Tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
+    - ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước, nếu không đủ → trả lỗi và không confirm invoice)
 - `GET /api/employee/invoices/<id>/details` - Get invoice details (Employee only)
 - `GET /api/employee/invoices/<id>/print` - Print invoice (Employee only)
   - **Business Logic**: Trả về invoice + tất cả details để in
@@ -684,46 +698,91 @@ Build an application (mobile and/or web) that supports the following core functi
 
 **ImportReceipt Controller (Owner - F108):**
 - `GET /api/owner/import-receipts` - List import receipts (Owner only)
-- `POST /api/owner/import-receipts` - Create import receipt (Owner only)
+  - **Business Logic**: List tất cả import receipts của household (filter qua warehouse.household_id)
+  - **Lưu ý**: ImportReceipt được tự động tạo khi invoice (hóa đơn mua) được confirm
 - `GET /api/owner/import-receipts/<id>` - Get import receipt by id (Owner only)
 - `PUT /api/owner/import-receipts/<id>` - Update import receipt (Owner only)
-- `DELETE /api/owner/import-receipts/<id>` - Delete import receipt (Owner only)
-- `PUT /api/owner/import-receipts/<id>/confirm` - Confirm import (tăng inventory) (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update warehouse_id, import_date, details)
+  - **Lưu ý**: Không được tạo thủ công, chỉ được xem và điều chỉnh
 - `GET /api/owner/import-receipts/<id>/details` - Get import receipt details (Owner only)
+- **Business Logic quan trọng**:
+  - **Tự động tạo**: Khi invoice (có `seller_id` - hóa đơn mua) được confirm → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+  - **Tự động confirm**: ImportReceipt được tạo với status='Confirm' và tự động tăng inventory
+  - **Inventory tự động cập nhật**: Khi ImportReceipt được tạo tự động → Tự động tăng inventory quantity cho từng product
+  - **Owner chỉ xem và điều chỉnh**: Owner không tạo thủ công, chỉ xem và điều chỉnh nếu cần
 
-**ImportDetail Controller:**
-- `GET /api/import-receipts/<receipt_id>/details` - List import details (Owner only)
-- `POST /api/import-receipts/<receipt_id>/details` - Create import detail (Owner only)
-- `GET /api/import-receipts/<receipt_id>/details/<id>` - Get import detail by id (Owner only)
-- `PUT /api/import-receipts/<receipt_id>/details/<id>` - Update import detail (Owner only)
-- `DELETE /api/import-receipts/<receipt_id>/details/<id>` - Delete import detail (Owner only)
+**ImportDetail Controller (Owner - F108):**
+- `GET /api/owner/import-receipts/<receipt_id>/details` - List import details (Owner only)
+- `GET /api/owner/import-receipts/<receipt_id>/details/<id>` - Get import detail by id (Owner only)
+- `PUT /api/owner/import-receipts/<receipt_id>/details/<id>` - Update import detail (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update product_id, unit_id, quantity)
+  - **Lưu ý**: ImportDetails được tự động tạo từ InvoiceDetails khi invoice confirm, Owner chỉ điều chỉnh nếu cần
 
 **ExportReceipt Controller (Owner - F118):**
 - `GET /api/owner/export-receipts` - List export receipts (Owner only)
-- `POST /api/owner/export-receipts` - Create export receipt (Owner only)
+  - **Business Logic**: List tất cả export receipts của household (filter qua warehouse.household_id)
+  - **Lưu ý**: ExportReceipt được tự động tạo khi invoice (hóa đơn bán) được confirm
 - `GET /api/owner/export-receipts/<id>` - Get export receipt by id (Owner only)
 - `PUT /api/owner/export-receipts/<id>` - Update export receipt (Owner only)
-- `DELETE /api/owner/export-receipts/<id>` - Delete export receipt (Owner only)
-- `PUT /api/owner/export-receipts/<id>/confirm` - Confirm export (giảm inventory) (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update warehouse_id, export_date, reason, details)
+  - **Lưu ý**: Không được tạo thủ công, chỉ được xem và điều chỉnh
 - `GET /api/owner/export-receipts/<id>/details` - Get export receipt details (Owner only)
+- **Business Logic quan trọng**:
+  - **Tự động tạo**: Khi invoice (KHÔNG có `seller_id` - hóa đơn bán, dù có `customer_id` hay không) được confirm → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+  - **Tự động confirm**: ExportReceipt được tạo với status='Confirm' và tự động giảm inventory
+  - **Inventory tự động cập nhật**: Khi ExportReceipt được tạo tự động → Tự động giảm inventory quantity cho từng product (phải kiểm tra đủ số lượng trước)
+  - **Owner chỉ xem và điều chỉnh**: Owner không tạo thủ công, chỉ xem và điều chỉnh nếu cần
 
-**ExportDetail Controller:**
-- `GET /api/export-receipts/<receipt_id>/details` - List export details (Owner only)
-- `POST /api/export-receipts/<receipt_id>/details` - Create export detail (Owner only)
-- `GET /api/export-receipts/<receipt_id>/details/<id>` - Get export detail by id (Owner only)
-- `PUT /api/export-receipts/<receipt_id>/details/<id>` - Update export detail (Owner only)
-- `DELETE /api/export-receipts/<receipt_id>/details/<id>` - Delete export detail (Owner only)
+**ExportDetail Controller (Owner - F118):**
+- `GET /api/owner/export-receipts/<receipt_id>/details` - List export details (Owner only)
+- `GET /api/owner/export-receipts/<receipt_id>/details/<id>` - Get export detail by id (Owner only)
+- `PUT /api/owner/export-receipts/<receipt_id>/details/<id>` - Update export detail (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update product_id, unit_id, quantity)
+  - **Lưu ý**: ExportDetails được tự động tạo từ InvoiceDetails khi invoice confirm, Owner chỉ điều chỉnh nếu cần
 
 **Inventory Controller (Owner - F106):**
 - `GET /api/owner/inventory` - List inventory (Owner only)
-- `POST /api/owner/inventory` - Create inventory record (Owner only)
+  - **Business Logic**: List tất cả inventory của household (filter qua warehouse.household_id)
+  - Query params: `warehouse_id` (optional), `product_id` (optional), `unit_id` (optional)
 - `GET /api/owner/inventory/<product_id>/<warehouse_id>` - Get inventory by product and warehouse (Owner only)
+  - **Business Logic**: Lấy inventory của 1 product tại 1 warehouse cụ thể
+  - Query params: `unit_id` (optional) - Nếu có, lấy chính xác theo product_id, unit_id và warehouse_id
 - `PUT /api/owner/inventory/<id>` - Update inventory (Owner only)
-- `DELETE /api/owner/inventory/<id>` - Delete inventory (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh quantity nếu cần (thường không cần vì tự động cập nhật)
+- **Business Logic quan trọng**:
+  - **Tự động cập nhật**: Inventory tự động cập nhật khi:
+    - Invoice confirm (có seller_id) → Tự động tạo ImportReceipt → Tăng inventory
+    - Invoice confirm (KHÔNG có seller_id - hóa đơn bán) → Tự động tạo ExportReceipt → Giảm inventory (kiểm tra đủ số lượng)
+  - **Không tạo thủ công**: Inventory được quản lý tự động, Owner chỉ xem và điều chỉnh nếu cần
 
 **Inventory Controller (Employee - F203):**
 - `GET /api/employee/inventory` - List inventory (Employee only, read-only)
+  - **Business Logic**: List tất cả inventory của household (filter qua warehouse.household_id)
+  - Query params: `warehouse_id` (optional), `product_id` (optional), `unit_id` (optional)
 - `GET /api/employee/inventory/<product_id>/<warehouse_id>` - Get inventory by product and warehouse (Employee only, read-only)
+  - **Business Logic**: Lấy inventory của 1 product tại 1 warehouse cụ thể
+  - Query params: `unit_id` (optional) - Nếu có, lấy chính xác theo product_id, unit_id và warehouse_id
+
+**Lưu ý quan trọng:**
+- **Data Isolation**: ImportReceipt, ExportReceipt không có `household_id` trực tiếp, nhưng có `warehouse_id`
+  - Cần filter qua `warehouse.household_id` trong Repository layer (join với Warehouse table)
+  - Inventory cũng filter qua `warehouse.household_id`
+- **Tự động tạo ImportReceipt/ExportReceipt**: 
+  - Khi invoice được confirm:
+    - Nếu invoice có `seller_id` (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+    - Nếu invoice có `customer_id` (hóa đơn bán) → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+  - ImportReceipt/ExportReceipt được tạo với status='Confirm' và tự động cập nhật inventory
+- **Inventory tự động cập nhật**:
+  - Khi ImportReceipt được tạo tự động → Tự động tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
+  - Khi ExportReceipt được tạo tự động → Tự động giảm inventory quantity (phải kiểm tra đủ số lượng trước, nếu không đủ → không tạo ExportReceipt và trả lỗi)
+- **Owner chỉ xem và điều chỉnh**:
+  - Owner KHÔNG tạo ImportReceipt/ExportReceipt thủ công
+  - Owner chỉ xem (GET) và điều chỉnh (PUT) nếu cần
+  - Owner không có quyền DELETE ImportReceipt/ExportReceipt (vì đã được confirm và đã cập nhật inventory)
+- **Permission**: 
+  - ImportReceipt: F108 (Owner only - chỉ GET, PUT, không có POST, DELETE)
+  - ExportReceipt: F118 (Owner only - chỉ GET, PUT, không có POST, DELETE)
+  - Inventory: F106 (Owner - chỉ GET, PUT, không có POST, DELETE), F203 (Employee read-only)
 
 ---
 

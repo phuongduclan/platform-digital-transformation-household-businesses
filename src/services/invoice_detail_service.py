@@ -89,7 +89,7 @@ class InvoiceDetailService:
         
         invoice_detail.updated_at = now
 
-        return self.repository.update(invoice_detail)
+        return self.repository.update(invoice_detail, household_id)
 
     def delete_invoice_detail(self, invoice_detail_id: int, household_id: int = None) -> None:
         """

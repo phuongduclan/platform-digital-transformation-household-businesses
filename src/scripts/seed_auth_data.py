@@ -100,9 +100,9 @@ def seed_functions():
         {'function_code': 'F103', 'function_name': 'manage_categories', 'url_pattern': '/api/owner/categories', 'http_methods': 'C,R,U,D', 'description': 'Manage categories', 'resource_type': 'Category'},
         {'function_code': 'F104', 'function_name': 'manage_products', 'url_pattern': '/api/owner/products', 'http_methods': 'C,R,U,D', 'description': 'Manage products', 'resource_type': 'Product'},
         {'function_code': 'F105', 'function_name': 'manage_units', 'url_pattern': '/api/owner/units', 'http_methods': 'C,R,U,D', 'description': 'Manage units', 'resource_type': 'Unit'},
-        {'function_code': 'F106', 'function_name': 'manage_inventory', 'url_pattern': '/api/owner/inventory', 'http_methods': 'C,R,U,D', 'description': 'Manage inventory', 'resource_type': 'Inventory'},
+        {'function_code': 'F106', 'function_name': 'manage_inventory', 'url_pattern': '/api/owner/inventory', 'http_methods': 'R,U', 'description': 'View and adjust inventory (auto-updated from import/export receipts, no manual create/delete)', 'resource_type': 'Inventory'},
         {'function_code': 'F107', 'function_name': 'manage_warehouses', 'url_pattern': '/api/owner/warehouses', 'http_methods': 'C,R,U,D', 'description': 'Manage warehouses', 'resource_type': 'Warehouse'},
-        {'function_code': 'F108', 'function_name': 'manage_import_receipts', 'url_pattern': '/api/owner/import-receipts', 'http_methods': 'C,R,U,D', 'description': 'Manage import receipts', 'resource_type': 'ImportReceipt'},
+        {'function_code': 'F108', 'function_name': 'manage_import_receipts', 'url_pattern': '/api/owner/import-receipts', 'http_methods': 'R,U', 'description': 'View and adjust import receipts (auto-created from invoice confirm, no manual create)', 'resource_type': 'ImportReceipt'},
         {'function_code': 'F109', 'function_name': 'manage_customers', 'url_pattern': '/api/owner/customers', 'http_methods': 'C,R,U,D', 'description': 'Manage customers', 'resource_type': 'Customer'},
         {'function_code': 'F110', 'function_name': 'manage_sellers', 'url_pattern': '/api/owner/sellers', 'http_methods': 'C,R,U,D', 'description': 'Manage sellers', 'resource_type': 'Seller'},
         {'function_code': 'F111', 'function_name': 'manage_all_invoices', 'url_pattern': '/api/owner/invoices', 'http_methods': 'C,R,U,D', 'description': 'Manage all invoices', 'resource_type': 'Invoice'},
@@ -112,7 +112,7 @@ def seed_functions():
         {'function_code': 'F115', 'function_name': 'view_household_reports', 'url_pattern': '/api/owner/reports', 'http_methods': 'R', 'description': 'View household reports', 'resource_type': 'Report'},
         {'function_code': 'F116', 'function_name': 'view_accounting_ledgers', 'url_pattern': '/api/owner/accounting-ledgers', 'http_methods': 'R', 'description': 'View accounting ledgers', 'resource_type': 'AccountingLedger'},
         {'function_code': 'F117', 'function_name': 'export_reports', 'url_pattern': '/api/owner/reports/export', 'http_methods': 'R', 'description': 'Export reports', 'resource_type': 'Report'},
-        {'function_code': 'F118', 'function_name': 'manage_export_receipts', 'url_pattern': '/api/owner/export-receipts', 'http_methods': 'C,R,U,D', 'description': 'Manage export receipts', 'resource_type': 'ExportReceipt'},
+        {'function_code': 'F118', 'function_name': 'manage_export_receipts', 'url_pattern': '/api/owner/export-receipts', 'http_methods': 'R,U', 'description': 'View and adjust export receipts (auto-created from invoice confirm, no manual create)', 'resource_type': 'ExportReceipt'},
         
         # Employee Functions (F2xx)
         {'function_code': 'F201', 'function_name': 'view_products', 'url_pattern': '/api/employee/products', 'http_methods': 'R', 'description': 'View products (read-only)', 'resource_type': 'Product'},
@@ -265,9 +265,12 @@ def main():
         print("- Owner Functions: F101-F118 (includes F102 manage_own_household and subscription)")
         print("- Employee Functions: F201-F216 (includes F216 view_warehouses)")
         print()
-        print("IMPORTANT: Admin does NOT have F001 manage_households.")
-        print("           Only Owner has F102 view_own_household (R, U) to manage household and subscription.")
-        print("           Admin F003: ONLY list all subscriptions and deactivate (NO create/update plan_id/delete).")
+        print("IMPORTANT:")
+        print("  - Admin does NOT have F001 manage_households.")
+        print("  - Only Owner has F102 view_own_household (R, U) to manage household and subscription.")
+        print("  - Admin F003: ONLY list all subscriptions and deactivate (NO create/update plan_id/delete).")
+        print("  - F108, F118: Only R,U (view and adjust import/export receipts, auto-created from invoice confirm).")
+        print("  - F106: Only R,U (view and adjust inventory, auto-updated from import/export receipts).")
         
     except Exception as e:
         session.rollback()

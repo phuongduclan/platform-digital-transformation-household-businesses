@@ -11,6 +11,9 @@ from api.controllers.warehouse_controller import owner_bp as owner_warehouses_bp
 from api.controllers.invoice_controller import (
     owner_invoice_bp, employee_invoice_bp, invoice_detail_bp
 )
+from api.controllers.import_receipt_controller import owner_import_receipt_bp
+from api.controllers.export_receipt_controller import owner_export_receipt_bp
+from api.controllers.inventory_controller import owner_inventory_bp, employee_inventory_bp
 
 from api.controllers.household_controller import owner_bp as owner_household_bp
 from api.controllers.subscription_plan_controller import admin_bp as admin_subscription_plan_bp, public_bp as public_subscription_plan_bp, owner_bp as owner_subscription_plan_bp
@@ -45,6 +48,12 @@ def register_routes(app):
     app.register_blueprint(owner_invoice_bp)
     app.register_blueprint(employee_invoice_bp)
     app.register_blueprint(invoice_detail_bp)
+    
+    # Import/Export/Inventory endpoints
+    app.register_blueprint(owner_import_receipt_bp)
+    app.register_blueprint(owner_export_receipt_bp)
+    app.register_blueprint(owner_inventory_bp)
+    app.register_blueprint(employee_inventory_bp)
     
     # Owner endpoints
     app.register_blueprint(owner_employees_bp)

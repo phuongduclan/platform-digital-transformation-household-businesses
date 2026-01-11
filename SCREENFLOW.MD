@@ -189,33 +189,66 @@ screens/
 │   │
 │   ├── inventory/
 │   │   ├── InventoryListScreen.tsx           # F106: manage_inventory (List)
+│   │   │                                     # - GET /api/owner/inventory
+│   │   │                                     # - Hiển thị tất cả inventory (tự động cập nhật từ import/export)
+│   │   │                                     # - Filter: warehouse_id, product_id
+│   │   │
 │   │   ├── InventoryDetailScreen.tsx         # F106: manage_inventory (Detail)
-│   │   ├── InventoryCreateScreen.tsx         # F106: manage_inventory (Create)
+│   │   │                                     # - GET /api/owner/inventory/<product_id>/<warehouse_id>
+│   │   │                                     # - Hiển thị inventory của 1 product tại 1 warehouse
+│   │   │
 │   │   └── InventoryEditScreen.tsx           # F106: manage_inventory (Update)
+│   │                                         # - PUT /api/owner/inventory/<id>
+│   │                                         # - Owner chỉ được điều chỉnh quantity nếu cần
+│   │                                         # - KHÔNG được tạo thủ công (tự động cập nhật từ import/export)
 │   │
 │   ├── import-receipts/
 │   │   ├── ImportReceiptListScreen.tsx       # F108: manage_import_receipts (List)
+│   │   │                                     # - GET /api/owner/import-receipts
+│   │   │                                     # - Hiển thị tất cả import receipts (tự động tạo từ invoice confirm)
+│   │   │                                     # - Filter: warehouse_id, date range
+│   │   │
 │   │   ├── ImportReceiptDetailScreen.tsx     # F108: manage_import_receipts (Detail)
-│   │   ├── ImportReceiptCreateScreen.tsx     # F108: manage_import_receipts (Create)
-│   │   ├── ImportReceiptEditScreen.tsx       # F108: manage_import_receipts (Update)
-│   │   └── ImportReceiptConfirmScreen.tsx    # F108: Confirm import (tăng inventory)
+│   │   │                                     # - GET /api/owner/import-receipts/<id>
+│   │   │                                     # - GET /api/owner/import-receipts/<id>/details
+│   │   │                                     # - Hiển thị thông tin import receipt (tự động tạo từ invoice)
+│   │   │
+│   │   └── ImportReceiptEditScreen.tsx       # F108: manage_import_receipts (Update)
+│   │                                         # - PUT /api/owner/import-receipts/<id>
+│   │                                         # - Owner chỉ được điều chỉnh (warehouse_id, import_date, details)
+│   │                                         # - KHÔNG được tạo thủ công (tự động tạo khi invoice confirm)
 │   │
 │   ├── import-details/
 │   │   ├── ImportDetailListScreen.tsx        # List details của import receipt
-│   │   ├── ImportDetailCreateScreen.tsx      # Create detail
+│   │   │                                     # - GET /api/owner/import-receipts/<receipt_id>/details
+│   │   │
 │   │   └── ImportDetailEditScreen.tsx        # Update detail
+│   │                                         # - PUT /api/owner/import-receipts/<receipt_id>/details/<id>
+│   │                                         # - Owner chỉ được điều chỉnh (product_id, unit_id, quantity)
 │   │
 │   ├── export-receipts/
 │   │   ├── ExportReceiptListScreen.tsx       # F118: manage_export_receipts (List)
+│   │   │                                     # - GET /api/owner/export-receipts
+│   │   │                                     # - Hiển thị tất cả export receipts (tự động tạo từ invoice confirm)
+│   │   │                                     # - Filter: warehouse_id, date range
+│   │   │
 │   │   ├── ExportReceiptDetailScreen.tsx     # F118: manage_export_receipts (Detail)
-│   │   ├── ExportReceiptCreateScreen.tsx     # F118: manage_export_receipts (Create)
-│   │   ├── ExportReceiptEditScreen.tsx       # F118: manage_export_receipts (Update)
-│   │   └── ExportReceiptConfirmScreen.tsx    # F118: Confirm export (giảm inventory)
+│   │   │                                     # - GET /api/owner/export-receipts/<id>
+│   │   │                                     # - GET /api/owner/export-receipts/<id>/details
+│   │   │                                     # - Hiển thị thông tin export receipt (tự động tạo từ invoice)
+│   │   │
+│   │   └── ExportReceiptEditScreen.tsx       # F118: manage_export_receipts (Update)
+│   │                                         # - PUT /api/owner/export-receipts/<id>
+│   │                                         # - Owner chỉ được điều chỉnh (warehouse_id, export_date, reason, details)
+│   │                                         # - KHÔNG được tạo thủ công (tự động tạo khi invoice confirm)
 │   │
 │   ├── export-details/
 │   │   ├── ExportDetailListScreen.tsx        # List details của export receipt
-│   │   ├── ExportDetailCreateScreen.tsx      # Create detail
+│   │   │                                     # - GET /api/owner/export-receipts/<receipt_id>/details
+│   │   │
 │   │   └── ExportDetailEditScreen.tsx        # Update detail
+│   │                                         # - PUT /api/owner/export-receipts/<receipt_id>/details/<id>
+│   │                                         # - Owner chỉ được điều chỉnh (product_id, unit_id, quantity)
 │   │
 │   ├── customers/
 │   │   ├── CustomerListScreen.tsx            # F109: manage_customers (List)
@@ -255,6 +288,10 @@ screens/
 │   │   ├── InvoiceConfirmScreen.tsx          # F111: Confirm invoice
 │   │   │                                     # - PUT /api/owner/invoices/<id>/confirm
 │   │   │                                     # - Bất kỳ ai trong household đều có thể confirm
+│   │   │                                     # - **Tự động tạo ImportReceipt/ExportReceipt**:
+│   │   │                                     #   + Nếu có seller_id → Tạo ImportReceipt
+│   │   │                                     #   + Nếu có customer_id → Tạo ExportReceipt
+│   │   │                                     # - **Tự động cập nhật Inventory** từ ImportReceipt/ExportReceipt
 │   │   │
 │   │   └── InvoicePrintScreen.tsx           # F111: Print invoice
 │   │                                         # - GET /api/owner/invoices/<id>/print
@@ -367,7 +404,10 @@ screens/
 │   │   │                                     # - PUT /api/employee/invoices/<id>/confirm
 │   │   │                                     # - Bất kỳ ai trong household đều có thể confirm
 │   │   │                                     # - Không cần là người tạo
-│   │   │                                     # - Auto deduct inventory
+│   │   │                                     # - **Tự động tạo ImportReceipt/ExportReceipt**:
+│   │   │                                     #   + Nếu có seller_id → Tạo ImportReceipt
+│   │   │                                     #   + Nếu có customer_id → Tạo ExportReceipt
+│   │   │                                     # - **Tự động cập nhật Inventory** từ ImportReceipt/ExportReceipt
 │   │   │                                     # - Auto create debt record (if on credit)
 │   │   │                                     # - Auto update accounting ledger
 │   │   │
@@ -613,7 +653,14 @@ EmployeeHomeScreen
 4. InvoiceConfirmScreen (F210)
    ├── PUT /api/employee/invoices/<id>/confirm
    ├── Bất kỳ ai trong household đều có thể confirm
-   ├── Auto deduct inventory
+   ├── **Tự động tạo ImportReceipt/ExportReceipt**:
+   │   ├── Nếu invoice có `seller_id` (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+   │   ├── Nếu invoice có `customer_id` (hóa đơn bán) → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+   │   └── ImportReceipt/ExportReceipt được tạo với status='Confirm'
+   ├── **Tự động cập nhật Inventory**:
+   │   ├── ImportReceipt → Tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
+   │   ├── ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước, nếu không đủ → trả lỗi)
+   │   └── Inventory tự động cập nhật theo biến động kho
    ├── Auto create debt record (if on credit) (F212)
    ├── Auto update accounting ledger
    └── Status: 'Draft' → 'Confirm'
@@ -702,20 +749,38 @@ EmployeeHomeScreen
    └── Export Excel (Circular 88/2021/TT-BTC)
 ```
 
-### Flow 4: Owner quản lý nhập hàng
+### Flow 4: Owner xem và điều chỉnh phiếu nhập/xuất (tự động tạo từ invoice)
 ```
 1. OwnerDashboardScreen
    ↓
-2. ImportReceiptListScreen (F108)
+2. InvoiceListScreen (F111)
+   ├── Xem danh sách invoices đã confirm
+   ├── Filter: status='Confirm'
+   └── Click vào invoice đã confirm
    ↓
-3. ImportReceiptCreateScreen
-   ├── Add Import Details
-   └── Save as Draft
+3. InvoiceDetailScreen
+   ├── GET /api/owner/invoices/<id>
+   ├── Xem thông tin invoice
+   ├── Link đến ImportReceipt (nếu có seller_id) hoặc ExportReceipt (nếu có customer_id)
+   └── Button: "Xem phiếu nhập/xuất"
    ↓
-4. ImportReceiptConfirmScreen
-   ├── Confirm import
-   ├── Auto increase inventory
-   └── Auto update accounting ledger
+4. ImportReceiptDetailScreen / ExportReceiptDetailScreen (F108/F118)
+   ├── GET /api/owner/import-receipts/<id> hoặc /api/owner/export-receipts/<id>
+   ├── Hiển thị thông tin phiếu nhập/xuất (tự động tạo từ invoice)
+   ├── Hiển thị details (tự động tạo từ invoice details)
+   └── Button: "Điều chỉnh" → ImportReceiptEditScreen / ExportReceiptEditScreen
+   ↓
+5. ImportReceiptEditScreen / ExportReceiptEditScreen
+   ├── PUT /api/owner/import-receipts/<id> hoặc /api/owner/export-receipts/<id>
+   ├── Owner điều chỉnh: warehouse_id, date, details (nếu cần)
+   └── Lưu thay đổi
+   ↓
+6. InventoryListScreen (F106)
+   ├── GET /api/owner/inventory
+   ├── Xem inventory đã được tự động cập nhật
+   └── Inventory tự động cập nhật từ ImportReceipt/ExportReceipt
+
+**Lưu ý**: Owner KHÔNG tạo ImportReceipt/ExportReceipt thủ công. Chúng được tự động tạo khi invoice confirm.
 ```
 
 ---

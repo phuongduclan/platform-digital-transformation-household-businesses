@@ -46,11 +46,12 @@ class InvoiceDetailRepository(IInvoiceDetailRepository):
         invoice_detail_models = query.all()
         return [self._to_domain(idm) for idm in invoice_detail_models]
 
-    def update(self, invoice_detail: InvoiceDetail) -> InvoiceDetail:
+    def update(self, invoice_detail: InvoiceDetail, household_id: int = None) -> InvoiceDetail:
         try:
-            invoice_detail_model = self.session.query(InvoiceDetailModel).filter_by(
-                id=invoice_detail.id
-            ).first()
+            query = self.session.query(InvoiceDetailModel).filter_by(id=invoice_detail.id)
+            if household_id is not None:
+                query = query.join(InvoiceModel).filter(InvoiceModel.household_id == household_id)
+            invoice_detail_model = query.first()
             if not invoice_detail_model:
                 raise ValueError('Invoice detail not found')
 

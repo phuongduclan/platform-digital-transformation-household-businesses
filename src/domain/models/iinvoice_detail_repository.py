@@ -16,7 +16,7 @@ class IInvoiceDetailRepository(ABC):
         pass
 
     @abstractmethod
-    def update(self, invoice_detail: InvoiceDetail) -> InvoiceDetail:
+    def update(self, invoice_detail: InvoiceDetail, household_id: int = None) -> InvoiceDetail:
         pass
 
     @abstractmethod
