@@ -989,15 +989,16 @@ EmployeeHomeScreen
 
 2. **Real-time Notifications** - Dùng WebSocket hoặc polling để hiển thị draft orders từ AI
 
-3. **Print Templates** - Sử dụng template theo Circular 88/2021/TT-BTC cho invoices và reports
+11. **Print Templates** - Sử dụng template theo Circular 88/2021/TT-BTC cho invoices và reports
 
-4. **Search & Filter** - Tất cả list screens đều có search và filter functionality
+12. **Search & Filter** - Tất cả list screens đều có search và filter functionality
 
-5. **Keyboard Shortcuts** - OrderCreateScreen hỗ trợ keyboard shortcuts cho fast operations
+13. **Keyboard Shortcuts** - OrderCreateScreen hỗ trợ keyboard shortcuts cho fast operations
 
-6. **Offline Support** - Có thể cần cache data cho offline mode (mobile app)
+14. **Offline Support** - Có thể cần cache data cho offline mode (mobile app)
 
-7. **Image Upload** - ProductCreateScreen/EditScreen hỗ trợ upload product images
+15. **Image Upload** - ProductCreateScreen/EditScreen hỗ trợ upload product images
 
-8. **Barcode Scanning** - Có thể tích hợp barcode scanner cho product search (nếu có hardware)
-9. **Hiển thị vai trò** - Ở trang Home Screen hiển thị Vai trò tương ứng.
+16. **Barcode Scanning** - Có thể tích hợp barcode scanner cho product search (nếu có hardware)
+
+17. **Hiển thị vai trò** - Ở trang Home Screen hiển thị Vai trò tương ứng.
