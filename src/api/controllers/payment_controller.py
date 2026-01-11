@@ -30,12 +30,14 @@ payment_repository = PaymentRepository()
 invoice_repository = InvoiceRepository()
 debt_record_repository = DebtRecordRepository()
 accounting_ledger_repository = AccountingLedgerRepository()
+customer_repository = CustomerRepository()
 
 payment_service = PaymentService(
     payment_repository,
     invoice_repository,
     debt_record_repository,
-    accounting_ledger_repository
+    accounting_ledger_repository,
+    customer_repository
 )
 
 # =====================================================
