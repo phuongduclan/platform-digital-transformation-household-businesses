@@ -20,6 +20,8 @@ from api.controllers.debt_record_controller import owner_debt_record_bp, employe
 from api.controllers.accounting_ledger_controller import (
     owner_accounting_ledger_bp, owner_reports_bp, admin_accounting_ledger_bp
 )
+from api.controllers.customer_controller import owner_customer_bp, employee_customer_bp
+from api.controllers.seller_controller import owner_seller_bp
 
 from api.controllers.household_controller import owner_bp as owner_household_bp
 from api.controllers.subscription_plan_controller import admin_bp as admin_subscription_plan_bp, public_bp as public_subscription_plan_bp, owner_bp as owner_subscription_plan_bp
@@ -71,6 +73,11 @@ def register_routes(app):
     app.register_blueprint(owner_accounting_ledger_bp)
     app.register_blueprint(owner_reports_bp)
     app.register_blueprint(admin_accounting_ledger_bp)
+    
+    # Customer & Seller endpoints
+    app.register_blueprint(owner_customer_bp)
+    app.register_blueprint(employee_customer_bp)
+    app.register_blueprint(owner_seller_bp)
     
     # Owner endpoints
     app.register_blueprint(owner_employees_bp)

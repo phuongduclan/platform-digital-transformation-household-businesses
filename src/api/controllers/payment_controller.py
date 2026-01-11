@@ -4,6 +4,7 @@ from infrastructure.repositories.payment_repository import PaymentRepository
 from infrastructure.repositories.invoice_repository import InvoiceRepository
 from infrastructure.repositories.debt_record_repository import DebtRecordRepository
 from infrastructure.repositories.accounting_ledger_repository import AccountingLedgerRepository
+from infrastructure.repositories.customer_repository import CustomerRepository
 from api.decorators.auth_decorators import require_permission
 from api.schemas.payment import PaymentRequestSchema, PaymentUpdateSchema, PaymentResponseSchema
 from decimal import Decimal

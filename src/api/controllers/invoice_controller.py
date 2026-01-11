@@ -16,6 +16,8 @@ from infrastructure.repositories.export_detail_repository import ExportDetailRep
 from infrastructure.repositories.warehouse_repository import WarehouseRepository
 from infrastructure.repositories.debt_record_repository import DebtRecordRepository
 from infrastructure.repositories.accounting_ledger_repository import AccountingLedgerRepository
+from infrastructure.repositories.customer_repository import CustomerRepository
+from infrastructure.repositories.seller_repository import SellerRepository
 from api.decorators.auth_decorators import require_permission
 from api.schemas.invoice import (
     InvoiceWithDetailsRequestSchema, InvoiceUpdateSchema,
@@ -64,6 +66,8 @@ inventory_repository = InventoryRepository()
 warehouse_repository = WarehouseRepository()
 debt_record_repository = DebtRecordRepository()
 accounting_ledger_repository = AccountingLedgerRepository()
+customer_repository = CustomerRepository()
+seller_repository = SellerRepository()
 
 import_receipt_service = ImportReceiptService(import_receipt_repository, import_detail_repository)
 export_receipt_service = ExportReceiptService(export_receipt_repository, export_detail_repository)
@@ -379,8 +383,8 @@ def owner_confirm_invoice(invoice_id):
             warehouse_repository=warehouse_repository,
             debt_record_service=debt_record_service,
             accounting_ledger_service=accounting_ledger_service,
-            seller_repository=None,  # TODO: Add SellerRepository if needed
-            customer_repository=None  # TODO: Add CustomerRepository if needed
+            seller_repository=seller_repository,
+            customer_repository=customer_repository
         )
         return jsonify(invoice_to_dict(invoice)), 200
     except ValueError as e:
@@ -707,8 +711,8 @@ def employee_confirm_invoice(invoice_id):
             warehouse_repository=warehouse_repository,
             debt_record_service=debt_record_service,
             accounting_ledger_service=accounting_ledger_service,
-            seller_repository=None,  # TODO: Add SellerRepository if needed
-            customer_repository=None  # TODO: Add CustomerRepository if needed
+            seller_repository=seller_repository,
+            customer_repository=customer_repository
         )
         return jsonify(invoice_to_dict(invoice)), 200
     except ValueError as e:

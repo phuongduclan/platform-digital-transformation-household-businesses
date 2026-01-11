@@ -12,7 +12,7 @@ class PaymentService:
     def __init__(self, repository: IPaymentRepository, invoice_repository: IInvoiceRepository,
                  debt_record_repository: IDebtRecordRepository = None,
                  accounting_ledger_repository: IAccountingLedgerRepository = None,
-                 customer_repository = None):  # ICustomerRepository
+                 customer_repository = None):
         self.repository = repository
         self.invoice_repository = invoice_repository
         self.debt_record_repository = debt_record_repository
@@ -87,8 +87,12 @@ class PaymentService:
             
             # Tự động tạo AccountingLedger
             if self.accounting_ledger_repository:
-                # Lấy customer name (tạm thời dùng "Khách hàng", có thể query từ Customer model sau)
+                # Lấy customer name
                 customer_name = "Khách hàng"
+                if self.customer_repository and invoice.customer_id:
+                    customer = self.customer_repository.get_by_id(invoice.customer_id, household_id)
+                    if customer:
+                        customer_name = customer.name or "Khách hàng"
                 
                 # Lấy balance hiện tại của accounting ledger
                 last_ledger = self._get_last_ledger_balance(household_id)
