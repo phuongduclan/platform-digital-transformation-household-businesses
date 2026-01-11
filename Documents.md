@@ -187,3 +187,701 @@ Build an application (mobile and/or web) that supports the following core functi
 | F213 | view_draft_orders | R |
 | F214 | confirm_draft_order | U |
 | F215 | receive_notifications | R |
+| F216 | view_warehouses | R |
+### Rules
+1/ 25 model entities ở infrastructure là nền tảng không đụng vào, bám sát để code BE, yêu cầu đúng từng field và các quan hệ khóa chính khóa ngoại.
+2/ Todo là code mẫu, là chuẩn mực của toàn bộ Flask clean architecture system, yêu cầu dựa vào để code.
+3/ API ở phần Controller gọi Service, rồi từ Service gọi Repositories.
+4/ API được gọi nhận JSON body, ở phần Domain thực hiện Object Data Transfer Object, tầng Service lấy Object DTO đó quăng xuống thằng Repositories thực hiện quá trình mapping từ Object DTO thành Object Model, rồi nó mới migrations xuống cơ sở dữ liệu.
+5/ Luồng ngược lại khi call API, FE nhận Json body để thực hiện.
+6/ Không tạo các file.md để tránh rối code.
+7/ Đọc kĩ file documents.md là yêu cầu từ khách hàng, đối chiếu yêu cầu và 25 models để thực hiện đầy đủ
+8/ Chưa đụng tới phần AI Draft Orders.
+
+### Phân công
+### **Phan Đức Lương: Authentication & Authorization**
+
+**Models:** `User`, `Role`, `Function`, `RoleFunction`
+
+**Files cần code:**
+
+**Domain:**
+- `src/domain/models/user.py`
+- `src/domain/models/iuser_repository.py`
+- `src/domain/models/role.py`
+- `src/domain/models/irole_repository.py`
+- `src/domain/models/function.py`
+- `src/domain/models/ifunction_repository.py`
+- `src/domain/models/role_function.py`
+- `src/domain/models/irole_function_repository.py`
+
+**Service:**
+- `src/services/user_service.py`
+- `src/services/role_service.py`
+- `src/services/function_service.py`
+- `src/services/role_function_service.py`
+
+**Repository:**
+- `src/infrastructure/repositories/user_repository.py`
+- `src/infrastructure/repositories/role_repository.py`
+- `src/infrastructure/repositories/function_repository.py`
+- `src/infrastructure/repositories/role_function_repository.py`
+
+**API:**
+- `src/api/controllers/auth_controller.py` (login, logout, me)
+- `src/api/controllers/user_controller.py` (CRUD users)
+- `src/api/controllers/role_controller.py` (CRUD roles)
+- `src/api/controllers/function_controller.py` (CRUD functions)
+- `src/api/controllers/role_function_controller.py` (assign functions to roles)
+- `src/api/schemas/user.py`
+- `src/api/schemas/role.py`
+- `src/api/schemas/function.py`
+- `src/api/schemas/role_function.py`
+
+**Routes:** Đăng ký trong `src/api/routes.py`
+
+**ENDPOINTS CẦN CODE:**
+
+**Auth Controller:**
+- `POST /api/auth/login` - Login (All roles)
+- `POST /api/auth/logout` - Logout (All roles)
+- `GET /api/auth/me` - Get current user (All roles)
+
+**User Controller (Admin - F005: manage_admin_users):**
+- `GET /api/admin/users` - List all users (Admin only, F005: R)
+  - **Business Rule**: Admin chỉ quản lý Admin và Owner (exclude Employee)
+  - **CHỈ Admin và Owner, KHÔNG Employee**
+- `POST /api/admin/users` - Create user (Admin only, F005: C)
+  - **Business Rule**: Admin không được tạo Employee (chỉ Owner tạo Employee)
+- `GET /api/admin/users/<id>` - Get user by id (Admin only, F005: R)
+  - **Business Rule**: Admin không được xem Employee (chỉ Owner xem Employee)
+- `PUT /api/admin/users/<id>` - Update user (Admin only, F005: U)
+  - **Business Rule**: Admin không được update Employee (chỉ Owner update Employee)
+- `DELETE /api/admin/users/<id>` - Delete user (Admin only, F005: D)
+  - **Business Rule**: Admin không được delete Employee (chỉ Owner delete Employee qua /api/owner/employees/)
+
+**User Controller (Owner - F101):**
+- `GET /api/owner/employees` - List employees of household (Owner only)
+- `POST /api/owner/employees` - Create employee (Owner only)
+- `GET /api/owner/employees/<id>` - Get employee by id (Owner only)
+- `PUT /api/owner/employees/<id>` - Update employee (Owner only)
+- `DELETE /api/owner/employees/<id>` - Delete employee (Owner only)
+
+**Role Controller (Admin only):**
+- `GET /api/admin/roles` - List all roles (Admin only)
+- `POST /api/admin/roles` - Create role (Admin only)
+- `GET /api/admin/roles/<id>` - Get role by id (Admin only)
+- `PUT /api/admin/roles/<id>` - Update role (Admin only)
+- `DELETE /api/admin/roles/<id>` - Delete role (Admin only)
+
+**Function Controller (Admin only):**
+- `GET /api/admin/functions` - List all functions (Admin only)
+- `POST /api/admin/functions` - Create function (Admin only)
+- `GET /api/admin/functions/<id>` - Get function by id (Admin only)
+- `PUT /api/admin/functions/<id>` - Update function (Admin only)
+- `DELETE /api/admin/functions/<id>` - Delete function (Admin only)
+**RoleFunction Controller (Admin only):**
+- `GET /api/admin/roles/<role_id>/functions` - Get functions of role (Admin only)
+- `POST /api/admin/roles/<role_id>/functions` - Assign function to role (Admin only)
+- `DELETE /api/admin/roles/<role_id>/functions/<function_id>` - Remove function from role (Admin only)
+
+---
+
+### *Linh Đa*THÀNH VIÊN 2: Household & Subscription**
+
+**Models:** `Household`, `Subscription`, `SubscriptionPlan`
+
+**Files cần code:**
+
+**Domain:**
+- `src/domain/models/household.py`
+- `src/domain/models/ihousehold_repository.py`
+- `src/domain/models/subscription.py`
+- `src/domain/models/isubscription_repository.py`
+- `src/domain/models/subscription_plan.py`
+- `src/domain/models/isubscription_plan_repository.py`
+
+**Service:**
+- `src/services/household_service.py`
+- `src/services/subscription_service.py`
+- `src/services/subscription_plan_service.py`
+
+**Repository:**
+- `src/infrastructure/repositories/household_repository.py`
+- `src/infrastructure/repositories/subscription_repository.py`
+- `src/infrastructure/repositories/subscription_plan_repository.py`
+
+**API:**
+- `src/api/controllers/household_controller.py`
+- `src/api/controllers/subscription_controller.py`
+- `src/api/controllers/subscription_plan_controller.py`
+- `src/api/schemas/household.py`
+- `src/api/schemas/subscription.py`
+- `src/api/schemas/subscription_plan.py`
+
+**Routes:** Đăng ký trong `src/api/routes.py`
+
+**ENDPOINTS CẦN CODE:**
+
+**Household Controller (Admin - F001):**
+- `GET /api/admin/households` - List all households (Admin only)
+- `POST /api/admin/households` - Create household (Admin only)
+- `GET /api/admin/households/<id>` - Get household by id (Admin only)
+- `PUT /api/admin/households/<id>` - Update household (Admin only)
+- `DELETE /api/admin/households/<id>` - Delete household (Admin only)
+
+**Household Controller (Owner - F102):**
+- `GET /api/owner/household` - Get own household (Owner's household only)
+- `PUT /api/owner/household` - Update own household (Owner only)
+
+**SubscriptionPlan Controller (Admin - F002):**
+- `GET /api/admin/subscription-plans` - List all subscription plans (Admin only)
+- `POST /api/admin/subscription-plans` - Create subscription plan (Admin only)
+- `GET /api/admin/subscription-plans/<id>` - Get subscription plan by id (Admin only)
+- `PUT /api/admin/subscription-plans/<id>` - Update subscription plan (Admin only)
+- `DELETE /api/admin/subscription-plans/<id>` - Delete subscription plan (Admin only)
+
+**SubscriptionPlan Controller (Owner - F102: view_own_household):**
+- `GET /api/owner/subscription-plans` - List all active subscription plans (Owner only, F102: R)
+  - **Business Logic**: Owner xem subscription plans để upgrade subscription của household mình
+  - **CHỈ trả về plans có status = "active"**
+  - **Dùng khi Owner muốn upgrade subscription**
+
+**SubscriptionPlan Controller (Public - No auth):**
+- `GET /api/public/subscription-plans` - List all active subscription plans (Public - No auth required)
+  - **Business Logic**: Owner chọn plan khi đăng ký (registration flow)
+  - **CHỈ trả về plans có status = "active"**
+  - **Dùng trong registration flow trước khi login**
+
+**Subscription Controller (Admin - F003: manage_subscriptions - CHỈ list và deactivate):**
+- `GET /api/admin/subscriptions` - List all subscriptions (Admin only, F003: R)
+  - **Business Rule**: Admin CHỈ được list all subscriptions, KHÔNG được create, update plan_id, delete
+- `PUT /api/admin/subscriptions/<id>` - Deactivate subscription (Admin only, F003: U)
+  - **Business Rule**: Admin CHỈ được deactivate (is_active=false), KHÔNG được:
+    - Create subscription (Owner tự đăng ký)
+    - Update plan_id (Owner tự upgrade)
+    - Delete subscription
+    - Activate subscription (Owner tự activate khi upgrade)
+  - **CHỈ nhận is_active=false**, nếu cố update plan_id, start_date, end_date, hoặc is_active=true → 403 Forbidden
+
+**Subscription Controller (Owner - F102: view_own_household):**
+- `GET /api/owner/subscription` - Get own subscription (Owner only, F102: R)
+  - **Business Logic**: Owner xem subscription của household mình (Data Isolation)
+  - **Lấy household_id từ JWT token tự động**
+- `PUT /api/owner/subscription` - Upgrade subscription plan (Owner only, F102: U)
+  - **Business Logic**: Owner tự upgrade subscription plan của household mình
+  - **Request body**: `{ "plan_id": <plan_id mới> }`
+  - **System tự động**: Update plan_id, start_date (default: today), end_date (tính từ billing_cycle của plan mới)
+  - **Data Isolation**: Lấy household_id từ JWT token tự động
+
+**Registration Controller (Public - No auth):**
+- `POST /api/public/register` - Owner registration flow (Public - No auth required)
+  - **Business Logic**: Owner đăng ký tài khoản - Tạo Household → Owner User → Subscription trong 1 transaction
+  - **Request body**: 
+    ```json
+    {
+      "plan_id": 1,
+      "household": {
+        "tax_code": "123456789012",
+        "name": "Household Name",
+        "phone": "0901234567",
+        "address": "123 Main St",
+        "description": "Description"
+      },
+      "owner_account": {
+        "user_name": "owner1",
+        "password": "password123",
+        "email": "owner@example.com",
+        "description": "Owner account"
+      }
+    }
+    ```
+  - **Flow**: 
+    1. Validate subscription plan tồn tại và active
+    2. Lấy Owner role
+    3. Tạo Household (status: Active)
+    4. Tạo Owner User account (role: Owner, status: Active, link với household)
+    5. Tạo Subscription (với plan_id, tự động tính start_date, end_date từ billing_cycle)
+  - **Tất cả trong 1 transaction**: Nếu bất kỳ bước nào fail → rollback hết
+
+---
+
+### **CẨM TÚ: THÀNH VIÊN 3: Product Management**
+
+**Models:** `Product`, `Category`, `Unit`, `Warehouse`
+
+**Files cần code:**
+
+**Domain:**
+- `src/domain/models/product.py`
+- `src/domain/models/iproduct_repository.py`
+- `src/domain/models/category.py`
+- `src/domain/models/icategory_repository.py`
+- `src/domain/models/unit.py`
+- `src/domain/models/iunit_repository.py`
+- `src/domain/models/warehouse.py`
+- `src/domain/models/iwarehouse_repository.py`
+
+**Service:**
+- `src/services/product_service.py`
+- `src/services/category_service.py`
+- `src/services/unit_service.py`
+- `src/services/warehouse_service.py`
+
+**Repository:**
+- `src/infrastructure/repositories/product_repository.py`
+- `src/infrastructure/repositories/category_repository.py`
+- `src/infrastructure/repositories/unit_repository.py`
+- `src/infrastructure/repositories/warehouse_repository.py`
+
+**API:**
+- `src/api/controllers/product_controller.py`
+- `src/api/controllers/category_controller.py`
+- `src/api/controllers/unit_controller.py`
+- `src/api/controllers/warehouse_controller.py`
+- `src/api/schemas/product.py`
+- `src/api/schemas/category.py`
+- `src/api/schemas/unit.py`
+- `src/api/schemas/warehouse.py`
+
+**Routes:** Đăng ký trong `src/api/routes.py`
+
+**ENDPOINTS CẦN CODE:**
+
+**Product Controller (Owner - F104):**
+- `GET /api/owner/products` - List products (Owner only)
+- `POST /api/owner/products` - Create product (Owner only)
+- `GET /api/owner/products/<id>` - Get product by id (Owner only)
+- `PUT /api/owner/products/<id>` - Update product (Owner only)
+- `DELETE /api/owner/products/<id>` - Delete product (Owner only)
+
+**Product Controller (Employee - F201):**
+- `GET /api/employee/products` - List products (Employee only, read-only)
+- `GET /api/employee/products/<id>` - Get product by id (Employee only, read-only)
+
+**Category Controller (Owner - F103):**
+- `GET /api/owner/categories` - List categories (Owner only)
+- `POST /api/owner/categories` - Create category (Owner only)
+- `GET /api/owner/categories/<id>` - Get category by id (Owner only)
+- `PUT /api/owner/categories/<id>` - Update category (Owner only)
+- `DELETE /api/owner/categories/<id>` - Delete category (Owner only)
+
+**Category Controller (Employee - F202):**
+- `GET /api/employee/categories` - List categories (Employee only, read-only)
+
+**Unit Controller (Owner - F105):**
+- `GET /api/owner/units` - List units (Owner only)
+- `POST /api/owner/units` - Create unit (Owner only)
+- `GET /api/owner/units/<id>` - Get unit by id (Owner only)
+- `PUT /api/owner/units/<id>` - Update unit (Owner only)
+- `DELETE /api/owner/units/<id>` - Delete unit (Owner only)
+
+**Unit Controller (Employee - F204):**
+- `GET /api/employee/units` - List units (Employee only, read-only)
+
+**Warehouse Controller (Owner - F107):**
+- `GET /api/owner/warehouses` - List warehouses (Owner only)
+- `POST /api/owner/warehouses` - Create warehouse (Owner only)
+- `GET /api/owner/warehouses/<id>` - Get warehouse by id (Owner only)
+- `PUT /api/owner/warehouses/<id>` - Update warehouse (Owner only)
+- `DELETE /api/owner/warehouses/<id>` - Delete warehouse (Owner only)
+
+**Warehouse Controller (Employee - F216):**
+- `GET /api/employee/warehouses` - List warehouses (Employee only, read-only) - Check warehouse before creating invoice
+- `GET /api/employee/warehouses/<id>` - Get warehouse by id (Employee only, read-only)
+
+---
+
+###Kim Chi **THÀNH VIÊN 4: Customer & Seller**
+
+**Models:** `Customer`, `Seller`
+
+**Files cần code:**
+
+**Domain:**
+- `src/domain/models/customer.py`
+- `src/domain/models/icustomer_repository.py`
+- `src/domain/models/seller.py`
+- `src/domain/models/iseller_repository.py`
+
+**Service:**
+- `src/services/customer_service.py`
+- `src/services/seller_service.py`
+
+**Repository:**
+- `src/infrastructure/repositories/customer_repository.py`
+- `src/infrastructure/repositories/seller_repository.py`
+
+**API:**
+- `src/api/controllers/customer_controller.py`
+- `src/api/controllers/seller_controller.py`
+- `src/api/schemas/customer.py`
+- `src/api/schemas/seller.py`
+
+**Routes:** Đăng ký trong `src/api/routes.py`
+
+**ENDPOINTS CẦN CODE:**
+
+**Customer Controller (Owner - F109):**
+- `GET /api/owner/customers` - List customers (Owner only)
+- `POST /api/owner/customers` - Create customer (Owner only)
+- `GET /api/owner/customers/<id>` - Get customer by id (Owner only)
+- `PUT /api/owner/customers/<id>` - Update customer (Owner only)
+- `DELETE /api/owner/customers/<id>` - Delete customer (Owner only)
+- `GET /api/owner/customers/<id>/history` - Get customer purchase history (Owner only)
+- `GET /api/owner/customers/<id>/debt` - Get customer outstanding debt (Owner only)
+
+**Customer Controller (Employee - F205, F206):**
+- `GET /api/employee/customers` - List customers (Employee only, read-only)
+- `GET /api/employee/customers/<id>` - Get customer by id (Employee only, read-only)
+- `GET /api/employee/customers/<id>/debt` - Get customer debt (Employee only, read-only)
+
+**Seller Controller (Owner - F110):**
+- `GET /api/owner/sellers` - List sellers (Owner only)
+- `POST /api/owner/sellers` - Create seller (Owner only)
+- `GET /api/owner/sellers/<id>` - Get seller by id (Owner only)
+- `PUT /api/owner/sellers/<id>` - Update seller (Owner only)
+- `DELETE /api/owner/sellers/<id>` - Delete seller (Owner only)
+
+---
+
+###  ** TUẤN -THÀNH VIÊN 5: Invoice & Order**
+
+**Models:** `Invoice`, `InvoiceDetail`
+
+**Files cần code:**
+
+**Domain:**
+- `src/domain/models/invoice.py`
+- `src/domain/models/iinvoice_repository.py`
+- `src/domain/models/invoice_detail.py`
+- `src/domain/models/iinvoice_detail_repository.py`
+
+**Service:**
+- `src/services/invoice_service.py`
+- `src/services/invoice_detail_service.py`
+
+**Repository:**
+- `src/infrastructure/repositories/invoice_repository.py`
+- `src/infrastructure/repositories/invoice_detail_repository.py`
+
+**API:**
+- `src/api/controllers/invoice_controller.py`
+- `src/api/controllers/invoice_detail_controller.py`
+- `src/api/schemas/invoice.py`
+- `src/api/schemas/invoice_detail.py`
+
+**Routes:** Đăng ký trong `src/api/routes.py`
+
+**ENDPOINTS CẦN CODE:**
+
+**Invoice Controller (Owner - F111):**
+- `GET /api/owner/invoices` - List all invoices của household (Owner only)
+  - Query params: `status` (filter by status: Draft, Confirm, Delete)
+  - **Business Logic**: List tất cả invoices của household, không phân biệt ai tạo
+- `POST /api/owner/invoices` - Create invoice với details (Owner only)
+  - **Business Logic**: Tạo invoice + details trong 1 transaction
+  - **Request body**: `{ invoice fields + details: [...] }`
+  - **Phải có ít nhất 1 detail**, tính toán total_amount, vat_total, discount_total từ details
+- `GET /api/owner/invoices/<id>` - Get invoice by id (Owner only)
+- `PUT /api/owner/invoices/<id>` - Update invoice (Owner only)
+  - **Business Logic**: Chỉ được update khi status='Draft'
+- `DELETE /api/owner/invoices/<id>` - Delete invoice (Owner only)
+  - **Business Logic**: Chỉ được delete khi status='Draft'
+- `PUT /api/owner/invoices/<id>/confirm` - Confirm invoice (Owner only)
+  - **Business Logic**: Chỉ được confirm khi status='Draft' → chuyển sang 'Confirm'
+  - **Bất kỳ ai trong household đều có thể confirm**, không cần là người tạo
+  - **Tự động tạo ImportReceipt/ExportReceipt**:
+    - Nếu invoice có `seller_id` (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+    - Nếu invoice KHÔNG có `seller_id` (hóa đơn bán, dù có `customer_id` hay không - kể cả khách vãng lai) → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+    - ImportReceipt/ExportReceipt được tạo với status='Confirm' và tự động cập nhật inventory
+  - **Tự động cập nhật Inventory**:
+    - ImportReceipt → Tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
+    - ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước, nếu không đủ → trả lỗi và không confirm invoice)
+- `GET /api/owner/invoices/<id>/details` - Get invoice details (Owner only)
+- `GET /api/owner/invoices/<id>/print` - Print invoice (Owner only)
+  - **Business Logic**: Trả về invoice + tất cả details để in
+
+**Invoice Controller (Employee - F207, F208, F209, F210):**
+- `GET /api/employee/invoices` - List all invoices của household (Employee only)
+  - Query params: `status` (filter by status='Draft' để xem draft orders từ AI)
+  - **Business Logic**: List tất cả invoices của household, không phân biệt ai tạo
+  - **Draft orders từ AI**: Filter `status='Draft'` để xem (thay vì endpoint riêng)
+- `POST /api/employee/invoices` - Create draft invoice với details (Employee only)
+  - **Business Logic**: Tạo invoice + details trong 1 transaction, status='Draft'
+  - **Request body**: `{ invoice fields + details: [...] }`
+  - **Phải có ít nhất 1 detail**, tính toán total_amount, vat_total, discount_total từ details
+- `GET /api/employee/invoices/<id>` - Get invoice by id (Employee only)
+- `PUT /api/employee/invoices/<id>` - Update draft invoice (Employee only)
+  - **Business Logic**: Chỉ được update khi status='Draft'
+- `DELETE /api/employee/invoices/<id>` - Delete draft invoice (Employee only)
+  - **Business Logic**: Chỉ được delete khi status='Draft'
+- `PUT /api/employee/invoices/<id>/confirm` - Confirm invoice (Employee only)
+  - **Business Logic**: Chỉ được confirm khi status='Draft' → chuyển sang 'Confirm'
+  - **Bất kỳ ai trong household đều có thể confirm**, không cần là người tạo
+  - **Tự động tạo ImportReceipt/ExportReceipt**:
+    - Nếu invoice có `seller_id` (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+    - Nếu invoice KHÔNG có `seller_id` (hóa đơn bán, dù có `customer_id` hay không - kể cả khách vãng lai) → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+    - ImportReceipt/ExportReceipt được tạo với status='Confirm' và tự động cập nhật inventory
+  - **Tự động cập nhật Inventory**:
+    - ImportReceipt → Tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
+    - ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước, nếu không đủ → trả lỗi và không confirm invoice)
+- `GET /api/employee/invoices/<id>/details` - Get invoice details (Employee only)
+- `GET /api/employee/invoices/<id>/print` - Print invoice (Employee only)
+  - **Business Logic**: Trả về invoice + tất cả details để in
+
+**InvoiceDetail Controller (Owner/Employee):**
+- `GET /api/invoices/<invoice_id>/details` - List invoice details (Owner/Employee)
+- `POST /api/invoices/<invoice_id>/details` - Create invoice detail (Owner/Employee)
+  - **Business Logic**: Chỉ được tạo detail khi invoice status='Draft'
+- `GET /api/invoices/<invoice_id>/details/<id>` - Get invoice detail by id (Owner/Employee)
+- `PUT /api/invoices/<invoice_id>/details/<id>` - Update invoice detail (Owner/Employee)
+  - **Business Logic**: Chỉ được update khi invoice status='Draft'
+- `DELETE /api/invoices/<invoice_id>/details/<id>` - Delete invoice detail (Owner/Employee)
+  - **Business Logic**: Chỉ được delete khi invoice status='Draft'
+
+**Lưu ý:**
+- **Draft Orders từ AI**: Không cần endpoint riêng, dùng `GET /api/employee/invoices?status=Draft` để xem
+- **Confirm Draft Order**: Dùng `PUT /api/employee/invoices/<id>/confirm` (đã có trong CRUD)
+- **Tạo invoice**: Phải có ít nhất 1 detail, tạo trong 1 transaction
+- **Data Isolation**: Owner và Employee đều thấy tất cả invoices của household (filter by household_id)
+
+---
+
+### **THÀNH VIÊN 6: Import/Export & Inventory**
+
+**Models:** `ImportReceipt`, `ImportDetail`, `ExportReceipt`, `ExportDetail`, `Inventory`
+
+**Files cần code:**
+
+**Domain:**
+- `src/domain/models/import_receipt.py`
+- `src/domain/models/iimport_receipt_repository.py`
+- `src/domain/models/import_detail.py`
+- `src/domain/models/iimport_detail_repository.py`
+- `src/domain/models/export_receipt.py`
+- `src/domain/models/iexport_receipt_repository.py`
+- `src/domain/models/export_detail.py`
+- `src/domain/models/iexport_detail_repository.py`
+- `src/domain/models/inventory.py`
+- `src/domain/models/iinventory_repository.py`
+
+**Service:**
+- `src/services/import_receipt_service.py`
+- `src/services/import_detail_service.py`
+- `src/services/export_receipt_service.py`
+- `src/services/export_detail_service.py`
+- `src/services/inventory_service.py`
+
+**Repository:**
+- `src/infrastructure/repositories/import_receipt_repository.py`
+- `src/infrastructure/repositories/import_detail_repository.py`
+- `src/infrastructure/repositories/export_receipt_repository.py`
+- `src/infrastructure/repositories/export_detail_repository.py`
+- `src/infrastructure/repositories/inventory_repository.py`
+
+**API:**
+- `src/api/controllers/import_receipt_controller.py`
+- `src/api/controllers/import_detail_controller.py`
+- `src/api/controllers/export_receipt_controller.py`
+- `src/api/controllers/export_detail_controller.py`
+- `src/api/controllers/inventory_controller.py`
+- `src/api/schemas/import_receipt.py`
+- `src/api/schemas/import_detail.py`
+- `src/api/schemas/export_receipt.py`
+- `src/api/schemas/export_detail.py`
+- `src/api/schemas/inventory.py`
+
+**Routes:** Đăng ký trong `src/api/routes.py`
+
+**ENDPOINTS CẦN CODE:**
+
+**ImportReceipt Controller (Owner - F108):**
+- `GET /api/owner/import-receipts` - List import receipts (Owner only)
+  - **Business Logic**: List tất cả import receipts của household (filter qua warehouse.household_id)
+  - **Lưu ý**: ImportReceipt được tự động tạo khi invoice (hóa đơn mua) được confirm
+- `GET /api/owner/import-receipts/<id>` - Get import receipt by id (Owner only)
+- `PUT /api/owner/import-receipts/<id>` - Update import receipt (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update warehouse_id, import_date, details)
+  - **Lưu ý**: Không được tạo thủ công, chỉ được xem và điều chỉnh
+- `GET /api/owner/import-receipts/<id>/details` - Get import receipt details (Owner only)
+- **Business Logic quan trọng**:
+  - **Tự động tạo**: Khi invoice (có `seller_id` - hóa đơn mua) được confirm → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+  - **Tự động confirm**: ImportReceipt được tạo với status='Confirm' và tự động tăng inventory
+  - **Inventory tự động cập nhật**: Khi ImportReceipt được tạo tự động → Tự động tăng inventory quantity cho từng product
+  - **Owner chỉ xem và điều chỉnh**: Owner không tạo thủ công, chỉ xem và điều chỉnh nếu cần
+
+**ImportDetail Controller (Owner - F108):**
+- `GET /api/owner/import-receipts/<receipt_id>/details` - List import details (Owner only)
+- `GET /api/owner/import-receipts/<receipt_id>/details/<id>` - Get import detail by id (Owner only)
+- `PUT /api/owner/import-receipts/<receipt_id>/details/<id>` - Update import detail (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update product_id, unit_id, quantity)
+  - **Lưu ý**: ImportDetails được tự động tạo từ InvoiceDetails khi invoice confirm, Owner chỉ điều chỉnh nếu cần
+
+**ExportReceipt Controller (Owner - F118):**
+- `GET /api/owner/export-receipts` - List export receipts (Owner only)
+  - **Business Logic**: List tất cả export receipts của household (filter qua warehouse.household_id)
+  - **Lưu ý**: ExportReceipt được tự động tạo khi invoice (hóa đơn bán) được confirm
+- `GET /api/owner/export-receipts/<id>` - Get export receipt by id (Owner only)
+- `PUT /api/owner/export-receipts/<id>` - Update export receipt (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update warehouse_id, export_date, reason, details)
+  - **Lưu ý**: Không được tạo thủ công, chỉ được xem và điều chỉnh
+- `GET /api/owner/export-receipts/<id>/details` - Get export receipt details (Owner only)
+- **Business Logic quan trọng**:
+  - **Tự động tạo**: Khi invoice (KHÔNG có `seller_id` - hóa đơn bán, dù có `customer_id` hay không) được confirm → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+  - **Tự động confirm**: ExportReceipt được tạo với status='Confirm' và tự động giảm inventory
+  - **Inventory tự động cập nhật**: Khi ExportReceipt được tạo tự động → Tự động giảm inventory quantity cho từng product (phải kiểm tra đủ số lượng trước)
+  - **Owner chỉ xem và điều chỉnh**: Owner không tạo thủ công, chỉ xem và điều chỉnh nếu cần
+
+**ExportDetail Controller (Owner - F118):**
+- `GET /api/owner/export-receipts/<receipt_id>/details` - List export details (Owner only)
+- `GET /api/owner/export-receipts/<receipt_id>/details/<id>` - Get export detail by id (Owner only)
+- `PUT /api/owner/export-receipts/<receipt_id>/details/<id>` - Update export detail (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh (update product_id, unit_id, quantity)
+  - **Lưu ý**: ExportDetails được tự động tạo từ InvoiceDetails khi invoice confirm, Owner chỉ điều chỉnh nếu cần
+
+**Inventory Controller (Owner - F106):**
+- `GET /api/owner/inventory` - List inventory (Owner only)
+  - **Business Logic**: List tất cả inventory của household (filter qua warehouse.household_id)
+  - Query params: `warehouse_id` (optional), `product_id` (optional), `unit_id` (optional)
+- `GET /api/owner/inventory/<product_id>/<warehouse_id>` - Get inventory by product and warehouse (Owner only)
+  - **Business Logic**: Lấy inventory của 1 product tại 1 warehouse cụ thể
+  - Query params: `unit_id` (optional) - Nếu có, lấy chính xác theo product_id, unit_id và warehouse_id
+- `PUT /api/owner/inventory/<id>` - Update inventory (Owner only)
+  - **Business Logic**: Owner chỉ được điều chỉnh quantity nếu cần (thường không cần vì tự động cập nhật)
+- **Business Logic quan trọng**:
+  - **Tự động cập nhật**: Inventory tự động cập nhật khi:
+    - Invoice confirm (có seller_id) → Tự động tạo ImportReceipt → Tăng inventory
+    - Invoice confirm (KHÔNG có seller_id - hóa đơn bán) → Tự động tạo ExportReceipt → Giảm inventory (kiểm tra đủ số lượng)
+  - **Không tạo thủ công**: Inventory được quản lý tự động, Owner chỉ xem và điều chỉnh nếu cần
+
+**Inventory Controller (Employee - F203):**
+- `GET /api/employee/inventory` - List inventory (Employee only, read-only)
+  - **Business Logic**: List tất cả inventory của household (filter qua warehouse.household_id)
+  - Query params: `warehouse_id` (optional), `product_id` (optional), `unit_id` (optional)
+- `GET /api/employee/inventory/<product_id>/<warehouse_id>` - Get inventory by product and warehouse (Employee only, read-only)
+  - **Business Logic**: Lấy inventory của 1 product tại 1 warehouse cụ thể
+  - Query params: `unit_id` (optional) - Nếu có, lấy chính xác theo product_id, unit_id và warehouse_id
+
+**Lưu ý quan trọng:**
+- **Data Isolation**: ImportReceipt, ExportReceipt không có `household_id` trực tiếp, nhưng có `warehouse_id`
+  - Cần filter qua `warehouse.household_id` trong Repository layer (join với Warehouse table)
+  - Inventory cũng filter qua `warehouse.household_id`
+- **Tự động tạo ImportReceipt/ExportReceipt**: 
+  - Khi invoice được confirm:
+    - Nếu invoice có `seller_id` (hóa đơn mua) → Tự động tạo ImportReceipt + ImportDetails từ InvoiceDetails
+    - Nếu invoice có `customer_id` (hóa đơn bán) → Tự động tạo ExportReceipt + ExportDetails từ InvoiceDetails
+  - ImportReceipt/ExportReceipt được tạo với status='Confirm' và tự động cập nhật inventory
+- **Inventory tự động cập nhật**:
+  - Khi ImportReceipt được tạo tự động → Tự động tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
+  - Khi ExportReceipt được tạo tự động → Tự động giảm inventory quantity (phải kiểm tra đủ số lượng trước, nếu không đủ → không tạo ExportReceipt và trả lỗi)
+- **Owner chỉ xem và điều chỉnh**:
+  - Owner KHÔNG tạo ImportReceipt/ExportReceipt thủ công
+  - Owner chỉ xem (GET) và điều chỉnh (PUT) nếu cần
+  - Owner không có quyền DELETE ImportReceipt/ExportReceipt (vì đã được confirm và đã cập nhật inventory)
+- **Permission**: 
+  - ImportReceipt: F108 (Owner only - chỉ GET, PUT, không có POST, DELETE)
+  - ExportReceipt: F118 (Owner only - chỉ GET, PUT, không có POST, DELETE)
+  - Inventory: F106 (Owner - chỉ GET, PUT, không có POST, DELETE), F203 (Employee read-only)
+
+---
+
+### **THÀNH VIÊN 7: Payment & Accounting**
+
+**Models:** `Payment`, `PaymentMethod`, `DebtRecord`, `AccountingLedger`
+
+**Files cần code:**
+
+**Domain:**
+- `src/domain/models/payment.py`
+- `src/domain/models/ipayment_repository.py`
+- `src/domain/models/payment_method.py`
+- `src/domain/models/ipayment_method_repository.py`
+- `src/domain/models/debt_record.py`
+- `src/domain/models/idebt_record_repository.py`
+- `src/domain/models/accounting_ledger.py`
+- `src/domain/models/iaccounting_ledger_repository.py`
+
+**Service:**
+- `src/services/payment_service.py`
+- `src/services/payment_method_service.py`
+- `src/services/debt_record_service.py`
+- `src/services/accounting_ledger_service.py`
+
+**Repository:**
+- `src/infrastructure/repositories/payment_repository.py`
+- `src/infrastructure/repositories/payment_method_repository.py`
+- `src/infrastructure/repositories/debt_record_repository.py`
+- `src/infrastructure/repositories/accounting_ledger_repository.py`
+
+**API:**
+- `src/api/controllers/payment_controller.py`
+- `src/api/controllers/payment_method_controller.py`
+- `src/api/controllers/debt_record_controller.py`
+- `src/api/controllers/accounting_ledger_controller.py`
+- `src/api/schemas/payment.py`
+- `src/api/schemas/payment_method.py`
+- `src/api/schemas/debt_record.py`
+- `src/api/schemas/accounting_ledger.py`
+
+**Routes:** Đăng ký trong `src/api/routes.py`
+
+**ENDPOINTS CẦN CODE:**
+
+**Payment Controller (Owner - F112):**
+- `GET /api/owner/payments` - List payments (Owner only)
+- `POST /api/owner/payments` - Create payment (Owner only)
+- `GET /api/owner/payments/<id>` - Get payment by id (Owner only)
+- `PUT /api/owner/payments/<id>` - Update payment (Owner only)
+- `DELETE /api/owner/payments/<id>` - Delete payment (Owner only)
+
+**Payment Controller (Employee - F211):**
+- `POST /api/employee/payments` - Record payment (Employee only)
+- `GET /api/employee/payments/<id>` - Get payment by id (Employee only)
+
+**PaymentMethod Controller (Owner - F113):**
+- `GET /api/owner/payment-methods` - List payment methods (Owner only)
+- `POST /api/owner/payment-methods` - Create payment method (Owner only)
+- `GET /api/owner/payment-methods/<id>` - Get payment method by id (Owner only)
+- `PUT /api/owner/payment-methods/<id>` - Update payment method (Owner only)
+- `DELETE /api/owner/payment-methods/<id>` - Delete payment method (Owner only)
+
+**DebtRecord Controller (Owner - F114):**
+- `GET /api/owner/debt-records` - List debt records (Owner only)
+- `POST /api/owner/debt-records` - Create debt record (Owner only)
+- `GET /api/owner/debt-records/<id>` - Get debt record by id (Owner only)
+- `PUT /api/owner/debt-records/<id>` - Update debt record (Owner only)
+- `DELETE /api/owner/debt-records/<id>` - Delete debt record (Owner only)
+
+**DebtRecord Controller (Employee - F212):**
+- `POST /api/employee/debt-records` - Record debt (Employee only)
+- `GET /api/employee/debt-records/<id>` - Get debt record by id (Employee only)
+
+**AccountingLedger Controller (Owner - F116, F117):**
+- `GET /api/owner/accounting-ledgers` - List accounting ledgers (Owner only)
+- `GET /api/owner/accounting-ledgers/export` - Export reports (Excel) (Owner only)
+  - Query params: `format=excel&from_date=...&to_date=...`
+- `GET /api/owner/reports/daily-revenue` - Daily revenue report (Owner only)
+  - Query params: `date=...`
+- `GET /api/owner/reports/monthly-revenue` - Monthly revenue report (Owner only)
+  - Query params: `month=...&year=...`
+- `GET /api/owner/reports/outstanding-debt` - Outstanding debt report (Owner only)
+
+**AccountingLedger Controller (Admin - F007):**
+- `GET /api/admin/accounting-ledgers` - List all accounting ledgers (Admin only)
+- `GET /api/admin/accounting-ledgers/export` - Export all ledgers (Admin only)
+  - Query params: `format=excel&household_id=...&from_date=...&to_date=...`
+
+---
+
+## Notes - Functions chưa phân công (làm sau):
+
+- **F004** - view_platform_analytics (Admin) - Platform analytics dashboard
+- **F006** - manage_system_config (Admin) - System configuration management
+- **F115** - view_household_reports (Owner) - Household reports
+- **F215** - receive_notifications (Employee) - Real-time notifications
+
+## Seed Data Test
+    cd src
+    
+    python scripts/seed_auth_data.py

@@ -1,20 +1,21 @@
 from flask import Flask, jsonify
 from api.swagger import spec
-from api.controllers.todo_controller import bp as todo_bp
 from api.middleware import middleware
-from api.responses import success_response
 from infrastructure.databases import init_db
 from config import Config
 from flasgger import Swagger
 from config import SwaggerConfig
 from flask_swagger_ui import get_swaggerui_blueprint
+from api.routes import register_routes
 
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object(Config)
     Swagger(app)
-    # Đăng ký blueprint trước
-    app.register_blueprint(todo_bp)
+    
+    # Register all routes
+    register_routes(app)
 
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
@@ -22,7 +23,7 @@ def create_app():
     swaggerui_blueprint = get_swaggerui_blueprint(
         SWAGGER_URL,
         API_URL,
-        config={'app_name': "Todo API"}
+        config={'app_name': "BizFlow API"}
     )
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
@@ -34,11 +35,10 @@ def create_app():
     # Register middleware
     middleware(app)
 
-    # Register routes
+    # Register routes for Swagger
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
-            # Thêm các endpoint khác nếu cần
-            if rule.endpoint.startswith(('todo.', 'user.')):
+            if rule.endpoint.startswith(('todo.', 'auth.', 'admin_', 'owner_', 'employee_', 'public')):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)
