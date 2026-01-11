@@ -598,6 +598,14 @@ Build an application (mobile and/or web) that supports the following core functi
   - **Tự động cập nhật Inventory**:
     - ImportReceipt → Tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
     - ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước, nếu không đủ → trả lỗi và không confirm invoice)
+  - **Tự động tạo DebtRecord** (nếu invoice có `customer_id != null` và `invoice_type = 'UNPAID'`):
+    - Tạo DebtRecord với `invoice_id`, `debit_amount = invoice.total_amount`, `credit_amount = null`
+    - Tính `balance` = balance trước đó của customer + debit_amount
+  - **Tự động tạo AccountingLedger**:
+    - **Hóa đơn mua** (`seller_id != null`): Ghi Chi với `debit_amount = invoice.total_amount`
+    - **Hóa đơn bán** (`customer_id != null`):
+      - Nếu `invoice_type = 'PAID'`: Ghi Thu với `credit_amount = invoice.total_amount`
+      - Nếu `invoice_type = 'UNPAID'`: **KHÔNG tạo AccountingLedger** (chưa có thu, chỉ tạo DebtRecord)
 - `GET /api/owner/invoices/<id>/details` - Get invoice details (Owner only)
 - `GET /api/owner/invoices/<id>/print` - Print invoice (Owner only)
   - **Business Logic**: Trả về invoice + tất cả details để in
@@ -626,6 +634,14 @@ Build an application (mobile and/or web) that supports the following core functi
   - **Tự động cập nhật Inventory**:
     - ImportReceipt → Tăng inventory quantity (tạo mới nếu chưa có, cộng thêm nếu đã có)
     - ExportReceipt → Giảm inventory quantity (kiểm tra đủ số lượng trước, nếu không đủ → trả lỗi và không confirm invoice)
+  - **Tự động tạo DebtRecord** (nếu invoice có `customer_id != null` và `invoice_type = 'UNPAID'`):
+    - Tạo DebtRecord với `invoice_id`, `debit_amount = invoice.total_amount`, `credit_amount = null`
+    - Tính `balance` = balance trước đó của customer + debit_amount
+  - **Tự động tạo AccountingLedger**:
+    - **Hóa đơn mua** (`seller_id != null`): Ghi Chi với `debit_amount = invoice.total_amount`
+    - **Hóa đơn bán** (`customer_id != null`):
+      - Nếu `invoice_type = 'PAID'`: Ghi Thu với `credit_amount = invoice.total_amount`
+      - Nếu `invoice_type = 'UNPAID'`: **KHÔNG tạo AccountingLedger** (chưa có thu, chỉ tạo DebtRecord)
 - `GET /api/employee/invoices/<id>/details` - Get invoice details (Employee only)
 - `GET /api/employee/invoices/<id>/print` - Print invoice (Employee only)
   - **Business Logic**: Trả về invoice + tất cả details để in
@@ -826,51 +842,163 @@ Build an application (mobile and/or web) that supports the following core functi
 
 **Routes:** Đăng ký trong `src/api/routes.py`
 
+**BUSINESS LOGIC QUAN TRỌNG:**
+
+#### **PaymentMethod:**
+- **Có sẵn trong hệ thống**: PaymentMethod được seed sẵn (ví dụ: Tiền mặt, Chuyển khoản, Thẻ, v.v.)
+- **Owner KHÔNG được tạo/sửa/xóa**: Chỉ được xem danh sách để chọn khi tạo Payment
+- **Admin quản lý**: Chỉ Admin mới có quyền CRUD PaymentMethod (nếu cần thêm phương thức mới)
+
+#### **Payment:**
+- **Mục đích**: Ghi nhận mỗi lần khách hàng thanh toán cho một hóa đơn bán
+- **Ai tạo**: Owner và Employee đều có thể tạo Payment
+- **Liên kết**: Payment phải liên kết với `invoice_id` (hóa đơn bán, `customer_id != null`)
+- **Tự động tạo DebtRecord**: Khi tạo Payment → Tự động tạo DebtRecord với `payment_id` và `credit_amount`
+- **Tự động cập nhật AccountingLedger**: 
+  - Nếu invoice `invoice_type='PAID'` và đã confirm → Payment này là thanh toán bổ sung → Ghi thu
+  - Nếu invoice `invoice_type='UNPAID'` → Payment này là thanh toán nợ → Ghi thu và cập nhật DebtRecord
+
+#### **DebtRecord:**
+- **Tự động tạo khi Invoice confirm**:
+  - Điều kiện: Invoice có `customer_id != null` và `invoice_type = 'UNPAID'`
+  - Tạo DebtRecord với:
+    - `invoice_id` = invoice.id
+    - `payment_id` = null
+    - `debit_amount` = invoice.total_amount
+    - `credit_amount` = null
+    - `balance` = tính từ balance trước đó + debit_amount (hoặc - credit_amount)
+- **Tự động tạo khi Payment được tạo**:
+  - Điều kiện: Payment liên kết với invoice có `customer_id != null`
+  - Tạo DebtRecord với:
+    - `invoice_id` = null
+    - `payment_id` = payment.id
+    - `debit_amount` = null
+    - `credit_amount` = payment.amount
+    - `balance` = tính từ balance trước đó - credit_amount
+- **Ràng buộc**: Một bản ghi chỉ nợ hoặc chỉ trả:
+  - Nếu `invoice_id != null` → `payment_id` phải = null (bản ghi nợ)
+  - Nếu `payment_id != null` → `invoice_id` phải = null (bản ghi trả)
+- **Balance**: Ghi nhận số dư tích lũy của khách hàng (balance = tổng credit - tổng debit)
+
+#### **AccountingLedger:**
+- **Tự động tạo khi Invoice confirm**:
+  - **Hóa đơn mua** (`seller_id != null`):
+    - `debit_amount` = invoice.total_amount (Chi)
+    - `credit_amount` = null
+    - `movement_type` = 'Chi'
+    - `description` = "Mua hàng từ {seller_name}"
+  - **Hóa đơn bán** (`customer_id != null`):
+    - **Nếu `invoice_type = 'PAID'`**:
+      - `debit_amount` = null
+      - `credit_amount` = invoice.total_amount (Thu ngay)
+      - `movement_type` = 'Thu'
+      - `description` = "Bán hàng cho {customer_name} - Đã thanh toán"
+    - **Nếu `invoice_type = 'UNPAID'`**:
+      - **KHÔNG tạo AccountingLedger ngay** (chưa có thu)
+      - Chỉ tạo DebtRecord
+      - Khi có Payment → Tạo AccountingLedger với `credit_amount` = payment.amount
+- **Tự động tạo khi Payment được tạo**:
+  - Điều kiện: Payment liên kết với invoice có `customer_id != null` (hóa đơn bán)
+  - **Nếu invoice `invoice_type = 'UNPAID'`**:
+    - `debit_amount` = null
+    - `credit_amount` = payment.amount (Thu nợ)
+    - `movement_type` = 'Thu'
+    - `description` = "Thu nợ từ {customer_name} - Hóa đơn #{invoice_id}"
+  - **Nếu invoice `invoice_type = 'PAID'`**:
+    - `debit_amount` = null
+    - `credit_amount` = payment.amount (Thu bổ sung, có thể là thanh toán thêm hoặc thanh toán một phần)
+    - `movement_type` = 'Thu'
+    - `description` = "Thu thanh toán từ {customer_name} - Hóa đơn #{invoice_id}"
+- **Balance**: Ghi nhận số dư tài khoản tích lũy (balance = tổng credit - tổng debit)
+
 **ENDPOINTS CẦN CODE:**
 
 **Payment Controller (Owner - F112):**
 - `GET /api/owner/payments` - List payments (Owner only)
+  - **Business Logic**: List tất cả payments của household (filter qua invoice.household_id)
+  - Query params: `invoice_id` (optional), `customer_id` (optional), `from_date`, `to_date`
 - `POST /api/owner/payments` - Create payment (Owner only)
+  - **Business Logic**: 
+    - Tạo Payment cho hóa đơn bán (`invoice_id` phải là hóa đơn bán, `customer_id != null`)
+    - Kiểm tra invoice đã confirm chưa (phải confirm mới được thanh toán)
+    - **Tự động tạo DebtRecord** (nếu invoice có `customer_id != null`):
+      - Tạo DebtRecord với `payment_id`, `credit_amount = payment.amount`, `invoice_id = null`
+      - Tính `balance` = balance trước đó của customer - credit_amount
+    - **Tự động tạo AccountingLedger**:
+      - Tạo AccountingLedger với `credit_amount = payment.amount` (Thu)
+      - `description` = "Thu từ {customer_name} - Hóa đơn #{invoice_id}"
+    - Transaction: Tạo Payment + DebtRecord + AccountingLedger trong 1 transaction
+  - **Request body**: `{ invoice_id, method_id, amount, description }`
 - `GET /api/owner/payments/<id>` - Get payment by id (Owner only)
 - `PUT /api/owner/payments/<id>` - Update payment (Owner only)
+  - **Business Logic**: Chỉ được update khi payment chưa được xác nhận (status='Draft')
+  - Cập nhật DebtRecord và AccountingLedger tương ứng
 - `DELETE /api/owner/payments/<id>` - Delete payment (Owner only)
+  - **Business Logic**: Chỉ được delete khi payment chưa được xác nhận (status='Draft')
+  - Xóa DebtRecord và AccountingLedger tương ứng
 
 **Payment Controller (Employee - F211):**
 - `POST /api/employee/payments` - Record payment (Employee only)
+  - **Business Logic**: 
+    - Tương tự Owner (tạo Payment + DebtRecord + AccountingLedger)
+    - Employee chỉ được tạo, không được update/delete
 - `GET /api/employee/payments/<id>` - Get payment by id (Employee only)
 
 **PaymentMethod Controller (Owner - F113):**
-- `GET /api/owner/payment-methods` - List payment methods (Owner only)
-- `POST /api/owner/payment-methods` - Create payment method (Owner only)
-- `GET /api/owner/payment-methods/<id>` - Get payment method by id (Owner only)
-- `PUT /api/owner/payment-methods/<id>` - Update payment method (Owner only)
-- `DELETE /api/owner/payment-methods/<id>` - Delete payment method (Owner only)
+- `GET /api/owner/payment-methods` - List payment methods (Owner only, read-only)
+  - **Business Logic**: Chỉ được xem danh sách PaymentMethod có sẵn (status='Active')
+  - **KHÔNG được**: Create, Update, Delete PaymentMethod
+
+**PaymentMethod Controller (Admin - F0xx):**
+- `GET /api/admin/payment-methods` - List all payment methods (Admin only)
+- `POST /api/admin/payment-methods` - Create payment method (Admin only)
+- `PUT /api/admin/payment-methods/<id>` - Update payment method (Admin only)
+- `DELETE /api/admin/payment-methods/<id>` - Delete payment method (Admin only)
 
 **DebtRecord Controller (Owner - F114):**
 - `GET /api/owner/debt-records` - List debt records (Owner only)
-- `POST /api/owner/debt-records` - Create debt record (Owner only)
+  - **Business Logic**: List tất cả debt records của household (filter qua customer.household_id)
+  - Query params: `customer_id` (optional), `from_date`, `to_date`
+  - Sắp xếp theo `record_at` DESC
 - `GET /api/owner/debt-records/<id>` - Get debt record by id (Owner only)
-- `PUT /api/owner/debt-records/<id>` - Update debt record (Owner only)
-- `DELETE /api/owner/debt-records/<id>` - Delete debt record (Owner only)
+- `GET /api/owner/debt-records/customer/<customer_id>` - Get debt records by customer (Owner only)
+  - **Business Logic**: Lấy tất cả debt records của 1 customer, tính balance hiện tại
+- **KHÔNG được**: Create, Update, Delete thủ công (tự động tạo khi Invoice confirm hoặc Payment tạo)
 
 **DebtRecord Controller (Employee - F212):**
-- `POST /api/employee/debt-records` - Record debt (Employee only)
+- `GET /api/employee/debt-records` - List debt records (Employee only, read-only)
 - `GET /api/employee/debt-records/<id>` - Get debt record by id (Employee only)
+- `GET /api/employee/debt-records/customer/<customer_id>` - Get debt records by customer (Employee only)
 
 **AccountingLedger Controller (Owner - F116, F117):**
 - `GET /api/owner/accounting-ledgers` - List accounting ledgers (Owner only)
+  - **Business Logic**: List tất cả accounting ledgers của household (filter qua invoice.household_id)
+  - Query params: `from_date`, `to_date`, `movement_type` (Thu/Chi)
+  - Sắp xếp theo `transaction_date` DESC
 - `GET /api/owner/accounting-ledgers/export` - Export reports (Excel) (Owner only)
   - Query params: `format=excel&from_date=...&to_date=...`
 - `GET /api/owner/reports/daily-revenue` - Daily revenue report (Owner only)
   - Query params: `date=...`
+  - **Business Logic**: Tính tổng `credit_amount` trong ngày (chỉ hóa đơn bán đã thanh toán)
 - `GET /api/owner/reports/monthly-revenue` - Monthly revenue report (Owner only)
   - Query params: `month=...&year=...`
+  - **Business Logic**: Tính tổng `credit_amount` trong tháng
 - `GET /api/owner/reports/outstanding-debt` - Outstanding debt report (Owner only)
+  - **Business Logic**: Lấy tất cả customers có balance > 0, sắp xếp theo balance DESC
 
 **AccountingLedger Controller (Admin - F007):**
 - `GET /api/admin/accounting-ledgers` - List all accounting ledgers (Admin only)
+  - Query params: `household_id` (optional), `from_date`, `to_date`
 - `GET /api/admin/accounting-ledgers/export` - Export all ledgers (Admin only)
   - Query params: `format=excel&household_id=...&from_date=...&to_date=...`
+
+**Lưu ý quan trọng:**
+- **PaymentMethod**: Có sẵn trong hệ thống, Owner chỉ xem, Admin quản lý
+- **Payment**: Tự động tạo DebtRecord và AccountingLedger khi tạo
+- **DebtRecord**: Tự động tạo khi Invoice confirm (UNPAID) hoặc Payment tạo, không được tạo thủ công
+- **AccountingLedger**: Tự động tạo khi Invoice confirm hoặc Payment tạo, không được tạo thủ công
+- **Data Isolation**: Tất cả đều filter qua `household_id` (qua invoice hoặc customer)
+- **Transaction Management**: Tạo Payment phải atomic (Payment + DebtRecord + AccountingLedger trong 1 transaction)
 
 ---
 

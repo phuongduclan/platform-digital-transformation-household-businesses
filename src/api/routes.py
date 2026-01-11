@@ -14,6 +14,12 @@ from api.controllers.invoice_controller import (
 from api.controllers.import_receipt_controller import owner_import_receipt_bp
 from api.controllers.export_receipt_controller import owner_export_receipt_bp
 from api.controllers.inventory_controller import owner_inventory_bp, employee_inventory_bp
+from api.controllers.payment_controller import owner_payment_bp, employee_payment_bp
+from api.controllers.payment_method_controller import owner_payment_method_bp, admin_payment_method_bp
+from api.controllers.debt_record_controller import owner_debt_record_bp, employee_debt_record_bp
+from api.controllers.accounting_ledger_controller import (
+    owner_accounting_ledger_bp, owner_reports_bp, admin_accounting_ledger_bp
+)
 
 from api.controllers.household_controller import owner_bp as owner_household_bp
 from api.controllers.subscription_plan_controller import admin_bp as admin_subscription_plan_bp, public_bp as public_subscription_plan_bp, owner_bp as owner_subscription_plan_bp
@@ -54,6 +60,17 @@ def register_routes(app):
     app.register_blueprint(owner_export_receipt_bp)
     app.register_blueprint(owner_inventory_bp)
     app.register_blueprint(employee_inventory_bp)
+    
+    # Payment & Accounting endpoints
+    app.register_blueprint(owner_payment_bp)
+    app.register_blueprint(employee_payment_bp)
+    app.register_blueprint(owner_payment_method_bp)
+    app.register_blueprint(admin_payment_method_bp)
+    app.register_blueprint(owner_debt_record_bp)
+    app.register_blueprint(employee_debt_record_bp)
+    app.register_blueprint(owner_accounting_ledger_bp)
+    app.register_blueprint(owner_reports_bp)
+    app.register_blueprint(admin_accounting_ledger_bp)
     
     # Owner endpoints
     app.register_blueprint(owner_employees_bp)

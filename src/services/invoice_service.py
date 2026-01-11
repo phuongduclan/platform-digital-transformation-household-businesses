@@ -185,7 +185,9 @@ class InvoiceService:
 
     def confirm_invoice(self, invoice_id: int, household_id: int, updated_by: str = None,
                        import_receipt_service=None, export_receipt_service=None,
-                       inventory_service=None, warehouse_repository=None) -> Invoice:
+                       inventory_service=None, warehouse_repository=None,
+                       debt_record_service=None, accounting_ledger_service=None,
+                       seller_repository=None, customer_repository=None) -> Invoice:
         """
         Confirm invoice: chuyển status từ 'Draft' → 'Confirm'
         Bất kỳ ai trong household đều có thể confirm, không cần là người tạo
@@ -303,6 +305,79 @@ class InvoiceService:
                                 quantity=detail.quantity,
                                 household_id=household_id
                             )
+
+            # Tự động tạo DebtRecord (nếu invoice có customer_id != null và invoice_type = 'UNPAID')
+            if debt_record_service and invoice.customer_id and invoice.invoice_type == 'UNPAID':
+                # Đảm bảo debt_record_service dùng cùng session
+                if hasattr(debt_record_service.repository, 'session'):
+                    debt_record_service.repository.session = db_session
+                
+                # Lấy balance hiện tại của customer
+                previous_balance = debt_record_service.get_customer_balance(invoice.customer_id, household_id)
+                new_balance = previous_balance + invoice.total_amount  # Nợ tăng balance
+                
+                debt_record = debt_record_service.create_debt_record(
+                    customer_id=invoice.customer_id,
+                    invoice_id=invoice_id,
+                    debit_amount=invoice.total_amount,
+                    description=invoice.description or f"Hóa đơn #{invoice_id}",
+                    household_id=household_id
+                )
+
+            # Tự động tạo AccountingLedger
+            if accounting_ledger_service:
+                # Đảm bảo accounting_ledger_service dùng cùng session
+                if hasattr(accounting_ledger_service.repository, 'session'):
+                    accounting_ledger_service.repository.session = db_session
+                
+                now = datetime.utcnow()
+                
+                # Hóa đơn mua (seller_id != null)
+                if invoice.seller_id:
+                    # Lấy seller name
+                    seller_name = "Nhà cung cấp"
+                    if seller_repository:
+                        seller = seller_repository.get_by_id(invoice.seller_id, household_id)
+                        if seller:
+                            seller_name = seller.name or "Nhà cung cấp"
+                    
+                    # Lấy balance hiện tại
+                    previous_balance = accounting_ledger_service._get_last_balance(household_id)
+                    new_balance = previous_balance - invoice.total_amount  # Chi giảm balance
+                    
+                    accounting_ledger = accounting_ledger_service.create_accounting_ledger(
+                        invoice_id=invoice_id,
+                        transaction_date=now,
+                        debit_amount=invoice.total_amount,
+                        description=f"Mua hàng từ {seller_name}",
+                        movement_type='Chi',
+                        household_id=household_id
+                    )
+                
+                # Hóa đơn bán (customer_id != null)
+                elif invoice.customer_id:
+                    # Chỉ tạo AccountingLedger nếu invoice_type = 'PAID'
+                    if invoice.invoice_type == 'PAID':
+                        # Lấy customer name
+                        customer_name = "Khách hàng"
+                        if customer_repository:
+                            customer = customer_repository.get_by_id(invoice.customer_id, household_id)
+                            if customer:
+                                customer_name = customer.name or "Khách hàng"
+                        
+                        # Lấy balance hiện tại
+                        previous_balance = accounting_ledger_service._get_last_balance(household_id)
+                        new_balance = previous_balance + invoice.total_amount  # Thu tăng balance
+                        
+                        accounting_ledger = accounting_ledger_service.create_accounting_ledger(
+                            invoice_id=invoice_id,
+                            transaction_date=now,
+                            credit_amount=invoice.total_amount,
+                            description=f"Bán hàng cho {customer_name} - Đã thanh toán",
+                            movement_type='Thu',
+                            household_id=household_id
+                        )
+                    # Nếu invoice_type = 'UNPAID' → KHÔNG tạo AccountingLedger (chưa có thu, chỉ tạo DebtRecord)
 
             # Commit transaction
             db_session.commit()

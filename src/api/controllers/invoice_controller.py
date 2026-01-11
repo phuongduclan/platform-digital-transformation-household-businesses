@@ -4,6 +4,8 @@ from services.invoice_detail_service import InvoiceDetailService
 from services.import_receipt_service import ImportReceiptService
 from services.export_receipt_service import ExportReceiptService
 from services.inventory_service import InventoryService
+from services.debt_record_service import DebtRecordService
+from services.accounting_ledger_service import AccountingLedgerService
 from infrastructure.repositories.invoice_repository import InvoiceRepository
 from infrastructure.repositories.invoice_detail_repository import InvoiceDetailRepository
 from infrastructure.repositories.import_receipt_repository import ImportReceiptRepository
@@ -12,6 +14,8 @@ from infrastructure.repositories.inventory_repository import InventoryRepository
 from infrastructure.repositories.import_detail_repository import ImportDetailRepository
 from infrastructure.repositories.export_detail_repository import ExportDetailRepository
 from infrastructure.repositories.warehouse_repository import WarehouseRepository
+from infrastructure.repositories.debt_record_repository import DebtRecordRepository
+from infrastructure.repositories.accounting_ledger_repository import AccountingLedgerRepository
 from api.decorators.auth_decorators import require_permission
 from api.schemas.invoice import (
     InvoiceWithDetailsRequestSchema, InvoiceUpdateSchema,
@@ -58,10 +62,14 @@ export_receipt_repository = ExportReceiptRepository()
 export_detail_repository = ExportDetailRepository()
 inventory_repository = InventoryRepository()
 warehouse_repository = WarehouseRepository()
+debt_record_repository = DebtRecordRepository()
+accounting_ledger_repository = AccountingLedgerRepository()
 
 import_receipt_service = ImportReceiptService(import_receipt_repository, import_detail_repository)
 export_receipt_service = ExportReceiptService(export_receipt_repository, export_detail_repository)
 inventory_service = InventoryService(inventory_repository)
+debt_record_service = DebtRecordService(debt_record_repository)
+accounting_ledger_service = AccountingLedgerService(accounting_ledger_repository)
 
 # =====================================================
 # HELPER FUNCTIONS
@@ -364,11 +372,15 @@ def owner_confirm_invoice(invoice_id):
     """
     try:
         invoice = invoice_service.confirm_invoice(
-            invoice_id, g.household_id, g.user_id,
+            invoice_id, g.household_id, str(g.user_id) if g.user_id else None,
             import_receipt_service=import_receipt_service,
             export_receipt_service=export_receipt_service,
             inventory_service=inventory_service,
-            warehouse_repository=warehouse_repository
+            warehouse_repository=warehouse_repository,
+            debt_record_service=debt_record_service,
+            accounting_ledger_service=accounting_ledger_service,
+            seller_repository=None,  # TODO: Add SellerRepository if needed
+            customer_repository=None  # TODO: Add CustomerRepository if needed
         )
         return jsonify(invoice_to_dict(invoice)), 200
     except ValueError as e:
@@ -688,11 +700,15 @@ def employee_confirm_invoice(invoice_id):
     """
     try:
         invoice = invoice_service.confirm_invoice(
-            invoice_id, g.household_id, g.user_id,
+            invoice_id, g.household_id, str(g.user_id) if g.user_id else None,
             import_receipt_service=import_receipt_service,
             export_receipt_service=export_receipt_service,
             inventory_service=inventory_service,
-            warehouse_repository=warehouse_repository
+            warehouse_repository=warehouse_repository,
+            debt_record_service=debt_record_service,
+            accounting_ledger_service=accounting_ledger_service,
+            seller_repository=None,  # TODO: Add SellerRepository if needed
+            customer_repository=None  # TODO: Add CustomerRepository if needed
         )
         return jsonify(invoice_to_dict(invoice)), 200
     except ValueError as e:
