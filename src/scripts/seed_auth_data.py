@@ -122,14 +122,12 @@ def seed_functions():
         {'function_code': 'F205', 'function_name': 'view_customers', 'url_pattern': '/api/employee/customers', 'http_methods': 'R', 'description': 'View customers (read-only)', 'resource_type': 'Customer'},
         {'function_code': 'F216', 'function_name': 'view_warehouses', 'url_pattern': '/api/employee/warehouses', 'http_methods': 'R', 'description': 'View warehouses (read-only) - Check warehouse before creating invoice', 'resource_type': 'Warehouse'},
         {'function_code': 'F206', 'function_name': 'view_customer_debt', 'url_pattern': '/api/employee/customers/*/debt', 'http_methods': 'R', 'description': 'View customer debt', 'resource_type': 'DebtRecord'},
-        {'function_code': 'F207', 'function_name': 'create_sales_invoice', 'url_pattern': '/api/employee/invoices', 'http_methods': 'C,R', 'description': 'Create sales invoice', 'resource_type': 'Invoice'},
-        {'function_code': 'F208', 'function_name': 'view_own_invoices', 'url_pattern': '/api/employee/invoices', 'http_methods': 'R', 'description': 'View own invoices', 'resource_type': 'Invoice'},
-        {'function_code': 'F209', 'function_name': 'update_draft_invoice', 'url_pattern': '/api/employee/invoices/*', 'http_methods': 'U', 'description': 'Update draft invoice', 'resource_type': 'Invoice'},
-        {'function_code': 'F210', 'function_name': 'confirm_invoice', 'url_pattern': '/api/employee/invoices/*/confirm', 'http_methods': 'U', 'description': 'Confirm invoice', 'resource_type': 'Invoice'},
+        {'function_code': 'F207', 'function_name': 'create_sales_invoice', 'url_pattern': '/api/employee/invoices', 'http_methods': 'C', 'description': 'Create draft invoice with details (transaction)', 'resource_type': 'Invoice'},
+        {'function_code': 'F208', 'function_name': 'view_invoices', 'url_pattern': '/api/employee/invoices', 'http_methods': 'R', 'description': 'View all invoices of household (filter by status to see draft orders)', 'resource_type': 'Invoice'},
+        {'function_code': 'F209', 'function_name': 'update_draft_invoice', 'url_pattern': '/api/employee/invoices/*', 'http_methods': 'U', 'description': 'Update draft invoice (only when status=Draft)', 'resource_type': 'Invoice'},
+        {'function_code': 'F210', 'function_name': 'confirm_invoice', 'url_pattern': '/api/employee/invoices/*/confirm', 'http_methods': 'U', 'description': 'Confirm invoice (Draft → Confirm, anyone in household can confirm)', 'resource_type': 'Invoice'},
         {'function_code': 'F211', 'function_name': 'record_payment', 'url_pattern': '/api/employee/payments', 'http_methods': 'C,R', 'description': 'Record payment', 'resource_type': 'Payment'},
         {'function_code': 'F212', 'function_name': 'record_debt', 'url_pattern': '/api/employee/debt-records', 'http_methods': 'C,R', 'description': 'Record debt', 'resource_type': 'DebtRecord'},
-        {'function_code': 'F213', 'function_name': 'view_draft_orders', 'url_pattern': '/api/employee/draft-orders', 'http_methods': 'R', 'description': 'View draft orders from AI', 'resource_type': 'DraftOrder'},
-        {'function_code': 'F214', 'function_name': 'confirm_draft_order', 'url_pattern': '/api/employee/draft-orders/*/confirm', 'http_methods': 'U', 'description': 'Confirm draft order', 'resource_type': 'DraftOrder'},
         {'function_code': 'F215', 'function_name': 'receive_notifications', 'url_pattern': '/api/employee/notifications', 'http_methods': 'R', 'description': 'Receive notifications', 'resource_type': 'Notification'},
     ]
     
@@ -171,8 +169,8 @@ def seed_role_functions():
     # Owner Functions
     owner_functions = ['F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111', 'F112', 'F113', 'F114', 'F115', 'F116', 'F117', 'F118']
     
-    # Employee Functions
-    employee_functions = ['F201', 'F202', 'F203', 'F204', 'F205', 'F206', 'F207', 'F208', 'F209', 'F210', 'F211', 'F212', 'F213', 'F214', 'F215', 'F216']
+    # Employee Functions (F213, F214 đã gộp vào F207-F210 - dùng filter status='Draft' để xem draft orders)
+    employee_functions = ['F201', 'F202', 'F203', 'F204', 'F205', 'F206', 'F207', 'F208', 'F209', 'F210', 'F211', 'F212', 'F215', 'F216']
     
     # Map Admin Functions
     print("  Mapping Admin functions...")

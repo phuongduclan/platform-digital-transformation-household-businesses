@@ -576,31 +576,61 @@ Build an application (mobile and/or web) that supports the following core functi
 **ENDPOINTS CẦN CODE:**
 
 **Invoice Controller (Owner - F111):**
-- `GET /api/owner/invoices` - List all invoices (Owner only)
-- `POST /api/owner/invoices` - Create invoice (Owner only)
+- `GET /api/owner/invoices` - List all invoices của household (Owner only)
+  - Query params: `status` (filter by status: Draft, Confirm, Delete)
+  - **Business Logic**: List tất cả invoices của household, không phân biệt ai tạo
+- `POST /api/owner/invoices` - Create invoice với details (Owner only)
+  - **Business Logic**: Tạo invoice + details trong 1 transaction
+  - **Request body**: `{ invoice fields + details: [...] }`
+  - **Phải có ít nhất 1 detail**, tính toán total_amount, vat_total, discount_total từ details
 - `GET /api/owner/invoices/<id>` - Get invoice by id (Owner only)
 - `PUT /api/owner/invoices/<id>` - Update invoice (Owner only)
+  - **Business Logic**: Chỉ được update khi status='Draft'
 - `DELETE /api/owner/invoices/<id>` - Delete invoice (Owner only)
+  - **Business Logic**: Chỉ được delete khi status='Draft'
+- `PUT /api/owner/invoices/<id>/confirm` - Confirm invoice (Owner only)
+  - **Business Logic**: Chỉ được confirm khi status='Draft' → chuyển sang 'Confirm'
+  - **Bất kỳ ai trong household đều có thể confirm**, không cần là người tạo
 - `GET /api/owner/invoices/<id>/details` - Get invoice details (Owner only)
+- `GET /api/owner/invoices/<id>/print` - Print invoice (Owner only)
+  - **Business Logic**: Trả về invoice + tất cả details để in
 
 **Invoice Controller (Employee - F207, F208, F209, F210):**
-- `POST /api/employee/invoices` - Create draft invoice (Employee only)
-- `GET /api/employee/invoices` - List own invoices (Employee only)
+- `GET /api/employee/invoices` - List all invoices của household (Employee only)
+  - Query params: `status` (filter by status='Draft' để xem draft orders từ AI)
+  - **Business Logic**: List tất cả invoices của household, không phân biệt ai tạo
+  - **Draft orders từ AI**: Filter `status='Draft'` để xem (thay vì endpoint riêng)
+- `POST /api/employee/invoices` - Create draft invoice với details (Employee only)
+  - **Business Logic**: Tạo invoice + details trong 1 transaction, status='Draft'
+  - **Request body**: `{ invoice fields + details: [...] }`
+  - **Phải có ít nhất 1 detail**, tính toán total_amount, vat_total, discount_total từ details
 - `GET /api/employee/invoices/<id>` - Get invoice by id (Employee only)
 - `PUT /api/employee/invoices/<id>` - Update draft invoice (Employee only)
+  - **Business Logic**: Chỉ được update khi status='Draft'
+- `DELETE /api/employee/invoices/<id>` - Delete draft invoice (Employee only)
+  - **Business Logic**: Chỉ được delete khi status='Draft'
 - `PUT /api/employee/invoices/<id>/confirm` - Confirm invoice (Employee only)
+  - **Business Logic**: Chỉ được confirm khi status='Draft' → chuyển sang 'Confirm'
+  - **Bất kỳ ai trong household đều có thể confirm**, không cần là người tạo
 - `GET /api/employee/invoices/<id>/details` - Get invoice details (Employee only)
+- `GET /api/employee/invoices/<id>/print` - Print invoice (Employee only)
+  - **Business Logic**: Trả về invoice + tất cả details để in
 
-**Draft Order Controller (Employee - F213, F214):**
-- `GET /api/employee/draft-orders` - View draft orders from AI (Employee only)
-- `PUT /api/employee/draft-orders/<id>/confirm` - Confirm draft order (Employee only)
-
-**InvoiceDetail Controller:**
+**InvoiceDetail Controller (Owner/Employee):**
 - `GET /api/invoices/<invoice_id>/details` - List invoice details (Owner/Employee)
 - `POST /api/invoices/<invoice_id>/details` - Create invoice detail (Owner/Employee)
+  - **Business Logic**: Chỉ được tạo detail khi invoice status='Draft'
 - `GET /api/invoices/<invoice_id>/details/<id>` - Get invoice detail by id (Owner/Employee)
 - `PUT /api/invoices/<invoice_id>/details/<id>` - Update invoice detail (Owner/Employee)
+  - **Business Logic**: Chỉ được update khi invoice status='Draft'
 - `DELETE /api/invoices/<invoice_id>/details/<id>` - Delete invoice detail (Owner/Employee)
+  - **Business Logic**: Chỉ được delete khi invoice status='Draft'
+
+**Lưu ý:**
+- **Draft Orders từ AI**: Không cần endpoint riêng, dùng `GET /api/employee/invoices?status=Draft` để xem
+- **Confirm Draft Order**: Dùng `PUT /api/employee/invoices/<id>/confirm` (đã có trong CRUD)
+- **Tạo invoice**: Phải có ít nhất 1 detail, tạo trong 1 transaction
+- **Data Isolation**: Owner và Employee đều thấy tất cả invoices của household (filter by household_id)
 
 ---
 

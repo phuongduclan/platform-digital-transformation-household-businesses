@@ -233,15 +233,45 @@ screens/
 │   │
 │   ├── invoices/
 │   │   ├── InvoiceListScreen.tsx             # F111: manage_all_invoices (List)
-│   │   ├── InvoiceDetailScreen.tsx           # F111: manage_all_invoices (Detail)
+│   │   │                                     # - GET /api/owner/invoices (filter by status)
+│   │   │                                     # - Hiển thị tất cả invoices của household
+│   │   │                                     # - Filter: status (Draft, Confirm, Delete), date range
+│   │   │
 │   │   ├── InvoiceCreateScreen.tsx           # F111: manage_all_invoices (Create)
+│   │   │                                     # - POST /api/owner/invoices
+│   │   │                                     # - Tạo invoice + details trong 1 request (transaction)
+│   │   │                                     # - Form: customer_id, seller_id, invoice_type, description
+│   │   │                                     # - Details: product_id, unit_id, quantity, price, vat, discount
+│   │   │                                     # - Tự động tính: total_amount, vat_total, discount_total
+│   │   │
+│   │   ├── InvoiceDetailScreen.tsx           # F111: manage_all_invoices (Detail)
+│   │   │                                     # - GET /api/owner/invoices/<id>
+│   │   │                                     # - GET /api/owner/invoices/<id>/details
+│   │   │
 │   │   ├── InvoiceEditScreen.tsx             # F111: manage_all_invoices (Update)
-│   │   └── InvoicePrintScreen.tsx            # Print invoice
+│   │   │                                     # - PUT /api/owner/invoices/<id>
+│   │   │                                     # - Chỉ được update khi status='Draft'
+│   │   │
+│   │   ├── InvoiceConfirmScreen.tsx          # F111: Confirm invoice
+│   │   │                                     # - PUT /api/owner/invoices/<id>/confirm
+│   │   │                                     # - Bất kỳ ai trong household đều có thể confirm
+│   │   │
+│   │   └── InvoicePrintScreen.tsx           # F111: Print invoice
+│   │                                         # - GET /api/owner/invoices/<id>/print
+│   │                                         # - Trả về invoice + tất cả details để in
 │   │
 │   ├── invoice-details/
 │   │   ├── InvoiceDetailListScreen.tsx       # List invoice details
+│   │   │                                     # - GET /api/invoices/<invoice_id>/details
+│   │   │
 │   │   ├── InvoiceDetailCreateScreen.tsx     # Create invoice detail
+│   │   │                                     # - POST /api/invoices/<invoice_id>/details
+│   │   │                                     # - Chỉ được tạo khi invoice status='Draft'
+│   │   │
 │   │   └── InvoiceDetailEditScreen.tsx       # Update invoice detail
+│   │                                         # - PUT /api/invoices/<invoice_id>/details/<id>
+│   │                                         # - DELETE /api/invoices/<invoice_id>/details/<id>
+│   │                                         # - Chỉ được update/delete khi invoice status='Draft'
 │   │
 │   ├── payments/
 │   │   ├── PaymentListScreen.tsx             # F112: manage_payments (List)
@@ -307,23 +337,56 @@ screens/
 │   │   ├── CustomerDetailScreen.tsx          # F205: view_customers (Read-only)
 │   │   └── CustomerDebtScreen.tsx            # F206: view_customer_debt
 │   │
-│   ├── orders/
-│   │   ├── OrderCreateScreen.tsx             # F207: create_sales_invoice
-│   │   │                                     # - Search products
-│   │   │                                     # - Add to cart
-│   │   │                                     # - Select customer (optional)
-│   │   │                                     # - Record debt if on credit
-│   │   │                                     # - Create draft invoice
+│   ├── invoices/
+│   │   ├── InvoiceListScreen.tsx            # F208: view_invoices
+│   │   │                                     # - GET /api/employee/invoices (filter by status)
+│   │   │                                     # - Hiển thị tất cả invoices của household
+│   │   │                                     # - Filter: status='Draft' để xem draft orders từ AI
+│   │   │                                     # - Không phân biệt ai tạo, chỉ filter theo household_id
 │   │   │
-│   │   ├── OrderListScreen.tsx               # F208: view_own_invoices
-│   │   ├── OrderDetailScreen.tsx             # F208: View invoice detail
-│   │   ├── OrderEditScreen.tsx               # F209: update_draft_invoice
-│   │   └── OrderConfirmScreen.tsx            # F210: confirm_invoice
+│   │   ├── InvoiceCreateScreen.tsx          # F207: create_sales_invoice
+│   │   │                                     # - POST /api/employee/invoices
+│   │   │                                     # - Tạo invoice + details trong 1 request (transaction)
+│   │   │                                     # - Search products (F201)
+│   │   │                                     # - Add to cart (details)
+│   │   │                                     # - Select customer (optional) (F205)
+│   │   │                                     # - Check customer debt (F206)
+│   │   │                                     # - Record debt if on credit (F212)
+│   │   │                                     # - Tự động tính: total_amount, vat_total, discount_total
+│   │   │                                     # - Status: 'Draft' (mặc định)
+│   │   │
+│   │   ├── InvoiceDetailScreen.tsx          # F208: View invoice detail
+│   │   │                                     # - GET /api/employee/invoices/<id>
+│   │   │                                     # - GET /api/employee/invoices/<id>/details
+│   │   │
+│   │   ├── InvoiceEditScreen.tsx            # F209: update_draft_invoice
+│   │   │                                     # - PUT /api/employee/invoices/<id>
+│   │   │                                     # - Chỉ được update khi status='Draft'
+│   │   │
+│   │   ├── InvoiceConfirmScreen.tsx         # F210: confirm_invoice
+│   │   │                                     # - PUT /api/employee/invoices/<id>/confirm
+│   │   │                                     # - Bất kỳ ai trong household đều có thể confirm
+│   │   │                                     # - Không cần là người tạo
+│   │   │                                     # - Auto deduct inventory
+│   │   │                                     # - Auto create debt record (if on credit)
+│   │   │                                     # - Auto update accounting ledger
+│   │   │
+│   │   └── InvoicePrintScreen.tsx           # Print invoice
+│   │                                         # - GET /api/employee/invoices/<id>/print
+│   │                                         # - Trả về invoice + tất cả details để in
 │   │
-│   ├── draft-orders/
-│   │   ├── DraftOrderListScreen.tsx          # F213: view_draft_orders (from AI)
-│   │   ├── DraftOrderDetailScreen.tsx        # View draft order detail
-│   │   └── DraftOrderConfirmScreen.tsx       # F214: confirm_draft_order
+│   ├── invoice-details/
+│   │   ├── InvoiceDetailListScreen.tsx       # List invoice details
+│   │   │                                     # - GET /api/invoices/<invoice_id>/details
+│   │   │
+│   │   ├── InvoiceDetailCreateScreen.tsx     # Create invoice detail
+│   │   │                                     # - POST /api/invoices/<invoice_id>/details
+│   │   │                                     # - Chỉ được tạo khi invoice status='Draft'
+│   │   │
+│   │   └── InvoiceDetailEditScreen.tsx       # Update invoice detail
+│   │                                         # - PUT /api/invoices/<invoice_id>/details/<id>
+│   │                                         # - DELETE /api/invoices/<invoice_id>/details/<id>
+│   │                                         # - Chỉ được update/delete khi invoice status='Draft'
 │   │
 │   ├── payments/
 │   │   ├── PaymentCreateScreen.tsx           # F211: record_payment
@@ -439,11 +502,9 @@ EmployeeHomeScreen
   │       ├── Record Debt (if on credit)
   │       └── Create Draft → Confirm
   │
-  ├── View Orders
-  │   └── OrderListScreen → Detail → Edit → Confirm
-  │
-  ├── Draft Orders (from AI)
-  │   └── DraftOrderListScreen → Detail → Confirm
+  ├── View Invoices
+  │   └── InvoiceListScreen → Detail → Edit → Confirm
+  │       └── Filter status='Draft' để xem draft orders từ AI
   │
   ├── Products (View Only)
   │   └── ProductListScreen → Detail
@@ -535,37 +596,53 @@ EmployeeHomeScreen
 ```
 1. EmployeeHomeScreen
    ↓
-2. OrderCreateScreen
+2. InvoiceCreateScreen (employee/invoices/)
    ├── Search Products (F201)
-   ├── Add to Cart
+   ├── Add to Cart (details: product_id, unit_id, quantity, price, vat, discount)
    ├── Select Customer (optional) (F205)
    ├── Check Customer Debt (F206)
-   ├── Create Draft Invoice (F207)
+   ├── POST /api/employee/invoices
+   │   └── Tạo invoice + details trong 1 transaction
+   │   └── Status: 'Draft' (mặc định)
+   │   └── Tự động tính: total_amount, vat_total, discount_total từ details
    ↓
-3. OrderEditScreen (if needed) (F209)
+3. InvoiceEditScreen (if needed) (F209)
+   ├── PUT /api/employee/invoices/<id>
+   └── Chỉ được update khi status='Draft'
    ↓
-4. OrderConfirmScreen (F210)
+4. InvoiceConfirmScreen (F210)
+   ├── PUT /api/employee/invoices/<id>/confirm
+   ├── Bất kỳ ai trong household đều có thể confirm
    ├── Auto deduct inventory
-   ├── Auto create debt record (if on credit)
+   ├── Auto create debt record (if on credit) (F212)
    ├── Auto update accounting ledger
+   └── Status: 'Draft' → 'Confirm'
    ↓
 5. InvoicePrintScreen
+   └── GET /api/employee/invoices/<id>/print
 ```
 
-### Flow 2: AI tạo draft order
+### Flow 2: AI tạo draft order (gộp vào Flow 1)
 ```
 1. AI receives message (text/voice)
    ↓
-2. Generate draft order
+2. Generate draft order (tạo invoice với status='Draft', source='AI')
+   ├── POST /api/employee/invoices (hoặc endpoint riêng cho AI)
+   └── Tạo invoice + details trong 1 transaction
    ↓
 3. NotificationCenterScreen (F215) - Real-time notification
    ↓
-4. DraftOrderListScreen (F213)
+4. InvoiceListScreen (employee/invoices/)
+   ├── GET /api/employee/invoices?status=Draft
+   └── Hiển thị draft orders (filter status='Draft' để xem draft orders từ AI)
    ↓
-5. DraftOrderDetailScreen - Review
+5. InvoiceDetailScreen - Review
+   ├── GET /api/employee/invoices/<id>
+   └── GET /api/employee/invoices/<id>/details
    ↓
-6. DraftOrderConfirmScreen (F214)
-   ├── Convert to Invoice
+6. InvoiceConfirmScreen (F210)
+   ├── PUT /api/employee/invoices/<id>/confirm
+   ├── Bất kỳ ai trong household đều có thể confirm
    ├── Auto deduct inventory
    └── Auto update accounting ledger
 ```
