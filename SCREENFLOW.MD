@@ -103,8 +103,28 @@ screens/
 │   │
 │   ├── accounting/
 │   │   ├── AccountingLedgerListScreen.tsx    # F007: view_all_accounting_ledgers
+│   │   │                                     # - GET /api/admin/accounting-ledgers
+│   │   │                                     # - Hiển thị tất cả accounting ledgers (all households)
+│   │   │                                     # - Filter: household_id, from_date, to_date
+│   │   │
 │   │   ├── AccountingLedgerExportScreen.tsx  # F007: Export reports
+│   │   │                                     # - Export Excel theo thông tư 88/2021/TT-BTC
+│   │   │
 │   │   └── AccountingLedgerDetailScreen.tsx  # F007: View detail
+│   │                                         # - GET /api/admin/accounting-ledgers/<id>
+│   │
+│   ├── payment-methods/
+│   │   ├── PaymentMethodListScreen.tsx       # F002: manage_subscription_plans (Admin CRUD PaymentMethod)
+│   │   │                                     # - GET /api/admin/payment-methods
+│   │   │
+│   │   ├── PaymentMethodCreateScreen.tsx     # F002: Create payment method
+│   │   │                                     # - POST /api/admin/payment-methods
+│   │   │
+│   │   ├── PaymentMethodEditScreen.tsx       # F002: Update payment method
+│   │   │                                     # - PUT /api/admin/payment-methods/<id>
+│   │   │
+│   │   └── PaymentMethodDetailScreen.tsx     # F002: View detail
+│   │                                         # - GET /api/admin/payment-methods/<id>
 │   │
 │   ├── system-config/
 │   │   ├── SystemConfigScreen.tsx            # F006: manage_system_config (View)
