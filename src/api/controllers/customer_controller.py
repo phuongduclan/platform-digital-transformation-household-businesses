@@ -3,7 +3,7 @@ from services.customer_service import CustomerService
 from infrastructure.repositories.customer_repository import CustomerRepository
 from infrastructure.repositories.invoice_repository import InvoiceRepository
 from infrastructure.repositories.debt_record_repository import DebtRecordRepository
-from api.decorators.auth_decorators import require_permission
+from api.decorators.auth_decorators import require_permission 
 from api.schemas.customer import CustomerRequestSchema, CustomerUpdateSchema, CustomerResponseSchema
 
 # =====================================================
