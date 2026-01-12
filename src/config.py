@@ -11,7 +11,7 @@ class Config:
     DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true', '1']
     TESTING = os.environ.get('TESTING', 'False').lower() in ['true', '1']
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'mssql+pymssql://sa:kc10156@127.0.0.1:1433/PlatformDB'
     CORS_HEADERS = 'Content-Type'
 
 
@@ -19,19 +19,19 @@ class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'mssql+pymssql://sa:kc10156@127.0.0.1:1433/PlatformDB'
 
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'mssql+pymssql://sa:kc10156@127.0.0.1:1433/PlatformDB'
 
 
 class ProductionConfig(Config):
     """Production configuration."""
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'mssql+pymssql://sa:kc10156@127.0.0.1:1433/PlatformDB'
 
 
 class SwaggerConfig:
