@@ -3,7 +3,9 @@ Flask-Cors>=3.0
 Flask-SQLAlchemy>=2.5
 SQLAlchemy>=1.4
 marshmallow>=3.0
-pymssql>=2.2
+# Database drivers
+psycopg2-binary>=2.9.0  # PostgreSQL driver for Supabase
+# pymssql>=2.2  # SQL Server driver (commented out, using PostgreSQL now)
 python-dotenv>=0.21 
 Flask-RESTX>=1.1.0 
 flasgger

@@ -65,40 +65,24 @@
      
    - Bước 3: Cài đặt các thư viện cần thiết
      ## Install:
-     		pip install -r requirements.txt
-   - Bước 4: Chạy mã xử lý dữ liệu
+     		pip install -r src/requirements.txt
+   - Bước 4: Tạo file .env
+     ## Tạo file .env ở root directory (cùng cấp với src/):
+     	Tạo file `.env` với nội dung:
+     	```
+     	# Flask settings
+     	FLASK_ENV=development
+     	SECRET_KEY=a_default_secret_key
+     	
+     	# PostgreSQL Database Configuration (Supabase)
+     	DATABASE_URI=postgresql://postgres.xjghpmiupxldgezcrucj:079206043460@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres
+     	```
+   - Bước 5: Chạy mã xử lý dữ liệu
      ## Run:
-    	python app.py
+    	python app.py 
+        
 
      Truy câp http://localhost:6868/docs
-
-
-
-## Create file .env in folder /src/.env
-    
-    # Flask settings
-    FLASK_ENV=development
-    SECRET_KEY=your_secret_key
-    
-    # SQL Server settings
-    DB_USER=sa
-    DB_PASSWORD=%40Bina0608
-    DB_HOST=127.0.0.1
-    DB_PORT=1433
-    DB_NAME=database_name
-
-    DATABASE_URI="mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/database_name"
-
-## pull image MS SQL server 
-    
-    ```bash
-    docker pull mcr.microsoft.com/mssql/server:2025-latest
-    ```
-## Install MS SQL server in docker 
-    ```bash
-    docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=@Bina0608" -p 1433:1433 --name sql_server -hostname sql_server -d mcr.microsoft.com/mssql/server:2025-latest
-    ```
-## Test connect SQL server 
 
 ## ORM Flask (from sqlalchemy.orm )
 Object Relational Mapping

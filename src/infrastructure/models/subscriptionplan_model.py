@@ -7,7 +7,8 @@ class SubscriptionPlan(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True) # Cho phép NULL
     name=Column(String(50),nullable=False)
-    user_id=Column(Integer, ForeignKey("users.id"),nullable=False) # Role Admin
+    # Removed user_id FK to avoid circular dependency - subscriptionplans should be created before users
+    # Admin users can be created later and linked via created_by field (String)
     billing_cycle=Column(String(50),nullable=True)
     price=Column(Numeric(10), nullable=True)
     description = Column(String(255), nullable=True)

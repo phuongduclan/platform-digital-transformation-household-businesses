@@ -7,7 +7,6 @@ class SubscriptionPlan:
         id: Optional[int],
         name: str,
         price: float,
-        user_id: int,
         billing_cycle: Optional[str] = None,
         description: Optional[str] = None,
         status: Optional[str] = "active",
@@ -19,7 +18,6 @@ class SubscriptionPlan:
         self.id = id
         self.name = name
         self.price = price
-        self.user_id = user_id
         self.billing_cycle = billing_cycle
         self.description = description
         self.status = status

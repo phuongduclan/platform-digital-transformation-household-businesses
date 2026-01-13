@@ -31,6 +31,10 @@ class InvoiceService:
         if customer_id == 0 or customer_id == '0':
             customer_id = None
         
+        # Validation: Khách vãng lai (customer_id = None) phải là PAID
+        if customer_id is None and invoice_type != 'PAID':
+            raise ValueError('Khách vãng lai phải thanh toán đủ ngay (invoice_type phải là PAID)')
+        
         # Tính toán tổng từ details
         total_amount = Decimal('0')
         vat_total = Decimal('0')
@@ -153,6 +157,13 @@ class InvoiceService:
             seller_id = None
         if customer_id == 0 or customer_id == '0':
             customer_id = None
+        
+        # Validation: Nếu đang update customer_id thành None (khách vãng lai) thì phải là PAID
+        if customer_id is None and invoice_type is not None and invoice_type != 'PAID':
+            raise ValueError('Khách vãng lai phải thanh toán đủ ngay (invoice_type phải là PAID)')
+        # Nếu đang update invoice_type thành UNPAID nhưng customer_id = None
+        if invoice_type == 'UNPAID' and (customer_id is None or invoice.customer_id is None):
+            raise ValueError('Hóa đơn bán chịu (UNPAID) phải có khách hàng trong bảng customer')
         
         # Cập nhật các field nếu có
         if seller_id is not None:
@@ -349,15 +360,27 @@ class InvoiceService:
                         invoice_id=invoice_id,
                         transaction_date=now,
                         debit_amount=invoice.total_amount,
-                        description=f"Mua hàng từ {seller_name}",
+                        description=f"Mua hàng từ {seller_name} - HĐ #{invoice_id}",
                         movement_type='Chi',
                         household_id=household_id
                     )
                 
-                # Hóa đơn bán (customer_id != null)
-                elif invoice.customer_id:
-                    # Chỉ tạo AccountingLedger nếu invoice_type = 'PAID'
-                    if invoice.invoice_type == 'PAID':
+                # Hóa đơn bán
+                elif not invoice.seller_id:
+                    # Trường hợp 1: Khách vãng lai (customer_id = None) - luôn PAID
+                    if invoice.customer_id is None:
+                        # Tạo AccountingLedger Thu cho khách vãng lai
+                        accounting_ledger = accounting_ledger_service.create_accounting_ledger(
+                            invoice_id=invoice_id,
+                            transaction_date=now,
+                            credit_amount=invoice.total_amount,
+                            description=f"Bán hàng cho khách vãng lai - HĐ #{invoice_id}",
+                            movement_type='Thu',
+                            household_id=household_id
+                        )
+                    
+                    # Trường hợp 2: Khách có trong customer + PAID (thu đủ ngay)
+                    elif invoice.customer_id and invoice.invoice_type == 'PAID':
                         # Lấy customer name
                         customer_name = "Khách hàng"
                         if customer_repository:
@@ -365,19 +388,19 @@ class InvoiceService:
                             if customer:
                                 customer_name = customer.name or "Khách hàng"
                         
-                        # Lấy balance hiện tại
-                        previous_balance = accounting_ledger_service._get_last_balance(household_id)
-                        new_balance = previous_balance + invoice.total_amount  # Thu tăng balance
-                        
+                        # Tạo AccountingLedger Thu
                         accounting_ledger = accounting_ledger_service.create_accounting_ledger(
                             invoice_id=invoice_id,
                             transaction_date=now,
                             credit_amount=invoice.total_amount,
-                            description=f"Bán hàng cho {customer_name} - Đã thanh toán",
+                            description=f"Bán hàng cho {customer_name} - Đã thanh toán - HĐ #{invoice_id}",
                             movement_type='Thu',
                             household_id=household_id
                         )
-                    # Nếu invoice_type = 'UNPAID' → KHÔNG tạo AccountingLedger (chưa có thu, chỉ tạo DebtRecord)
+                    
+                    # Trường hợp 3: Khách có trong customer + UNPAID (ghi nợ)
+                    # → KHÔNG tạo AccountingLedger ở đây (chưa có thu)
+                    # → Chỉ tạo DebtRecord, AccountingLedger sẽ được tạo khi có Payment
 
             # Commit transaction
             db_session.commit()

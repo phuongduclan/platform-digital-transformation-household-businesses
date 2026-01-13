@@ -100,6 +100,8 @@ def owner_list_payments():
 def owner_create_payment():
     """
     Create payment (Owner)
+    Chỉ được tạo cho hóa đơn bán chịu (invoice_type = UNPAID) có khách hàng trong bảng customer.
+    Tự động tạo DebtRecord (trả nợ) và AccountingLedger (thu tiền).
     ---
     post:
       summary: Create payment
@@ -123,6 +125,8 @@ def owner_create_payment():
       responses:
         201:
           description: Payment created
+        400:
+          description: Invalid request (hóa đơn không phải UNPAID hoặc không có customer_id)
     """
     data = request.get_json()
     schema = PaymentRequestSchema()
@@ -260,6 +264,8 @@ def owner_delete_payment(payment_id):
 def employee_create_payment():
     """
     Record payment (Employee)
+    Chỉ được tạo cho hóa đơn bán chịu (invoice_type = UNPAID) có khách hàng trong bảng customer.
+    Tự động tạo DebtRecord (trả nợ) và AccountingLedger (thu tiền).
     ---
     post:
       summary: Record payment
@@ -283,6 +289,8 @@ def employee_create_payment():
       responses:
         201:
           description: Payment created
+        400:
+          description: Invalid request (hóa đơn không phải UNPAID hoặc không có customer_id)
     """
     data = request.get_json()
     schema = PaymentRequestSchema()
