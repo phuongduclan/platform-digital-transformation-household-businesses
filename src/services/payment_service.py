@@ -23,7 +23,8 @@ class PaymentService:
                       description: str = None, created_by: str = None,
                       household_id: int = None) -> Payment:
         """
-        Tạo Payment cho hóa đơn bán.
+        Tạo Payment cho hóa đơn bán chịu (UNPAID).
+        Chỉ cho phép tạo Payment cho hóa đơn có customer_id và invoice_type = 'UNPAID'.
         Tự động tạo DebtRecord và AccountingLedger trong 1 transaction.
         """
         # Kiểm tra invoice tồn tại và là hóa đơn bán
@@ -32,10 +33,13 @@ class PaymentService:
             raise ValueError('Invoice not found')
         
         if invoice.customer_id is None:
-            raise ValueError('Payment can only be created for sales invoices (with customer_id)')
+            raise ValueError('Payment chỉ được tạo cho hóa đơn có khách hàng trong bảng customer (không áp dụng cho khách vãng lai)')
         
         if invoice.status != 'Confirm':
-            raise ValueError('Payment can only be created for confirmed invoices')
+            raise ValueError('Payment chỉ được tạo cho hóa đơn đã confirm')
+        
+        if invoice.invoice_type != 'UNPAID':
+            raise ValueError('Payment chỉ được tạo cho hóa đơn bán chịu (invoice_type = UNPAID). Hóa đơn đã thanh toán đủ (PAID) không cần Payment')
         
         # Lấy session từ repository để quản lý transaction
         db_session = getattr(self.repository, 'session', None)
@@ -105,7 +109,7 @@ class PaymentService:
                         transaction_date=now,
                         credit_amount=amount,
                         balance=new_balance,
-                        description=f"Thu từ {customer_name} - Hóa đơn #{invoice_id}",
+                        description=f"Thu từ {customer_name} - HĐ #{invoice_id} - Payment #{payment.id}",
                         movement_type='Thu'
                     )
                 )

@@ -1,4 +1,10 @@
-from infrastructure.databases.mssql import init_mssql, Base
+# Use PostgreSQL for Supabase deployment
+from infrastructure.databases.postgres import init_postgres, Base as PostgresBase, session as postgres_session, engine as postgres_engine
+
+# Re-export for backward compatibility - all files importing from infrastructure.databases.mssql will get PostgreSQL connection
+Base = PostgresBase
+session = postgres_session
+engine = postgres_engine
 
 # Migration Entities -> Tables
 def init_db(app):
@@ -30,4 +36,7 @@ def init_db(app):
         User,
         Warehouse
     )
-    init_mssql(app)
+    init_postgres(app)
+
+# Re-export session and Base so files can import from __init__.py or mssql.py
+__all__ = ['init_db', 'Base', 'session', 'engine']

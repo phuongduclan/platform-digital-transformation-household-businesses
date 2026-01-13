@@ -20,7 +20,6 @@ class SubscriptionPlanRepository(ISubscriptionPlanRepository):
             plan_model = SubscriptionPlanModel(
                 name=plan.name,
                 price=plan.price,
-                user_id=plan.user_id,
                 billing_cycle=plan.billing_cycle,
                 description=plan.description,
                 status=plan.status,
@@ -36,8 +35,6 @@ class SubscriptionPlanRepository(ISubscriptionPlanRepository):
         except Exception as e:
             self.session.rollback()
             raise ValueError(f"Error creating subscription plan: {str(e)}")
-        finally:
-            self.session.close()
 
     # ---------------- READ ----------------
     def get_by_id(self, plan_id: int) -> Optional[SubscriptionPlanModel]:
@@ -53,28 +50,33 @@ class SubscriptionPlanRepository(ISubscriptionPlanRepository):
     # ---------------- UPDATE ----------------
     def update(self, plan: SubscriptionPlanModel) -> SubscriptionPlanModel:
         try:
-            plan_model = SubscriptionPlanModel(
-                id=plan.id,
-                name=plan.name,
-                price=plan.price,
-                user_id=plan.user_id,
-                billing_cycle=plan.billing_cycle,
-                description=plan.description,
-                status=plan.status,
-                created_by=plan.created_by,
-                updated_by=plan.updated_by,
-                created_at=plan.created_at,
-                updated_at=plan.updated_at
-            )
-            self.session.merge(plan_model)
+            # Query existing plan from database
+            plan_model = self.session.query(SubscriptionPlanModel).filter_by(id=plan.id).first()
+            if not plan_model:
+                raise ValueError("Subscription plan not found")
+            
+            # Update only provided fields
+            if plan.name is not None:
+                plan_model.name = plan.name
+            if plan.price is not None:
+                plan_model.price = plan.price
+            if plan.billing_cycle is not None:
+                plan_model.billing_cycle = plan.billing_cycle
+            if plan.description is not None:
+                plan_model.description = plan.description
+            if plan.status is not None:
+                plan_model.status = plan.status
+            if plan.updated_by is not None:
+                plan_model.updated_by = plan.updated_by
+            if plan.updated_at is not None:
+                plan_model.updated_at = plan.updated_at
+            
             self.session.commit()
             self.session.refresh(plan_model)
             return plan_model
         except Exception as e:
             self.session.rollback()
             raise ValueError(f"Error updating subscription plan: {str(e)}")
-        finally:
-            self.session.close()
 
     # ---------------- DELETE ----------------
     def delete(self, plan_id: int) -> None:
@@ -88,5 +90,3 @@ class SubscriptionPlanRepository(ISubscriptionPlanRepository):
         except Exception as e:
             self.session.rollback()
             raise ValueError(f"Error deleting subscription plan: {str(e)}")
-        finally:
-            self.session.close()

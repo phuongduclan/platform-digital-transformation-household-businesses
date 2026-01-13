@@ -190,9 +190,6 @@ def create_plan():
                 status:
                   type: string
                   example: "active"
-                user_id:
-                  type: integer
-                  example: 123
                 billing_cycle:
                   type: string
                   example: "monthly"
@@ -244,7 +241,6 @@ def create_plan():
     plan = service.create_plan(
         name=data['name'],
         price=data['price'],
-        user_id=data['user_id'],
         billing_cycle=data.get('billing_cycle'),
         description=data.get('description'),
         status=data.get('status', 'active'),
@@ -371,15 +367,11 @@ def update_plan(id):
     plan = service.update_plan(
         plan_id=id,
         name=data.get('name'),
-        user_id=data.get('user_id'),
         billing_cycle=data.get('billing_cycle'),
         price=data.get('price'),
         description=data.get('description'),
         status=data.get('status'),
-        created_by=data.get('created_by'),
-        updated_by=data.get('updated_by'),
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_by=data.get('updated_by')
     )
     return jsonify(response_schema.dump(plan)), 200
 

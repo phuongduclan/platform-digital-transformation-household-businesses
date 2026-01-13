@@ -1,12 +1,14 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from config import Config
-from infrastructure.databases.base import Base
+# Compatibility layer: Re-export PostgreSQL connection as MSSQL for backward compatibility
+# All existing imports from infrastructure.databases.mssql will continue to work
+# This allows us to switch to PostgreSQL (Supabase) without modifying 42+ files
+from infrastructure.databases.postgres import (
+    Base,
+    session,
+    engine,
+    SessionLocal
+)
 
-# Database configuration
-DATABASE_URI = Config.DATABASE_URI
-engine = create_engine(DATABASE_URI)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-session = SessionLocal()
 def init_mssql(app):
-    Base.metadata.create_all(bind=engine)
+    """Compatibility function - redirects to PostgreSQL initialization."""
+    from infrastructure.databases.postgres import init_postgres
+    init_postgres(app)

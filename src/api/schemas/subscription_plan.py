@@ -7,7 +7,6 @@ class SubscriptionPlanRequestSchema(Schema):
         unknown = EXCLUDE  # bỏ qua các field không định nghĩa, tránh lỗi validate
 
     name = fields.Str(required=True)
-    user_id = fields.Int(required=True)  # bắt buộc, lấy từ user login
     billing_cycle = fields.Str(required=False, allow_none=True)
     price = fields.Float(required=True)  # kiểu số
     description = fields.Str(required=False, allow_none=True)
@@ -16,7 +15,6 @@ class SubscriptionPlanRequestSchema(Schema):
 class SubscriptionPlanResponseSchema(Schema):
     id = fields.Int(required=True)
     name = fields.Str(required=True)
-    user_id = fields.Int(required=True)
     billing_cycle = fields.Str(required=False, allow_none=True)
     price = fields.Float(required=True)
     description = fields.Str(required=False, allow_none=True)

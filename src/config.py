@@ -10,8 +10,14 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a_default_secret_key'
     DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true', '1']
     TESTING = os.environ.get('TESTING', 'False').lower() in ['true', '1']
+    # PostgreSQL connection string for Supabase
+    # IMPORTANT: Use Session Pooler for IPv4 compatibility (not Direct connection)
+    # Format: postgresql://postgres.[project-ref]:[password]@aws-1-[region].pooler.supabase.com:5432/postgres
+    # Project ID: xjghpmiupxldgezcrucj
+    # Region: Asia (ap-southeast-2)
+    # Connection string from: Dashboard > Connect > Method: Session pooler
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'postgresql://postgres.xjghpmiupxldgezcrucj:079206043460@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres'
     CORS_HEADERS = 'Content-Type'
 
 
@@ -19,19 +25,19 @@ class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'postgresql://postgres.xjghpmiupxldgezcrucj:079206043460@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres'
 
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'postgresql://postgres.xjghpmiupxldgezcrucj:079206043460@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres'
 
 
 class ProductionConfig(Config):
     """Production configuration."""
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
-        'mssql+pymssql://sa:%40Bina0608@127.0.0.1:1433/PlatformDB'
+        'postgresql://postgres.xjghpmiupxldgezcrucj:079206043460@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres'
 
 
 class SwaggerConfig:
