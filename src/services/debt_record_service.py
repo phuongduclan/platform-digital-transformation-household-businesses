@@ -1,9 +1,10 @@
 from domain.models.debt_record import DebtRecord
 from domain.models.idebt_record_repository import IDebtRecordRepository
+from domain.models.idebt_record_service import IDebtRecordService
 from typing import List, Optional
 from decimal import Decimal
 
-class DebtRecordService:
+class DebtRecordService(IDebtRecordService):
     def __init__(self, repository: IDebtRecordRepository):
         self.repository = repository
 

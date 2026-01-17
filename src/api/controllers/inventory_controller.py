@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iinventory_service import IInventoryService
 from services.inventory_service import InventoryService
 from infrastructure.repositories.inventory_repository import InventoryRepository
 from api.decorators.auth_decorators import require_permission
@@ -21,7 +22,7 @@ employee_inventory_bp = Blueprint(
 
 # Initialize services
 inventory_repository = InventoryRepository()
-inventory_service = InventoryService(inventory_repository)
+inventory_service: IInventoryService = InventoryService(inventory_repository)
 
 # =====================================================
 # HELPER FUNCTIONS

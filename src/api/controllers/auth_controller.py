@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
+from domain.models.iauth_service import IAuthService
 from services.auth_service import AuthService
 from infrastructure.databases.mssql import session
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
-auth_service = AuthService(session)
+auth_service: IAuthService = AuthService(session)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():

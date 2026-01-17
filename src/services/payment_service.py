@@ -3,12 +3,13 @@ from domain.models.ipayment_repository import IPaymentRepository
 from domain.models.iinvoice_repository import IInvoiceRepository
 from domain.models.idebt_record_repository import IDebtRecordRepository
 from domain.models.iaccounting_ledger_repository import IAccountingLedgerRepository
+from domain.models.ipayment_service import IPaymentService
 # from domain.models.icustomer_repository import ICustomerRepository  # TODO: Import khi có CustomerRepository
 from typing import List, Optional
 from datetime import datetime
 from decimal import Decimal
 
-class PaymentService:
+class PaymentService(IPaymentService):
     def __init__(self, repository: IPaymentRepository, invoice_repository: IInvoiceRepository,
                  debt_record_repository: IDebtRecordRepository = None,
                  accounting_ledger_repository: IAccountingLedgerRepository = None,

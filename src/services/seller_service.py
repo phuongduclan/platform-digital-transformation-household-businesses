@@ -1,9 +1,10 @@
 from domain.models.seller import Seller
 from domain.models.iseller_repository import ISellerRepository
+from domain.models.iseller_service import ISellerService
 from typing import List, Optional
 from datetime import datetime
 
-class SellerService:
+class SellerService(ISellerService):
     def __init__(self, repository: ISellerRepository):
         self.repository = repository
 

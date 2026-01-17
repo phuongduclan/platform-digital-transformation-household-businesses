@@ -1,8 +1,9 @@
 from domain.models.inventory import Inventory
 from domain.models.iinventory_repository import IInventoryRepository
+from domain.models.iinventory_service import IInventoryService
 from typing import List, Optional
 
-class InventoryService:
+class InventoryService(IInventoryService):
     def __init__(self, repository: IInventoryRepository):
         self.repository = repository
 

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from domain.models.irole_function_service import IRoleFunctionService
 from services.role_function_service import RoleFunctionService
 from infrastructure.repositories.role_function_repository import RoleFunctionRepository
 from api.schemas.role_function import RoleFunctionRequestSchema, RoleFunctionResponseSchema
@@ -6,7 +7,7 @@ from infrastructure.databases.mssql import session
 from api.decorators.auth_decorators import require_permission
 
 bp = Blueprint('admin_role_functions', __name__, url_prefix='/api/admin/roles')
-role_function_service = RoleFunctionService(RoleFunctionRepository(session))
+role_function_service: IRoleFunctionService = RoleFunctionService(RoleFunctionRepository(session))
 request_schema = RoleFunctionRequestSchema()
 response_schema = RoleFunctionResponseSchema()
 

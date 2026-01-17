@@ -1,11 +1,12 @@
 """
 Subscription Service - Check household có subscription active và CRUD subscription
 """
+from domain.models.isubscription_service import ISubscriptionService
 from datetime import datetime, timezone
 from infrastructure.databases.mssql import session
 from infrastructure.models import Subscription  # path đúng với project
 
-class SubscriptionService:
+class SubscriptionService(ISubscriptionService):
     def __init__(self, db_session=None):
         # Nếu không truyền session thì dùng mặc định
         self.session = db_session or session

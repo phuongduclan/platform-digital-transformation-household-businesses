@@ -1,4 +1,8 @@
 from flask import Blueprint, request, jsonify
+from domain.models.ihousehold_service import IHouseholdService
+from domain.models.iuser_service import IUserService
+from domain.models.isubscription_service import ISubscriptionService
+from domain.models.isubscription_plan_service import ISubscriptionPlanService
 from services.household_service import HouseholdService
 from services.user_service import UserService
 from services.subscription_service import SubscriptionService
@@ -11,10 +15,10 @@ from infrastructure.models import Role
 from datetime import datetime, timezone, timedelta
 bp = Blueprint('public_registration', __name__, url_prefix='/api/public')
 
-household_service = HouseholdService(HouseholdRepository(session=session))
-user_service = UserService(UserRepository(session=session))
-subscription_service = SubscriptionService(session)
-subscription_plan_service = SubscriptionPlanService(SubscriptionPlanRepository(session=session))
+household_service: IHouseholdService = HouseholdService(HouseholdRepository(session=session))
+user_service: IUserService = UserService(UserRepository(session=session))
+subscription_service: ISubscriptionService = SubscriptionService(session)
+subscription_plan_service: ISubscriptionPlanService = SubscriptionPlanService(SubscriptionPlanRepository(session=session))
 
 
 @bp.route('/register', methods=['POST'])

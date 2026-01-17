@@ -1,9 +1,10 @@
 from domain.models.product import Product
 from domain.models.iproduct_repository import IProductRepository
+from domain.models.iproduct_service import IProductService
 from typing import List, Optional
 from datetime import datetime
 
-class ProductService:
+class ProductService(IProductService):
     def __init__(self, repository: IProductRepository):
         self.repository = repository
 

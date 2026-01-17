@@ -1,11 +1,12 @@
 from domain.models.import_receipt import ImportReceipt
 from domain.models.iimport_receipt_repository import IImportReceiptRepository
 from domain.models.iimport_detail_repository import IImportDetailRepository
+from domain.models.iimport_receipt_service import IImportReceiptService
 from domain.models.import_detail import ImportDetail
 from typing import List, Optional
 from datetime import datetime, date
 
-class ImportReceiptService:
+class ImportReceiptService(IImportReceiptService):
     def __init__(self, repository: IImportReceiptRepository, import_detail_repository: IImportDetailRepository):
         self.repository = repository
         self.import_detail_repository = import_detail_repository

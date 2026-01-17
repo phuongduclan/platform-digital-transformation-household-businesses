@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iimport_receipt_service import IImportReceiptService
 from services.import_receipt_service import ImportReceiptService
 from infrastructure.repositories.import_receipt_repository import ImportReceiptRepository
 from infrastructure.repositories.import_detail_repository import ImportDetailRepository
@@ -18,7 +19,7 @@ owner_import_receipt_bp = Blueprint(
 # Initialize services
 import_receipt_repository = ImportReceiptRepository()
 import_detail_repository = ImportDetailRepository()
-import_receipt_service = ImportReceiptService(import_receipt_repository, import_detail_repository)
+import_receipt_service: IImportReceiptService = ImportReceiptService(import_receipt_repository, import_detail_repository)
 
 # =====================================================
 # HELPER FUNCTIONS

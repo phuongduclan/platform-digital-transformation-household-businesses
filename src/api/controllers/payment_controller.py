@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.ipayment_service import IPaymentService
 from services.payment_service import PaymentService
 from infrastructure.repositories.payment_repository import PaymentRepository
 from infrastructure.repositories.invoice_repository import InvoiceRepository
@@ -32,7 +33,7 @@ debt_record_repository = DebtRecordRepository()
 accounting_ledger_repository = AccountingLedgerRepository()
 customer_repository = CustomerRepository()
 
-payment_service = PaymentService(
+payment_service: IPaymentService = PaymentService(
     payment_repository,
     invoice_repository,
     debt_record_repository,

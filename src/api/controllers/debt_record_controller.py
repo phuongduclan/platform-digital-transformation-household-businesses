@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.idebt_record_service import IDebtRecordService
 from services.debt_record_service import DebtRecordService
 from infrastructure.repositories.debt_record_repository import DebtRecordRepository
 from api.decorators.auth_decorators import require_permission
@@ -23,7 +24,7 @@ employee_debt_record_bp = Blueprint(
 
 # Initialize services
 debt_record_repository = DebtRecordRepository()
-debt_record_service = DebtRecordService(debt_record_repository)
+debt_record_service: IDebtRecordService = DebtRecordService(debt_record_repository)
 
 # =====================================================
 # HELPER FUNCTIONS

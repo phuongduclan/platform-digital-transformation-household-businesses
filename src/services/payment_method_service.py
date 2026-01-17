@@ -1,8 +1,9 @@
 from domain.models.payment_method import PaymentMethod
 from domain.models.ipayment_method_repository import IPaymentMethodRepository
+from domain.models.ipayment_method_service import IPaymentMethodService
 from typing import List, Optional
 
-class PaymentMethodService:
+class PaymentMethodService(IPaymentMethodService):
     def __init__(self, repository: IPaymentMethodRepository):
         self.repository = repository
 

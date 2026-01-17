@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.ipayment_method_service import IPaymentMethodService
 from services.payment_method_service import PaymentMethodService
 from infrastructure.repositories.payment_method_repository import PaymentMethodRepository
 from api.decorators.auth_decorators import require_permission
@@ -22,7 +23,7 @@ admin_payment_method_bp = Blueprint(
 
 # Initialize services
 payment_method_repository = PaymentMethodRepository()
-payment_method_service = PaymentMethodService(payment_method_repository)
+payment_method_service: IPaymentMethodService = PaymentMethodService(payment_method_repository)
 
 # =====================================================
 # HELPER FUNCTIONS

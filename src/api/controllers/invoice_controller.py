@@ -1,4 +1,11 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iinvoice_service import IInvoiceService
+from domain.models.iinvoice_detail_service import IInvoiceDetailService
+from domain.models.iimport_receipt_service import IImportReceiptService
+from domain.models.iexport_receipt_service import IExportReceiptService
+from domain.models.iinventory_service import IInventoryService
+from domain.models.idebt_record_service import IDebtRecordService
+from domain.models.iaccounting_ledger_service import IAccountingLedgerService
 from services.invoice_service import InvoiceService
 from services.invoice_detail_service import InvoiceDetailService
 from services.import_receipt_service import ImportReceiptService
@@ -54,8 +61,8 @@ invoice_detail_bp = Blueprint(
 # Initialize services
 invoice_repository = InvoiceRepository()
 invoice_detail_repository = InvoiceDetailRepository()
-invoice_service = InvoiceService(invoice_repository, invoice_detail_repository)
-invoice_detail_service = InvoiceDetailService(invoice_detail_repository, invoice_repository)
+invoice_service: IInvoiceService = InvoiceService(invoice_repository, invoice_detail_repository)
+invoice_detail_service: IInvoiceDetailService = InvoiceDetailService(invoice_detail_repository, invoice_repository)
 
 # Initialize import/export/inventory services for auto-creation
 import_receipt_repository = ImportReceiptRepository()
@@ -69,11 +76,11 @@ accounting_ledger_repository = AccountingLedgerRepository()
 customer_repository = CustomerRepository()
 seller_repository = SellerRepository()
 
-import_receipt_service = ImportReceiptService(import_receipt_repository, import_detail_repository)
-export_receipt_service = ExportReceiptService(export_receipt_repository, export_detail_repository)
-inventory_service = InventoryService(inventory_repository)
-debt_record_service = DebtRecordService(debt_record_repository)
-accounting_ledger_service = AccountingLedgerService(accounting_ledger_repository)
+import_receipt_service: IImportReceiptService = ImportReceiptService(import_receipt_repository, import_detail_repository)
+export_receipt_service: IExportReceiptService = ExportReceiptService(export_receipt_repository, export_detail_repository)
+inventory_service: IInventoryService = InventoryService(inventory_repository)
+debt_record_service: IDebtRecordService = DebtRecordService(debt_record_repository)
+accounting_ledger_service: IAccountingLedgerService = AccountingLedgerService(accounting_ledger_repository)
 
 # =====================================================
 # HELPER FUNCTIONS

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iwarehouse_service import IWarehouseService
 from services.warehouse_service import WarehouseService
 from infrastructure.repositories.warehouse_repository import WarehouseRepository
 from api.decorators.auth_decorators import require_permission
@@ -19,7 +20,7 @@ employee_bp = Blueprint(
     url_prefix="/api/employee/warehouses"
 )
 
-warehouse_service = WarehouseService(WarehouseRepository())
+warehouse_service: IWarehouseService = WarehouseService(WarehouseRepository())
 
 
 # =====================================================

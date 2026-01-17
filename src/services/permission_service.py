@@ -1,10 +1,11 @@
 """
 Permission Service - Check role có function code không
 """
+from domain.models.ipermission_service import IPermissionService
 from infrastructure.databases.mssql import session
 from infrastructure.models import RoleFunction, Function, Role
 
-class PermissionService:
+class PermissionService(IPermissionService):
     def __init__(self, db_session):
         self.session = db_session
     

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from domain.models.ihousehold_service import IHouseholdService
 from services.household_service import HouseholdService
 from infrastructure.repositories.household_repository import HouseholdRepository
 from api.schemas.household import HouseholdRequestSchema, HouseholdResponseSchema
@@ -10,7 +11,7 @@ from datetime import datetime, timezone
 # Owner endpoints only - Admin không có quyền quản lý Household
 owner_bp = Blueprint('owner_household', __name__, url_prefix='/api/owner/household')
 
-household_service = HouseholdService(HouseholdRepository(session=session))
+household_service: IHouseholdService = HouseholdService(HouseholdRepository(session=session))
 request_schema = HouseholdRequestSchema()
 response_schema = HouseholdResponseSchema()
 

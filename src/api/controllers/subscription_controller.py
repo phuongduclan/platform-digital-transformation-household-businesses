@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from domain.models.isubscription_service import ISubscriptionService
 from services.subscription_service import SubscriptionService
 from infrastructure.repositories.subscription_repository import SubscriptionRepository
 from api.schemas.subscription import SubscriptionRequestSchema, SubscriptionResponseSchema
@@ -13,7 +14,7 @@ admin_bp = Blueprint('admin_subscription', __name__, url_prefix='/api/admin/subs
 # Owner endpoints
 owner_bp = Blueprint('owner_subscription', __name__, url_prefix='/api/owner/subscription')
 
-service = SubscriptionService(session)
+service: ISubscriptionService = SubscriptionService(session)
 request_schema = SubscriptionRequestSchema()
 response_schema = SubscriptionResponseSchema()
 

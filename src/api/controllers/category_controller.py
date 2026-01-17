@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.icategory_service import ICategoryService
 from services.category_service import CategoryService
 from infrastructure.repositories.category_repository import CategoryRepository
 from api.decorators.auth_decorators import require_permission
@@ -19,7 +20,7 @@ employee_bp = Blueprint(
     url_prefix="/api/employee/categories"
 )
 
-category_service = CategoryService(CategoryRepository())
+category_service: ICategoryService = CategoryService(CategoryRepository())
 
 
 # =====================================================

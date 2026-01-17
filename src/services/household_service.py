@@ -1,11 +1,12 @@
 from domain.models.household import Household
 from domain.models.ihousehold_repository import IHouseholdRepository
+from domain.models.ihousehold_service import IHouseholdService
 from typing import List, Optional
 from datetime import datetime, timezone
 from infrastructure.databases.mssql import session
 from infrastructure.models.household_model import Household as HouseholdModel
 
-class HouseholdService:
+class HouseholdService(IHouseholdService):
     def __init__(self, repository: IHouseholdRepository):
         self.repository = repository
 

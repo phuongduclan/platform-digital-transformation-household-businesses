@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.icustomer_service import ICustomerService
 from services.customer_service import CustomerService
 from infrastructure.repositories.customer_repository import CustomerRepository
 from infrastructure.repositories.invoice_repository import InvoiceRepository
@@ -27,7 +28,7 @@ customer_repository = CustomerRepository()
 invoice_repository = InvoiceRepository()
 debt_record_repository = DebtRecordRepository()
 
-customer_service = CustomerService(
+customer_service: ICustomerService = CustomerService(
     customer_repository,
     invoice_repository,
     debt_record_repository

@@ -1,9 +1,10 @@
 from domain.models.category import Category
 from domain.models.icategory_repository import ICategoryRepository
+from domain.models.icategory_service import ICategoryService
 from typing import List, Optional
 from datetime import datetime
 
-class CategoryService:
+class CategoryService(ICategoryService):
     def __init__(self, repository: ICategoryRepository):
         self.repository = repository
 

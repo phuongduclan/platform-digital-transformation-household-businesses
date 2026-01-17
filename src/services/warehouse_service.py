@@ -1,10 +1,11 @@
 from domain.models.warehouse import Warehouse
 from domain.models.iwarehouse_repository import IWarehouseRepository
+from domain.models.iwarehouse_service import IWarehouseService
 from typing import List, Optional
 from datetime import datetime
 
 
-class WarehouseService:
+class WarehouseService(IWarehouseService):
     def __init__(self, repository: IWarehouseRepository):
         self.repository = repository
 

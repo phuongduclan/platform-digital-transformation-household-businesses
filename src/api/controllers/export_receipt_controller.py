@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iexport_receipt_service import IExportReceiptService
 from services.export_receipt_service import ExportReceiptService
 from infrastructure.repositories.export_receipt_repository import ExportReceiptRepository
 from infrastructure.repositories.export_detail_repository import ExportDetailRepository
@@ -18,7 +19,7 @@ owner_export_receipt_bp = Blueprint(
 # Initialize services
 export_receipt_repository = ExportReceiptRepository()
 export_detail_repository = ExportDetailRepository()
-export_receipt_service = ExportReceiptService(export_receipt_repository, export_detail_repository)
+export_receipt_service: IExportReceiptService = ExportReceiptService(export_receipt_repository, export_detail_repository)
 
 # =====================================================
 # HELPER FUNCTIONS

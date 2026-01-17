@@ -1,10 +1,11 @@
 from domain.models.accounting_ledger import AccountingLedger
 from domain.models.iaccounting_ledger_repository import IAccountingLedgerRepository
+from domain.models.iaccounting_ledger_service import IAccountingLedgerService
 from typing import List, Optional
 from datetime import datetime
 from decimal import Decimal
 
-class AccountingLedgerService:
+class AccountingLedgerService(IAccountingLedgerService):
     def __init__(self, repository: IAccountingLedgerRepository):
         self.repository = repository
 

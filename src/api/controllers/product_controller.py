@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iproduct_service import IProductService
 from services.product_service import ProductService
 from infrastructure.repositories.product_repository import ProductRepository
 from api.decorators.auth_decorators import require_permission
@@ -19,7 +20,7 @@ employee_bp = Blueprint(
     url_prefix="/api/employee/products"
 )
 
-product_service = ProductService(ProductRepository())
+product_service: IProductService = ProductService(ProductRepository())
 
 
 # =====================================================

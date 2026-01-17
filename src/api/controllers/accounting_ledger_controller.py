@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iaccounting_ledger_service import IAccountingLedgerService
 from services.accounting_ledger_service import AccountingLedgerService
 from infrastructure.repositories.accounting_ledger_repository import AccountingLedgerRepository
 from api.decorators.auth_decorators import require_permission
@@ -29,7 +30,7 @@ admin_accounting_ledger_bp = Blueprint(
 
 # Initialize services
 accounting_ledger_repository = AccountingLedgerRepository()
-accounting_ledger_service = AccountingLedgerService(accounting_ledger_repository)
+accounting_ledger_service: IAccountingLedgerService = AccountingLedgerService(accounting_ledger_repository)
 
 # =====================================================
 # HELPER FUNCTIONS
@@ -199,10 +200,11 @@ def owner_outstanding_debt():
           description: Outstanding debt by customer
     """
     try:
+        from domain.models.idebt_record_service import IDebtRecordService
         from services.debt_record_service import DebtRecordService
         from infrastructure.repositories.debt_record_repository import DebtRecordRepository
         
-        debt_record_service = DebtRecordService(DebtRecordRepository())
+        debt_record_service: IDebtRecordService = DebtRecordService(DebtRecordRepository())
         debt_records = debt_record_service.list_debt_records(g.household_id)
         
         # Group by customer and get latest balance

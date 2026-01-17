@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from domain.models.itodo_service import ITodoService
 from services.todo_service import TodoService
 from infrastructure.repositories.todo_repository import TodoRepository
 from api.schemas.todo import TodoRequestSchema, TodoResponseSchema
@@ -6,7 +7,7 @@ from datetime import datetime
 from infrastructure.databases.mssql import session
 bp = Blueprint('todo', __name__, url_prefix='/todos')
 
-todo_service = TodoService(TodoRepository(session))
+todo_service: ITodoService = TodoService(TodoRepository(session))
 
 request_schema = TodoRequestSchema()
 response_schema = TodoResponseSchema()

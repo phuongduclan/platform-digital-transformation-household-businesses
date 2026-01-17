@@ -1,9 +1,10 @@
 from domain.models.role_function import RoleFunction
 from domain.models.irole_function_repository import IRoleFunctionRepository
+from domain.models.irole_function_service import IRoleFunctionService
 from typing import List, Optional
 from datetime import datetime
 
-class RoleFunctionService:
+class RoleFunctionService(IRoleFunctionService):
     def __init__(self, repository: IRoleFunctionRepository):
         self.repository = repository
 

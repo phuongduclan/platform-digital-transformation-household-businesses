@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from domain.models.ifunction_service import IFunctionService
 from services.function_service import FunctionService
 from infrastructure.repositories.function_repository import FunctionRepository
 from api.schemas.function import FunctionRequestSchema, FunctionResponseSchema, FunctionUpdateSchema
@@ -6,7 +7,7 @@ from infrastructure.databases.mssql import session
 from api.decorators.auth_decorators import require_permission
 
 bp = Blueprint('admin_functions', __name__, url_prefix='/api/admin/functions')
-function_service = FunctionService(FunctionRepository(session))
+function_service: IFunctionService = FunctionService(FunctionRepository(session))
 request_schema = FunctionRequestSchema()
 response_schema = FunctionResponseSchema()
 update_schema = FunctionUpdateSchema()

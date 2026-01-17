@@ -1,9 +1,10 @@
 from domain.models.unit import Unit
 from domain.models.iunit_repository import IUnitRepository
+from domain.models.iunit_service import IUnitService
 from typing import List, Optional
 from datetime import datetime
 
-class UnitService:
+class UnitService(IUnitService):
     def __init__(self, repository: IUnitRepository):
         self.repository = repository
 

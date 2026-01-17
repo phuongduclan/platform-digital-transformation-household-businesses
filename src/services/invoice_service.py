@@ -1,12 +1,13 @@
 from domain.models.invoice import Invoice
 from domain.models.iinvoice_repository import IInvoiceRepository
 from domain.models.iinvoice_detail_repository import IInvoiceDetailRepository
+from domain.models.iinvoice_service import IInvoiceService
 from domain.models.invoice_detail import InvoiceDetail
 from typing import List, Optional
 from datetime import datetime
 from decimal import Decimal
 
-class InvoiceService:
+class InvoiceService(IInvoiceService):
     def __init__(self, repository: IInvoiceRepository, invoice_detail_repository: IInvoiceDetailRepository):
         self.repository = repository
         self.invoice_detail_repository = invoice_detail_repository

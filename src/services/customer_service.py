@@ -2,11 +2,12 @@ from domain.models.customer import Customer
 from domain.models.icustomer_repository import ICustomerRepository
 from domain.models.iinvoice_repository import IInvoiceRepository
 from domain.models.idebt_record_repository import IDebtRecordRepository
+from domain.models.icustomer_service import ICustomerService
 from typing import List, Optional
 from datetime import datetime
 from decimal import Decimal
 
-class CustomerService:
+class CustomerService(ICustomerService):
     def __init__(self, repository: ICustomerRepository,
                  invoice_repository: IInvoiceRepository = None,
                  debt_record_repository: IDebtRecordRepository = None):

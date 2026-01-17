@@ -1,9 +1,10 @@
 from domain.models.function import Function
 from domain.models.ifunction_repository import IFunctionRepository
+from domain.models.ifunction_service import IFunctionService
 from typing import List, Optional
 from datetime import datetime
 
-class FunctionService:
+class FunctionService(IFunctionService):
     def __init__(self, repository: IFunctionRepository):
         self.repository = repository
 

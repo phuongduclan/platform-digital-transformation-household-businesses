@@ -1,11 +1,12 @@
 from domain.models.user import User
 from domain.models.iuser_repository import IUserRepository
+from domain.models.iuser_service import IUserService
 from typing import List, Optional
 from datetime import datetime
 from infrastructure.databases.mssql import session
 from infrastructure.models import Role
 
-class UserService:
+class UserService(IUserService):
     def __init__(self, repository: IUserRepository):
         self.repository = repository
     

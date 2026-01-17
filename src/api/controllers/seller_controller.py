@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iseller_service import ISellerService
 from services.seller_service import SellerService
 from infrastructure.repositories.seller_repository import SellerRepository
 from api.decorators.auth_decorators import require_permission
@@ -16,7 +17,7 @@ owner_seller_bp = Blueprint(
 
 # Initialize services
 seller_repository = SellerRepository()
-seller_service = SellerService(seller_repository)
+seller_service: ISellerService = SellerService(seller_repository)
 
 # =====================================================
 # HELPER FUNCTIONS

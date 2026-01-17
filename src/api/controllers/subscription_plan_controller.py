@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from domain.models.isubscription_plan_service import ISubscriptionPlanService
 from services.subscription_plan_service import SubscriptionPlanService
 from infrastructure.repositories.subscription_plan_repository import SubscriptionPlanRepository
 from api.schemas.subscription_plan import SubscriptionPlanRequestSchema, SubscriptionPlanResponseSchema
@@ -12,7 +13,7 @@ admin_bp = Blueprint('admin_subscription_plan', __name__, url_prefix='/api/admin
 # Public endpoint (không cần auth - Owner chọn plan khi đăng ký)
 public_bp = Blueprint('public_subscription_plan', __name__, url_prefix='/api/public/subscription-plans')
 
-service = SubscriptionPlanService(SubscriptionPlanRepository(session=session))
+service: ISubscriptionPlanService = SubscriptionPlanService(SubscriptionPlanRepository(session=session))
 request_schema = SubscriptionPlanRequestSchema()
 response_schema = SubscriptionPlanResponseSchema()
 

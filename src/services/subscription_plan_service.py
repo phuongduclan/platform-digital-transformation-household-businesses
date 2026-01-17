@@ -1,9 +1,10 @@
 from domain.models.subscription_plan import SubscriptionPlan
 from domain.models.isubscription_plan_repository import ISubscriptionPlanRepository
+from domain.models.isubscription_plan_service import ISubscriptionPlanService
 from typing import List, Optional
 from datetime import datetime
 
-class SubscriptionPlanService:
+class SubscriptionPlanService(ISubscriptionPlanService):
     def __init__(self, repository: ISubscriptionPlanRepository):
         self.repository = repository
 

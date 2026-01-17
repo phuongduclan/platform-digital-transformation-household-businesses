@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from domain.models.iuser_service import IUserService
 from services.user_service import UserService
 from infrastructure.repositories.user_repository import UserRepository
 from api.schemas.user import UserRequestSchema, UserResponseSchema, UserUpdateSchema
@@ -8,7 +9,7 @@ from api.utils.auth_utils import get_current_household_id
 
 # Admin endpoints
 admin_bp = Blueprint('admin_users', __name__, url_prefix='/api/admin/users')
-user_service = UserService(UserRepository(session))
+user_service: IUserService = UserService(UserRepository(session))
 request_schema = UserRequestSchema()
 response_schema = UserResponseSchema()
 update_schema = UserUpdateSchema()

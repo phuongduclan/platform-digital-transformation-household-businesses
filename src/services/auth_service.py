@@ -1,6 +1,7 @@
 """
 Auth Service - Business logic cho authentication
 """
+from domain.models.iauth_service import IAuthService
 from infrastructure.databases.mssql import session
 from infrastructure.models import User as UserModel, Role
 from datetime import datetime, timedelta
@@ -9,7 +10,7 @@ from flask import current_app
 from config import Config
 from services.subscription_service import SubscriptionService
 
-class AuthService:
+class AuthService(IAuthService):
     def __init__(self, db_session):
         self.session = db_session
         self.subscription_service = SubscriptionService(db_session)

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, jsonify
+from domain.models.iunit_service import IUnitService
 from services.unit_service import UnitService
 from infrastructure.repositories.unit_repository import UnitRepository
 from api.decorators.auth_decorators import require_permission
@@ -19,7 +20,7 @@ employee_bp = Blueprint(
     url_prefix="/api/employee/units"
 )
 
-unit_service = UnitService(UnitRepository())
+unit_service: IUnitService = UnitService(UnitRepository())
 
 # ================= HELPER =================
 

@@ -1,8 +1,9 @@
 from domain.models.todo import Todo
 from domain.models.itodo_repository import ITodoRepository
+from domain.models.itodo_service import ITodoService
 from typing import List, Optional
 
-class TodoService:
+class TodoService(ITodoService):
     def __init__(self, repository: ITodoRepository):
         self.repository = repository
 
