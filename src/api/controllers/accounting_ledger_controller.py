@@ -227,6 +227,89 @@ def owner_outstanding_debt():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@owner_reports_bp.route("/overview", methods=["GET"])
+@require_permission("F117", ["GET"])
+def owner_overview_report():
+    """
+    Tổng quan báo cáo (doanh thu + công nợ) (Owner)
+    ---
+    get:
+      summary: Overview report (revenue & outstanding debt)
+      tags: [Owner Reports]
+      security: [{Bearer: []}]
+      parameters:
+        - name: date
+          in: query
+          type: string
+          format: date
+          required: false
+        - name: month
+          in: query
+          type: integer
+          required: false
+        - name: year
+          in: query
+          type: integer
+          required: false
+      responses:
+        200:
+          description: Overview metrics
+    """
+    try:
+        # Ngày được chọn cho báo cáo ngày, mặc định là hôm nay
+        date_str = request.args.get('date')
+        if date_str:
+            day = datetime.fromisoformat(date_str)
+        else:
+            day = datetime.utcnow()
+            date_str = day.date().isoformat()
+
+        # Tháng/năm cho báo cáo tháng, mặc định theo ngày ở trên
+        month = request.args.get('month', type=int) or day.month
+        year = request.args.get('year', type=int) or day.year
+
+        # Doanh thu ngày
+        daily_revenue = accounting_ledger_service.get_daily_revenue(g.household_id, day)
+
+        # Doanh thu tháng
+        monthly_revenue = accounting_ledger_service.get_monthly_revenue(g.household_id, month, year)
+
+        # Công nợ hiện tại theo từng khách hàng (tái sử dụng logic outstanding_debt)
+        from domain.models.idebt_record_service import IDebtRecordService
+        from services.debt_record_service import DebtRecordService
+        from infrastructure.repositories.debt_record_repository import DebtRecordRepository
+
+        debt_record_service: IDebtRecordService = DebtRecordService(DebtRecordRepository())
+        debt_records = debt_record_service.list_debt_records(g.household_id)
+
+        customer_balances = {}
+        for dr in debt_records:
+            if dr.customer_id not in customer_balances:
+                balance = debt_record_service.get_customer_balance(dr.customer_id, g.household_id)
+                if balance > 0:
+                    customer_balances[dr.customer_id] = {
+                        "customer_id": dr.customer_id,
+                        "balance": str(balance)
+                    }
+
+        outstanding_list = sorted(
+            customer_balances.values(),
+            key=lambda x: float(x["balance"]),
+            reverse=True
+        )
+
+        return jsonify({
+            "date": date_str,
+            "daily_revenue": str(daily_revenue),
+            "month": month,
+            "year": year,
+            "monthly_revenue": str(monthly_revenue),
+            "outstanding_debts": outstanding_list
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # =====================================================
 # ADMIN ENDPOINTS (F007)
 # =====================================================

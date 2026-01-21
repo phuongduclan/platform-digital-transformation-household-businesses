@@ -25,6 +25,9 @@ from infrastructure.repositories.debt_record_repository import DebtRecordReposit
 from infrastructure.repositories.accounting_ledger_repository import AccountingLedgerRepository
 from infrastructure.repositories.customer_repository import CustomerRepository
 from infrastructure.repositories.seller_repository import SellerRepository
+from infrastructure.repositories.household_repository import HouseholdRepository
+from infrastructure.repositories.product_repository import ProductRepository
+from infrastructure.repositories.unit_repository import UnitRepository
 from api.decorators.auth_decorators import require_permission
 from api.schemas.invoice import (
     InvoiceWithDetailsRequestSchema, InvoiceUpdateSchema,
@@ -75,6 +78,9 @@ debt_record_repository = DebtRecordRepository()
 accounting_ledger_repository = AccountingLedgerRepository()
 customer_repository = CustomerRepository()
 seller_repository = SellerRepository()
+household_repository = HouseholdRepository()
+product_repository = ProductRepository()
+unit_repository = UnitRepository()
 
 import_receipt_service: IImportReceiptService = ImportReceiptService(import_receipt_repository, import_detail_repository)
 export_receipt_service: IExportReceiptService = ExportReceiptService(export_receipt_repository, export_detail_repository)
@@ -235,10 +241,9 @@ def owner_create_invoice():
             details=details
         )
         return jsonify(invoice_to_dict(invoice)), 201
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (ValueError, Exception) as e:
+        from api.utils.exception_handler import handle_exception_with_rollback
+        return handle_exception_with_rollback(e, 400 if isinstance(e, ValueError) else 500)
 
 @owner_invoice_bp.route("/<int:invoice_id>", methods=["GET"])
 @require_permission("F111", ["GET"])
@@ -425,10 +430,10 @@ def owner_get_invoice_details(invoice_id):
 @require_permission("F111", ["GET"])
 def owner_print_invoice(invoice_id):
     """
-    Print invoice (Owner)
+    Get invoice data for printing (Owner) - Returns JSON with all invoice data
     ---
     get:
-      summary: Print invoice
+      summary: Get invoice data for printing
       tags: [Owner Invoices]
       security: [{Bearer: []}]
       parameters:
@@ -438,16 +443,79 @@ def owner_print_invoice(invoice_id):
           type: integer
       responses:
         200:
-          description: Invoice with details for printing
+          description: Invoice data for printing (JSON)
     """
     invoice = invoice_service.get_invoice(invoice_id, g.household_id)
     if not invoice:
         return jsonify({"error": "Invoice not found"}), 404
     
+    # Get invoice details
     details = invoice_detail_service.list_invoice_details(invoice_id, g.household_id)
+    
+    # Get household info
+    household = household_repository.get_by_id(g.household_id)
+    household_dict = None
+    if household:
+        household_dict = {
+            "id": household.id,
+            "name": household.name,
+            "tax_code": household.tax_code,
+            "address": household.address,
+            "phone": household.phone,
+            "description": household.description
+        }
+    
+    # Get customer or seller
+    customer_dict = None
+    seller_dict = None
+    if invoice.customer_id:
+        customer = customer_repository.get_by_id(invoice.customer_id, g.household_id)
+        if customer:
+            customer_dict = {
+                "id": customer.id,
+                "name": customer.name,
+                "tax_code": customer.tax_code,
+                "address": customer.address,
+                "phone": customer.phone
+            }
+    elif invoice.seller_id:
+        seller = seller_repository.get_by_id(invoice.seller_id, g.household_id)
+        if seller:
+            seller_dict = {
+                "id": seller.id,
+                "name": seller.name,
+                "tax_code": seller.tax_code,
+                "address": seller.address,
+                "phone": seller.phone
+            }
+    
+    # Enrich details with product and unit names
+    enriched_details = []
+    for detail in details:
+        product = product_repository.get_by_id(detail.product_id, g.household_id) if detail.product_id else None
+        unit = unit_repository.get_by_id(detail.unit_id, g.household_id) if detail.unit_id else None
+        detail_dict = invoice_detail_to_dict(detail)
+        detail_dict['product_name'] = product.name if product else 'Sản phẩm'
+        detail_dict['unit_name'] = unit.name if unit else ''
+        # Calculate line total
+        quantity = float(detail.quantity or 0)
+        price = float(detail.price or 0)
+        discount = float(detail.discount or 0)
+        vat_rate = float(detail.vat or 0)
+        subtotal = quantity * price
+        after_discount = subtotal - discount
+        vat_amount = after_discount * vat_rate / 100
+        line_total = after_discount + vat_amount
+        detail_dict['line_total'] = str(line_total)
+        enriched_details.append(detail_dict)
+    
+    # Return JSON with all data
     return jsonify({
         "invoice": invoice_to_dict(invoice),
-        "details": [invoice_detail_to_dict(d) for d in details]
+        "household": household_dict,
+        "customer": customer_dict,
+        "seller": seller_dict,
+        "details": enriched_details
     }), 200
 
 # =====================================================
@@ -455,7 +523,7 @@ def owner_print_invoice(invoice_id):
 # =====================================================
 
 @employee_invoice_bp.route("", methods=["GET"])
-@require_permission("F207", ["GET"])
+@require_permission("F208", ["GET"])
 def employee_list_invoices():
     """
     List all invoices của household (Employee)
@@ -480,7 +548,7 @@ def employee_list_invoices():
     return jsonify([invoice_to_dict(inv) for inv in invoices]), 200
 
 @employee_invoice_bp.route("", methods=["POST"])
-@require_permission("F208", ["POST"])
+@require_permission("F207", ["POST"])
 def employee_create_invoice():
     """
     Create draft invoice với details (Employee)
@@ -563,13 +631,12 @@ def employee_create_invoice():
             details=details
         )
         return jsonify(invoice_to_dict(invoice)), 201
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (ValueError, Exception) as e:
+        from api.utils.exception_handler import handle_exception_with_rollback
+        return handle_exception_with_rollback(e, 400 if isinstance(e, ValueError) else 500)
 
 @employee_invoice_bp.route("/<int:invoice_id>", methods=["GET"])
-@require_permission("F207", ["GET"])
+@require_permission("F208", ["GET"])
 def employee_get_invoice(invoice_id):
     """
     Get invoice by id (Employee)
@@ -728,7 +795,7 @@ def employee_confirm_invoice(invoice_id):
         return jsonify({"error": str(e)}), 500
 
 @employee_invoice_bp.route("/<int:invoice_id>/details", methods=["GET"])
-@require_permission("F207", ["GET"])
+@require_permission("F208", ["GET"])
 def employee_get_invoice_details(invoice_id):
     """
     Get invoice details (Employee)
@@ -750,13 +817,13 @@ def employee_get_invoice_details(invoice_id):
     return jsonify([invoice_detail_to_dict(d) for d in details]), 200
 
 @employee_invoice_bp.route("/<int:invoice_id>/print", methods=["GET"])
-@require_permission("F207", ["GET"])
+@require_permission("F208", ["GET"])
 def employee_print_invoice(invoice_id):
     """
-    Print invoice (Employee)
+    Get invoice data for printing (Employee) - Returns JSON with all invoice data
     ---
     get:
-      summary: Print invoice
+      summary: Get invoice data for printing
       tags: [Employee Invoices]
       security: [{Bearer: []}]
       parameters:
@@ -766,16 +833,79 @@ def employee_print_invoice(invoice_id):
           type: integer
       responses:
         200:
-          description: Invoice with details for printing
+          description: Invoice data for printing (JSON)
     """
     invoice = invoice_service.get_invoice(invoice_id, g.household_id)
     if not invoice:
         return jsonify({"error": "Invoice not found"}), 404
     
+    # Get invoice details
     details = invoice_detail_service.list_invoice_details(invoice_id, g.household_id)
+    
+    # Get household info
+    household = household_repository.get_by_id(g.household_id)
+    household_dict = None
+    if household:
+        household_dict = {
+            "id": household.id,
+            "name": household.name,
+            "tax_code": household.tax_code,
+            "address": household.address,
+            "phone": household.phone,
+            "description": household.description
+        }
+    
+    # Get customer or seller
+    customer_dict = None
+    seller_dict = None
+    if invoice.customer_id:
+        customer = customer_repository.get_by_id(invoice.customer_id, g.household_id)
+        if customer:
+            customer_dict = {
+                "id": customer.id,
+                "name": customer.name,
+                "tax_code": customer.tax_code,
+                "address": customer.address,
+                "phone": customer.phone
+            }
+    elif invoice.seller_id:
+        seller = seller_repository.get_by_id(invoice.seller_id, g.household_id)
+        if seller:
+            seller_dict = {
+                "id": seller.id,
+                "name": seller.name,
+                "tax_code": seller.tax_code,
+                "address": seller.address,
+                "phone": seller.phone
+            }
+    
+    # Enrich details with product and unit names
+    enriched_details = []
+    for detail in details:
+        product = product_repository.get_by_id(detail.product_id, g.household_id) if detail.product_id else None
+        unit = unit_repository.get_by_id(detail.unit_id, g.household_id) if detail.unit_id else None
+        detail_dict = invoice_detail_to_dict(detail)
+        detail_dict['product_name'] = product.name if product else 'Sản phẩm'
+        detail_dict['unit_name'] = unit.name if unit else ''
+        # Calculate line total
+        quantity = float(detail.quantity or 0)
+        price = float(detail.price or 0)
+        discount = float(detail.discount or 0)
+        vat_rate = float(detail.vat or 0)
+        subtotal = quantity * price
+        after_discount = subtotal - discount
+        vat_amount = after_discount * vat_rate / 100
+        line_total = after_discount + vat_amount
+        detail_dict['line_total'] = str(line_total)
+        enriched_details.append(detail_dict)
+    
+    # Return JSON with all data
     return jsonify({
         "invoice": invoice_to_dict(invoice),
-        "details": [invoice_detail_to_dict(d) for d in details]
+        "household": household_dict,
+        "customer": customer_dict,
+        "seller": seller_dict,
+        "details": enriched_details
     }), 200
 
 # =====================================================

@@ -29,6 +29,10 @@ def require_permission(function_code, methods=None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            # Skip OPTIONS requests (CORS preflight)
+            if request.method == 'OPTIONS':
+                return jsonify({'message': 'OK'}), 200
+            
             # 1. Lấy token từ header
             auth_header = request.headers.get('Authorization')
             

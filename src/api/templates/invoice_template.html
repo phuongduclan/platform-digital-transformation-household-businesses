@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa đơn #{{ invoice.id }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 12px;
+            color: #000;
+            line-height: 1.4;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+        .header h2 {
+            font-size: 18px;
+            font-weight: normal;
+            margin: 0;
+        }
+        .invoice-info {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .invoice-info-row {
+            display: table-row;
+        }
+        .invoice-info-cell {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+            padding: 5px 0;
+        }
+        .invoice-info-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .parties {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .party {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .party-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        .party-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .party-detail {
+            margin: 3px 0;
+            font-size: 11px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th {
+            background-color: #f0f0f0;
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        td {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 11px;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .summary {
+            margin-top: 20px;
+            margin-left: auto;
+            width: 300px;
+        }
+        .summary-row {
+            display: table;
+            width: 100%;
+            margin: 5px 0;
+        }
+        .summary-label {
+            display: table-cell;
+            width: 60%;
+            text-align: right;
+            padding-right: 10px;
+            font-weight: bold;
+        }
+        .summary-value {
+            display: table-cell;
+            width: 40%;
+            text-align: right;
+        }
+        .total-row {
+            font-size: 14px;
+            font-weight: bold;
+            border-top: 2px solid #000;
+            padding-top: 5px;
+            margin-top: 10px;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ household.name or 'HỘ KINH DOANH' }}</h1>
+        <h2>HÓA ĐƠN BÁN HÀNG</h2>
+    </div>
+
+    <div class="invoice-info">
+        <div class="invoice-info-row">
+            <div class="invoice-info-cell">
+                <span class="invoice-info-label">Số hóa đơn:</span>
+                <span>#{{ invoice.id }}</span>
+            </div>
+            <div class="invoice-info-cell text-right">
+                <span class="invoice-info-label">Ngày:</span>
+                <span>{{ invoice.created_at.strftime('%d/%m/%Y') if invoice.created_at else '' }}</span>
+            </div>
+        </div>
+        {% if household.tax_code %}
+        <div class="invoice-info-row">
+            <div class="invoice-info-cell">
+                <span class="invoice-info-label">Mã số thuế:</span>
+                <span>{{ household.tax_code }}</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if household.address %}
+        <div class="invoice-info-row">
+            <div class="invoice-info-cell">
+                <span class="invoice-info-label">Địa chỉ:</span>
+                <span>{{ household.address }}</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if household.phone %}
+        <div class="invoice-info-row">
+            <div class="invoice-info-cell">
+                <span class="invoice-info-label">Điện thoại:</span>
+                <span>{{ household.phone }}</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="parties">
+        <div class="party">
+            <div class="party-label">BÊN BÁN:</div>
+            <div class="party-name">{{ household.name or 'Hộ kinh doanh' }}</div>
+            {% if household.tax_code %}
+            <div class="party-detail">MST: {{ household.tax_code }}</div>
+            {% endif %}
+            {% if household.address %}
+            <div class="party-detail">Địa chỉ: {{ household.address }}</div>
+            {% endif %}
+            {% if household.phone %}
+            <div class="party-detail">ĐT: {{ household.phone }}</div>
+            {% endif %}
+        </div>
+        <div class="party">
+            {% if customer %}
+            <div class="party-label">BÊN MUA:</div>
+            <div class="party-name">{{ customer.name or 'Khách hàng' }}</div>
+            {% if customer.tax_code %}
+            <div class="party-detail">MST: {{ customer.tax_code }}</div>
+            {% endif %}
+            {% if customer.address %}
+            <div class="party-detail">Địa chỉ: {{ customer.address }}</div>
+            {% endif %}
+            {% if customer.phone %}
+            <div class="party-detail">ĐT: {{ customer.phone }}</div>
+            {% endif %}
+            {% elif seller %}
+            <div class="party-label">NHÀ CUNG CẤP:</div>
+            <div class="party-name">{{ seller.name or 'Nhà cung cấp' }}</div>
+            {% if seller.tax_code %}
+            <div class="party-detail">MST: {{ seller.tax_code }}</div>
+            {% endif %}
+            {% if seller.address %}
+            <div class="party-detail">Địa chỉ: {{ seller.address }}</div>
+            {% endif %}
+            {% if seller.phone %}
+            <div class="party-detail">ĐT: {{ seller.phone }}</div>
+            {% endif %}
+            {% else %}
+            <div class="party-label">BÊN MUA:</div>
+            <div class="party-name">Khách lẻ</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;">STT</th>
+                <th style="width: 30%;">Tên sản phẩm</th>
+                <th style="width: 10%;">Đơn vị</th>
+                <th style="width: 10%;" class="text-right">Số lượng</th>
+                <th style="width: 15%;" class="text-right">Đơn giá</th>
+                <th style="width: 10%;" class="text-right">Giảm giá</th>
+                <th style="width: 10%;" class="text-right">VAT (%)</th>
+                <th style="width: 10%;" class="text-right">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in details %}
+            <tr>
+                <td class="text-center">{{ loop.index }}</td>
+                <td>{{ detail.product_name or 'Sản phẩm' }}</td>
+                <td>{{ detail.unit_name or '' }}</td>
+                <td class="text-right">{{ detail.quantity }}</td>
+                <td class="text-right">{{ "{:,.0f}".format(float(detail.price or 0)) }}</td>
+                <td class="text-right">{{ "{:,.0f}".format(float(detail.discount or 0)) }}</td>
+                <td class="text-right">{{ detail.vat or 0 }}</td>
+                <td class="text-right">
+                    {% set subtotal = (float(detail.quantity or 0) * float(detail.price or 0)) %}
+                    {% set discount = float(detail.discount or 0) %}
+                    {% set vat_amount = (subtotal - discount) * float(detail.vat or 0) / 100 %}
+                    {% set total = subtotal - discount + vat_amount %}
+                    {{ "{:,.0f}".format(total) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary">
+        <div class="summary-row">
+            <div class="summary-label">Tổng tiền hàng:</div>
+            <div class="summary-value">{{ "{:,.0f}".format(float(invoice.total_amount or 0) - float(invoice.vat_total or 0) + float(invoice.discount_total or 0)) }}</div>
+        </div>
+        {% if invoice.discount_total and float(invoice.discount_total) > 0 %}
+        <div class="summary-row">
+            <div class="summary-label">Giảm giá:</div>
+            <div class="summary-value">-{{ "{:,.0f}".format(float(invoice.discount_total or 0)) }}</div>
+        </div>
+        {% endif %}
+        {% if invoice.vat_total and float(invoice.vat_total) > 0 %}
+        <div class="summary-row">
+            <div class="summary-label">VAT:</div>
+            <div class="summary-value">{{ "{:,.0f}".format(float(invoice.vat_total or 0)) }}</div>
+        </div>
+        {% endif %}
+        <div class="summary-row total-row">
+            <div class="summary-label">TỔNG CỘNG:</div>
+            <div class="summary-value">{{ "{:,.0f}".format(float(invoice.total_amount or 0)) }} đ</div>
+        </div>
+    </div>
+
+    {% if invoice.description %}
+    <div style="margin-top: 20px;">
+        <strong>Ghi chú:</strong> {{ invoice.description }}
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Cảm ơn quý khách đã sử dụng dịch vụ!</p>
+        <p>Hóa đơn được tạo tự động từ hệ thống BizFlow</p>
+    </div>
+</body>
+</html>

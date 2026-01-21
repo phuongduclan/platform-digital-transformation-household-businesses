@@ -34,10 +34,10 @@ class TodoRepository(ITodoRepository):
             self.session.refresh(todo)
             return todo
         except Exception as e:
-            self.session.rollback()
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(self.session)
             raise ValueError('Todo not found')
-        finally:
-            self.session.close()
+        # Don't close shared session
     
     # def add(self, todo: Todo) -> Todo:
     #     todo.id = self._id_counter
@@ -73,10 +73,10 @@ class TodoRepository(ITodoRepository):
             self.session.commit()
             return todo
         except Exception as e:
-            self.session.rollback()
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(self.session)
             raise ValueError('Todo not found')
-        finally:
-            self.session.close()
+        # Don't close shared session
 
     def delete(self, todo_id: int) -> None:
         # self._todos = [t for t in self._todos if t.id != todo_id] 
@@ -88,7 +88,7 @@ class TodoRepository(ITodoRepository):
             else:
                 raise ValueError('Todo not found')
         except Exception as e:
-            self.session.rollback()
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(self.session)
             raise ValueError('Todo not found')
-        finally:
-            self.session.close()
+        # Don't close shared session

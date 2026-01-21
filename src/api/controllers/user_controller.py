@@ -109,6 +109,11 @@ def list_users():
     except ValueError as e:
         # Business rule violation: Admin không được filter Employee role
         return jsonify({'error': str(e)}), 403
+    except Exception as e:
+        # Log error for debugging
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
 @admin_bp.route('/', methods=['POST'])
 @require_permission(function_code="F005", methods=["POST"])
@@ -278,20 +283,23 @@ def update_user(user_id):
           description: User not found
     """
     data = request.get_json()
-    errors = update_schema.validate(data)
-    if errors:
-        return jsonify(errors), 400
+    if not data:
+        return jsonify({'error': 'Request body is required'}), 400
+    
+    # API này chỉ dùng để activate/deactivate Owner accounts
+    # Chỉ nhận status field
+    if 'status' not in data:
+        return jsonify({'error': 'status field is required'}), 400
+    
+    # Validate status
+    if data.get('status') not in ['Active', 'Inactive']:
+        return jsonify({'error': 'status must be Active or Inactive'}), 400
     
     try:
         # Business rule được xử lý ở Application Layer (UserService)
+        # Chỉ update status, không update các field khác
         user = user_service.update_user(
             user_id=user_id,
-            household_id=data.get('household_id'),
-            role_id=data.get('role_id'),
-            user_name=data.get('user_name'),
-            password=data.get('password'),
-            email=data.get('email'),
-            description=data.get('description'),
             status=data.get('status'),
             updated_by=data.get('updated_by'),
             is_admin_updating=True  # Flag để service check business rule

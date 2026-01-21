@@ -15,6 +15,14 @@ class CustomError(Exception):
         return {'message': self.message}
 
 def handle_error(error):
+    # Rollback session if there's an invalid transaction
+    from infrastructure.databases.mssql import session
+    from infrastructure.databases.session_utils import safe_rollback
+    try:
+        safe_rollback(session)
+    except:
+        pass  # Ignore errors during rollback
+    
     if isinstance(error, CustomError):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code

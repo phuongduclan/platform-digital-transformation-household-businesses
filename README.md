@@ -84,6 +84,27 @@
 
      Truy câp http://localhost:6868/docs
 
+## Run Frontend (FE)
+
+ - Bước 1: Kiểm tra Node.js
+     ## Check version:
+     		node -v
+     		npm -v
+
+ - Bước 2: Di chuyển vào thư mục FE
+     ## Command:
+     		cd FE
+
+ - Bước 3: Cài đặt các thư viện
+     ## Install:
+     		npm install
+
+ - Bước 4: Chạy ứng dụng
+     ## Run:
+     		npm run dev
+
+     Truy cập http://localhost:3000
+
 ## ORM Flask (from sqlalchemy.orm )
 Object Relational Mapping
 

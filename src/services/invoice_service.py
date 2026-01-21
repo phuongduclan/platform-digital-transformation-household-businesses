@@ -31,10 +31,16 @@ class InvoiceService(IInvoiceService):
             seller_id = None
         if customer_id == 0 or customer_id == '0':
             customer_id = None
+
+        # Validation: Invoice không được gắn đồng thời seller_id và customer_id
+        # Hóa đơn mua: chỉ có seller_id, không có customer_id
+        # Hóa đơn bán: có hoặc không có customer_id, nhưng không có seller_id
+        if seller_id is not None and customer_id is not None:
+            raise ValueError('Invoice không được có đồng thời seller_id và customer_id. Vui lòng chọn 1 loại hóa đơn (mua hoặc bán).')
         
-        # Validation: Khách vãng lai (customer_id = None) phải là PAID
+        # Validation: Hóa đơn không gắn khách hàng (customer_id = None) không được ghi nhận công nợ
         if customer_id is None and invoice_type != 'PAID':
-            raise ValueError('Khách vãng lai phải thanh toán đủ ngay (invoice_type phải là PAID)')
+            raise ValueError('Hóa đơn không gắn khách hàng phải có invoice_type = PAID (thanh toán đủ ngay)')
         
         # Tính toán tổng từ details
         total_amount = Decimal('0')
@@ -129,7 +135,8 @@ class InvoiceService(IInvoiceService):
             return invoice
 
         except Exception as e:
-            db_session.rollback()
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(db_session)
             raise ValueError(f'Error creating invoice with details: {str(e)}')
 
     def get_invoice(self, invoice_id: int, household_id: int) -> Optional[Invoice]:
@@ -158,10 +165,17 @@ class InvoiceService(IInvoiceService):
             seller_id = None
         if customer_id == 0 or customer_id == '0':
             customer_id = None
+
+        # Validation: Invoice không được gắn đồng thời seller_id và customer_id
+        # Kiểm tra dựa trên giá trị sau khi update (nếu field không truyền lên thì giữ nguyên)
+        new_seller_id = seller_id if seller_id is not None else invoice.seller_id
+        new_customer_id = customer_id if customer_id is not None else invoice.customer_id
+        if new_seller_id is not None and new_customer_id is not None:
+            raise ValueError('Invoice không được có đồng thời seller_id và customer_id. Vui lòng chọn 1 loại hóa đơn (mua hoặc bán).')
         
-        # Validation: Nếu đang update customer_id thành None (khách vãng lai) thì phải là PAID
+        # Validation: Nếu đang update customer_id thành None thì không được để invoice_type khác PAID
         if customer_id is None and invoice_type is not None and invoice_type != 'PAID':
-            raise ValueError('Khách vãng lai phải thanh toán đủ ngay (invoice_type phải là PAID)')
+            raise ValueError('Hóa đơn không gắn khách hàng phải có invoice_type = PAID (thanh toán đủ ngay)')
         # Nếu đang update invoice_type thành UNPAID nhưng customer_id = None
         if invoice_type == 'UNPAID' and (customer_id is None or invoice.customer_id is None):
             raise ValueError('Hóa đơn bán chịu (UNPAID) phải có khách hàng trong bảng customer')
@@ -408,5 +422,6 @@ class InvoiceService(IInvoiceService):
             return invoice
 
         except Exception as e:
-            db_session.rollback()
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(db_session)
             raise ValueError(f'Error confirming invoice: {str(e)}')

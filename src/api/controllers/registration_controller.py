@@ -11,6 +11,7 @@ from infrastructure.repositories.household_repository import HouseholdRepository
 from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.repositories.subscription_plan_repository import SubscriptionPlanRepository
 from infrastructure.databases.mssql import session
+from infrastructure.databases.session_utils import safe_rollback
 from infrastructure.models import Role
 from datetime import datetime, timezone, timedelta
 bp = Blueprint('public_registration', __name__, url_prefix='/api/public')
@@ -230,8 +231,10 @@ def register_owner():
         }), 201
         
     except ValueError as e:
-        session.rollback()
+        safe_rollback(session)
         return jsonify({'error': str(e)}), 400
     except Exception as e:
-        session.rollback()
+        safe_rollback(session)
+        import traceback
+        print(f"Registration error: {traceback.format_exc()}")
         return jsonify({'error': f'Registration failed: {str(e)}'}), 500

@@ -75,7 +75,8 @@ class ExportReceiptService(IExportReceiptService):
             return export_receipt
 
         except Exception as e:
-            db_session.rollback()
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(db_session)
             raise ValueError(f'Error creating export receipt with details: {str(e)}')
 
     def get_export_receipt(self, export_receipt_id: int, household_id: int) -> Optional[ExportReceipt]:

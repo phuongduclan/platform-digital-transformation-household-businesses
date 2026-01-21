@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from api.swagger import spec
 from api.middleware import middleware
 from infrastructure.databases import init_db
@@ -12,6 +13,17 @@ from api.routes import register_routes
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    
+    # Enable CORS for all routes (cho phép FE gọi API từ localhost:3000)
+    # Flask-CORS will automatically handle OPTIONS preflight requests
+    CORS(app, 
+         resources={r"/*": {
+             "origins": "*",
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+             "allow_headers": ["Content-Type", "Authorization"],
+             "expose_headers": ["Content-Type"]
+         }})
+    
     Swagger(app)
     
     # Register all routes

@@ -41,17 +41,25 @@ def decode_jwt_middleware():
 def middleware(app):
     @app.before_request
     def before_request():
+        # Skip OPTIONS requests - Flask-CORS will handle them
+        if request.method == 'OPTIONS':
+            return jsonify({'message': 'OK'}), 200
+        
         log_request_info(app)
         decode_jwt_middleware()  # Decode JWT và lưu vào g
 
     @app.after_request
     def after_request(response):
+        # Don't add CORS headers here - Flask-CORS already handles them
         return add_custom_headers(response)
 
     @app.errorhandler(Exception)
     def handle_exception(error):
+        # Rollback session if there's an invalid transaction
+        from infrastructure.databases.mssql import session
+        from infrastructure.databases.session_utils import safe_rollback
+        try:
+            safe_rollback(session)
+        except:
+            pass  # Ignore errors during rollback
         return error_handling_middleware(error)
-
-    @app.route('/options', methods=['OPTIONS'])
-    def options_route():
-        return handle_options_request()

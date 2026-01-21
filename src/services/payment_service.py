@@ -78,6 +78,16 @@ class PaymentService(IPaymentService):
                     invoice.customer_id, household_id
                 )
                 previous_balance = last_debt_record.balance if last_debt_record else Decimal('0')
+
+                # Chặn thanh toán nếu không còn dư nợ hoặc thanh toán vượt quá dư nợ
+                if previous_balance <= 0:
+                    raise ValueError('Khách hàng hiện không còn dư nợ để thanh toán thêm')
+                if amount > previous_balance:
+                    raise ValueError(
+                        f'Số tiền thanh toán vượt quá số nợ còn lại. '
+                        f'Nợ còn lại: {previous_balance}, thanh toán yêu cầu: {amount}'
+                    )
+
                 new_balance = previous_balance - amount  # Trả nợ nên giảm balance
                 
                 debt_record = self.debt_record_repository.create(
@@ -114,12 +124,27 @@ class PaymentService(IPaymentService):
                         movement_type='Thu'
                     )
                 )
+
+            # Nếu sau khi thanh toán, tổng dư nợ của customer về 0 → cập nhật invoice_type = PAID
+            if self.debt_record_repository and invoice.customer_id:
+                last_debt_record_after = self.debt_record_repository.get_customer_balance(
+                    invoice.customer_id, household_id
+                )
+                remaining_balance = last_debt_record_after.balance if last_debt_record_after else Decimal('0')
+                if remaining_balance == 0:
+                    invoice.invoice_type = 'PAID'
+                    invoice.updated_by = created_by
+                    invoice.updated_at = now
+                    if hasattr(self.invoice_repository, 'session'):
+                        self.invoice_repository.session = db_session
+                    self.invoice_repository.update(invoice)
             
             db_session.commit()
             return payment
             
         except Exception as e:
-            db_session.rollback()
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(db_session)
             raise ValueError(f'Error creating payment: {str(e)}')
 
     def get_payment(self, payment_id: int, household_id: int) -> Optional[Payment]:

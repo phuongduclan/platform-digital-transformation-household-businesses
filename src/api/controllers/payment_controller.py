@@ -8,6 +8,7 @@ from infrastructure.repositories.accounting_ledger_repository import AccountingL
 from infrastructure.repositories.customer_repository import CustomerRepository
 from api.decorators.auth_decorators import require_permission
 from api.schemas.payment import PaymentRequestSchema, PaymentUpdateSchema, PaymentResponseSchema
+from api.utils.exception_handler import handle_exception_with_rollback
 from decimal import Decimal
 
 # =====================================================
@@ -145,10 +146,8 @@ def owner_create_payment():
             household_id=g.household_id
         )
         return jsonify(payment_to_dict(payment)), 201
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (ValueError, Exception) as e:
+        return handle_exception_with_rollback(e, 400 if isinstance(e, ValueError) else 500)
 
 @owner_payment_bp.route("/<int:payment_id>", methods=["GET"])
 @require_permission("F112", ["GET"])
@@ -309,10 +308,8 @@ def employee_create_payment():
             household_id=g.household_id
         )
         return jsonify(payment_to_dict(payment)), 201
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (ValueError, Exception) as e:
+        return handle_exception_with_rollback(e, 400 if isinstance(e, ValueError) else 500)
 
 @employee_payment_bp.route("/<int:payment_id>", methods=["GET"])
 @require_permission("F211", ["GET"])

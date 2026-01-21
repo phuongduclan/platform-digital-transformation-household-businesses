@@ -102,6 +102,34 @@ def admin_list_payment_methods():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@admin_payment_method_bp.route("/<int:payment_method_id>", methods=["GET"])
+@require_permission("F002", ["GET"])
+def admin_get_payment_method(payment_method_id: int):
+    """
+    Get payment method by id (Admin)
+    ---
+    get:
+      summary: Get payment method (Admin)
+      tags: [Admin Payment Methods]
+      security: [{Bearer: []}]
+      parameters:
+        - name: payment_method_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Payment method detail
+        404:
+          description: Not found
+    """
+    payment_method = payment_method_service.get_payment_method(payment_method_id)
+    if not payment_method:
+        return jsonify({"error": "Payment method not found"}), 404
+    return jsonify(payment_method_to_dict(payment_method)), 200
+
 @admin_payment_method_bp.route("", methods=["POST"])
 @require_permission("F002", ["POST"])
 def admin_create_payment_method():

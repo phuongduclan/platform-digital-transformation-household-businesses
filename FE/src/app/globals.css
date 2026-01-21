@@ -1,0 +1,960 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply min-h-screen bg-slate-50 text-slate-900;
+  }
+
+  body {
+    @apply antialiased;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+}
+
+/* BizFlow loader (Figma car animation) */
+.bizflow-loader {
+  position: relative;
+  width: 380px;
+  height: 380px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bizflow-loader .car-container {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+}
+
+.bizflow-loader .car {
+  position: absolute;
+  width: 220px;
+  height: 110px;
+  background-color: #911717;
+  left: 30px;
+  top: 150px;
+  clip-path: polygon(6% 0%, 80% 0%, 100% 50%, 100% 100%, 0% 100%);
+}
+
+.bizflow-loader .car::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 45px;
+  background-color: #ba1c1c;
+  left: 0px;
+  top: 5px;
+  border-top: 4px solid #630909;
+  border-bottom: 2px solid #630909;
+}
+
+.bizflow-loader .car::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 110px;
+  background-color: #630909;
+  left: 140px;
+  top: 5px;
+  transform: rotate(3deg);
+  box-shadow:
+    -65px 5px #630909,
+    78px 5px #630909;
+}
+
+.bizflow-loader .front-part {
+  position: absolute;
+  width: 100px;
+  height: 55px;
+  background-color: #911717;
+  right: 30px;
+  top: 205px;
+  clip-path: polygon(0% 0%, 100% 20%, 100% 100%, 0% 100%);
+}
+
+.bizflow-loader .front-part2 {
+  position: absolute;
+  width: 100px;
+  height: 10px;
+  background-color: rgb(154, 11, 11);
+  right: 30px;
+  transform: rotate(6.3deg);
+  top: 212px;
+  border-bottom: 2px solid #630909;
+}
+
+.bizflow-loader .front-part2::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 8px;
+  background-color: rgba(251, 243, 205, 0.686);
+  right: 22px;
+  top: -4px;
+  box-shadow: inset 0px -3px #000000c9;
+}
+
+.bizflow-loader .front-part2::before {
+  content: "";
+  position: absolute;
+  width: 95px;
+  height: 5px;
+  background-color: #d41111;
+  top: -5px;
+  border-radius: 50% 50% 0% 0%;
+}
+
+.bizflow-loader .front-part3 {
+  position: absolute;
+  background-color: #3d090965;
+  width: 320px;
+  height: 30px;
+  bottom: 120px;
+  left: 30px;
+  box-shadow: inset 0px 12px rgba(252, 72, 72, 0.147);
+}
+
+.bizflow-loader .front-part3::before {
+  content: "";
+  position: absolute;
+  background-color: #f984843b;
+  width: 220px;
+  height: 8px;
+  bottom: 46px;
+  left: 0px;
+}
+
+.bizflow-loader .bottom-part {
+  position: absolute;
+  width: 320px;
+  height: 20px;
+  background-color: #630909;
+  left: 30px;
+  top: 260px;
+}
+
+.bizflow-loader .bottom-part::before {
+  content: "";
+  position: absolute;
+  width: 50px;
+  height: 25px;
+  background-color: #864343;
+  left: -8px;
+  top: -5px;
+  border-radius: 5px 0px 0px 10px;
+  box-shadow:
+    inset -5px -8px rgba(0, 0, 0, 0.409),
+    inset -5px 3px rgba(255, 255, 255, 0.324);
+}
+
+.bizflow-loader .wheel-container {
+  position: absolute;
+  width: 100px;
+  height: 46px;
+  background-color: black;
+  left: 40px;
+  top: 234px;
+  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  box-shadow: 100px 0px;
+}
+
+.bizflow-loader .wheel-container2 {
+  left: 235px;
+}
+
+.bizflow-loader .wheel-back {
+  position: absolute;
+  background-color: rgb(33, 9, 9);
+  width: 30px;
+  height: 70px;
+  left: 6px;
+  top: 175px;
+  border-radius: 8px;
+  transform: rotate(4deg);
+  box-shadow:
+    inset 6px -1px 0px -2px rgb(101, 101, 101),
+    inset 0px 5px rgb(96, 96, 96),
+    inset 0px 30px 0px -4px #2b2b2b;
+}
+
+.bizflow-loader .wheel-break {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgb(183, 189, 211);
+  bottom: 25px;
+  left: 25px;
+}
+
+.bizflow-loader .wheel-break::after {
+  content: "";
+  position: absolute;
+  background-color: rgb(183, 0, 0);
+  width: 8px;
+  height: 15px;
+  right: -1px;
+  top: 8px;
+  border-radius: 0% 100% 100% 0% / 0% 50% 50% 0%;
+}
+
+.bizflow-loader .wheel-break::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: rgb(0, 0, 0);
+  top: 3.5px;
+  left: 3.5px;
+  border: 4px solid rgb(90, 100, 134);
+}
+
+.bizflow-loader .wheel-break2 {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgb(183, 189, 211);
+  bottom: 25px;
+  left: 25px;
+}
+
+.bizflow-loader .wheel-break2::after {
+  content: "";
+  position: absolute;
+  background-color: rgb(183, 0, 0);
+  width: 10px;
+  height: 25px;
+  left: -2px;
+  top: 3px;
+  border-radius: 100% 0% 0% 100% / 50% 0% 0% 50%;
+}
+
+.bizflow-loader .wheel-break2::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: rgb(0, 0, 0);
+  top: 3.5px;
+  left: 3.5px;
+  border: 4px solid rgb(90, 100, 134);
+}
+
+.bizflow-loader .window {
+  width: 55px;
+  height: 40px;
+  position: absolute;
+  background-color: black;
+  top: 160px;
+  left: 45px;
+  transform: skew(-5deg);
+  border-radius: 6px;
+  box-shadow: inset 0px 0px 0px 2px rgb(61, 61, 61);
+}
+
+.bizflow-loader .window::before {
+  content: "";
+  width: 48px;
+  height: 40px;
+  position: absolute;
+  background-color: black;
+  top: 0px;
+  left: 72px;
+  border-radius: 6px;
+  box-shadow: inset 0px 0px 0px 2px rgb(61, 61, 61);
+}
+
+.bizflow-loader .window::after {
+  content: "";
+  width: 30px;
+  height: 40px;
+  position: absolute;
+  background-color: black;
+  top: 0px;
+  left: 132px;
+  border-radius: 6px 6px 0px 6px;
+  box-shadow:
+    inset 2px 0px rgb(61, 61, 61),
+    inset 0px 2px rgb(61, 61, 61);
+}
+
+.bizflow-loader .window2 {
+  width: 53px;
+  height: 20px;
+  position: absolute;
+  background-color: black;
+  top: 180px;
+  left: 180px;
+  border-radius: 0% 100% 10% 0% / 0% 80% 10% 4%;
+  box-shadow: inset 0px -2px rgb(61, 61, 61);
+}
+
+.bizflow-loader .window2::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 42px;
+  background-color: black;
+  top: -18px;
+  right: 11px;
+  transform: rotate(-37deg);
+  border-radius: 0% 10% 0% 100%;
+  box-shadow: inset -2px 0px rgb(61, 61, 61);
+}
+
+.bizflow-loader .window2::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 36px;
+  background-color: rgb(60, 60, 61);
+  top: -18px;
+  right: 25px;
+  transform: skew(37deg);
+  box-shadow:
+    -60px 0px rgb(60, 60, 61),
+    -130px 0px rgb(60, 60, 61);
+}
+
+.bizflow-loader .window3 {
+  width: 4px;
+  height: 25px;
+  position: absolute;
+  background-color: #bbbcbc52;
+  top: 173px;
+  left: 189px;
+  transform: skew(38deg);
+  box-shadow:
+    -60px 0px #bbbcbc52,
+    -129px -1px #bbbcbc52;
+}
+
+.bizflow-loader .window3::before {
+  content: "";
+  width: 3px;
+  height: 55px;
+  position: absolute;
+  background-color: black;
+  top: -22px;
+  left: 42px;
+}
+
+.bizflow-loader .details {
+  position: absolute;
+  width: 60px;
+  height: 4px;
+  background-color: black;
+  top: 220px;
+  left: 40px;
+  box-shadow: 150px 0px;
+}
+
+.bizflow-loader .details::before {
+  content: "";
+  position: absolute;
+  width: 50px;
+  height: 4px;
+  background-color: black;
+  top: 0px;
+  right: -70px;
+  box-shadow:
+    15px 45px 0px 0px #6f6f6f,
+    70px 45px 0px 0px #6f6f6f,
+    50px 45px 0px 0px #6f6f6f,
+    20px 50px 0px 1px #3b3b3b,
+    66px 50px 0px 1px #3b3b3b,
+    20px 50px 0px 5px,
+    66px 50px 0px 5px;
+}
+
+.bizflow-loader .details::after {
+  content: "";
+  position: absolute;
+  width: 70px;
+  height: 4px;
+  background-color: black;
+  right: -230px;
+  transform: rotate(5deg);
+  bottom: -3px;
+}
+
+.bizflow-loader .details2 {
+  position: absolute;
+  width: 60px;
+  height: 8px;
+  background-color: #c42525;
+  top: 228px;
+  left: 60px;
+  box-shadow: 195px 2px #c42525;
+  border-radius: 17% 18% 26% 26% / 100% 100% 0% 0%;
+}
+
+.bizflow-loader .details2::before {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 54px;
+  background-color: #c42525;
+  transform: rotate(24deg);
+  left: -8.7px;
+  box-shadow: 178.1px -79px #c42525;
+}
+
+.bizflow-loader .details2::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 54px;
+  background-color: #9c1717;
+  transform: rotate(-24deg);
+  left: 65px;
+  box-shadow: 178.1px 79px #9c1717;
+}
+
+.bizflow-loader .details4 {
+  position: absolute;
+  width: 50px;
+  height: 3px;
+  background-color: #f75f5f8c;
+  top: 233px;
+  left: 64px;
+  box-shadow: 195px 2px #f75f5f8c;
+  border-radius: 17% 18% 26% 26% / 100% 100% 0% 0%;
+}
+
+.bizflow-loader .details4::before {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 50px;
+  background-color: #f75f5f8c;
+  transform: rotate(24deg);
+  left: -11px;
+  top: -2px;
+  box-shadow: 178.1px -77px 0px -0.5px #f75f5f8c;
+}
+
+.bizflow-loader .details4::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 50px;
+  background-color: #f75f5f8c;
+  transform: rotate(-24deg);
+  left: 60px;
+  top: -2px;
+  box-shadow: 177px 81px #f75f5f8c;
+}
+
+.bizflow-loader .details3 {
+  position: absolute;
+  width: 20px;
+  height: 15px;
+  background-color: black;
+  bottom: 175px;
+  right: 146px;
+  box-shadow:
+    inset 0px 2px #424141,
+    inset -2px 0px #1d1515,
+    inset 0px 10px rgb(37, 37, 37);
+  border-radius: 4px 4px 0px 4px;
+}
+
+.bizflow-loader .details3::before {
+  position: absolute;
+  content: "";
+  width: 10px;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.858);
+  left: -41px;
+  top: 30px;
+  box-shadow: -67px 0px;
+}
+
+.bizflow-loader .details3::after {
+  position: absolute;
+  content: "";
+  width: 2px;
+  height: 2px;
+  background-color: rgba(179, 178, 178, 0.858);
+  left: -41px;
+  top: 30px;
+  box-shadow: -67px 0px rgb(167, 167, 167);
+}
+
+.bizflow-loader .bumper {
+  position: absolute;
+  width: 20px;
+  height: 35px;
+  background-color: black;
+  bottom: 100px;
+  right: 23px;
+  border-radius: 0% 20% 20% 0%;
+  box-shadow: inset -4px 0px rgb(79, 79, 79);
+}
+
+.bizflow-loader .bumper::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 3px;
+  background-color: rgb(105, 105, 105);
+  box-shadow: 0px 14px 0px -0.3px rgba(251, 251, 251, 0.315);
+}
+
+.bizflow-loader .bumper::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 25px;
+  background-color: rgb(69, 69, 69);
+  rotate: 8deg;
+  top: 3px;
+  left: -2px;
+}
+
+.bizflow-loader .bumper2 {
+  position: absolute;
+  width: 25px;
+  height: 5px;
+  background-color: rgb(39, 39, 39);
+  bottom: 101px;
+  right: 23px;
+  rotate: 5deg;
+}
+
+.bizflow-loader .bumper2::before {
+  content: "";
+  position: absolute;
+}
+
+.bizflow-loader .details5 {
+  position: absolute;
+  width: 100px;
+  height: 2px;
+  background-color: rgb(187, 187, 187);
+  bottom: 107px;
+  left: 138px;
+}
+
+.bizflow-loader .details5::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.096);
+  top: -80px;
+  left: -125px;
+  transform: rotate(5deg);
+  box-shadow:
+    inset 0px -3px rgba(255, 255, 255, 0.24),
+    0px 40px 0px 1px black;
+}
+
+.bizflow-loader .details5::after {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 1px;
+  background-color: rgb(0, 0, 0);
+  top: -120px;
+  left: -98px;
+  box-shadow: 0px -2px 0px 1px;
+}
+
+.bizflow-loader .wheel-logo {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 1px 4px 1px;
+  border-color: transparent transparent white transparent;
+  z-index: 1;
+  transform: scale(1);
+}
+
+.bizflow-loader .wheel-logo::before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 1px 4px 1px;
+  border-color: transparent transparent white transparent;
+  transform: rotate(-65deg);
+  right: 1px;
+}
+
+.bizflow-loader .wheel-logo::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 1px 4px 1px;
+  border-color: transparent transparent white transparent;
+  transform: rotate(65deg);
+  left: 1px;
+}
+
+.bizflow-loader .head-lights {
+  position: absolute;
+  width: 16px;
+  height: 20px;
+  background-color: rgb(212, 207, 166);
+  left: 334px;
+  bottom: 140px;
+  box-shadow:
+    inset 3px 0px #840f0f,
+    inset -5px 0px #9a4e4e,
+    inset -5px 0px #ad2121;
+}
+
+.bizflow-loader .head-lights::before {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 15px;
+  background-color: #840f0f;
+  left: 11px;
+  bottom: 0px;
+}
+
+.bizflow-loader .head-lights::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #840f0f86;
+  left: 3px;
+  bottom: 0px;
+  box-shadow: -1px -13px 0px -1px rgba(254, 254, 235, 0.568);
+}
+
+.bizflow-loader .tail-lights {
+  position: absolute;
+  width: 4px;
+  height: 10px;
+  background-color: rgb(252, 3, 3);
+  right: 348px;
+  bottom: 125px;
+  box-shadow: inset -2px 0px rgb(214, 0, 0);
+}
+
+.bizflow-loader .tail-lights::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 16px;
+  background-color: rgba(255, 0, 0, 0.288);
+  left: -4px;
+}
+
+.bizflow-loader .extra-lighting-details {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.712);
+  height: 1.5px;
+  width: 50px;
+  bottom: 145px;
+  left: 65px;
+  box-shadow: 195px 2px rgba(255, 255, 255, 0.712);
+}
+
+.bizflow-loader .extra-lighting-details::before {
+  content: "";
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.288);
+  height: 2px;
+  width: 115px;
+  top: 10px;
+  left: 65px;
+  box-shadow: -30px -35px 0px 1px rgba(255, 255, 255, 0.205);
+}
+
+.bizflow-loader .extra-lighting-details::after {
+  content: "";
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.568);
+  height: 2px;
+  width: 80px;
+  top: -22px;
+  left: 190px;
+  rotate: 8deg;
+  box-shadow: 0px -3px rgba(0, 0, 0, 0.349);
+}
+
+.bizflow-loader .extra-lighting-details2 {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.226);
+  height: 12px;
+  width: 10px;
+  bottom: 165px;
+  left: 220px;
+  rotate: 15deg;
+}
+
+.bizflow-loader .extra-lighting-details2::before {
+  content: "";
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.308);
+  height: 8px;
+  width: 10px;
+  bottom: 5px;
+  left: 0px;
+  rotate: -15deg;
+}
+
+.bizflow-loader .extra-lighting-details3 {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.089);
+  height: 45px;
+  width: 5px;
+  bottom: 175px;
+  left: 100px;
+  rotate: 5deg;
+  box-shadow:
+    10px 0px rgba(255, 255, 255, 0.144),
+    65px -5px rgba(255, 255, 255, 0.144);
+}
+
+.bizflow-loader .extra-lighting-details3::before {
+  content: "";
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.418);
+  height: 1px;
+  width: 25px;
+  bottom: -33px;
+  left: 240px;
+  rotate: -5deg;
+  box-shadow: 1px -12px rgba(255, 255, 255, 0.541);
+}
+
+.bizflow-loader .street {
+  position: absolute;
+  width: 600px;
+  height: 450px;
+  bottom: 0px;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.bizflow-loader .line {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  background-color: black;
+  bottom: 62px;
+}
+
+.bizflow-loader .obstacles {
+  position: absolute;
+  width: 20px;
+  height: 15px;
+  background-color: black;
+  border-radius: 40% 40% 0% 0%;
+  bottom: 60px;
+  left: 110%;
+}
+
+.bizflow-loader .wheel-ring {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  left: 10px;
+  top: 10px;
+  border: 6px solid rgb(34, 34, 34);
+  box-shadow:
+    0px 0px 0px 4px rgb(63, 63, 63),
+    inset 0px 0px 0px 2px rgb(0, 0, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bizflow-loader .wheel-ring2 {
+  left: 10px;
+  top: 10px;
+}
+
+.bizflow-loader .container-wheel2 {
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  bottom: 60px;
+  left: 245px;
+}
+
+.bizflow-loader .container-wheel1 {
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  bottom: 60px;
+  left: 50px;
+}
+
+.bizflow-loader .wheel-center {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgb(255, 255, 255);
+  box-shadow:
+    inset 0px 0px 0px 5px,
+    inset 0px 0px 0px 6px rgb(191, 191, 191),
+    inset 0px 0px 0px 12px black;
+}
+
+.bizflow-loader .wheel-center2 {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  z-index: 1;
+  border: 1px solid white;
+}
+
+.bizflow-loader .wheel-ring-stick {
+  position: absolute;
+  width: 4px;
+  height: 18px;
+  background-color: black;
+  top: 32px;
+  left: 19px;
+  transform: rotate(15deg);
+}
+
+.bizflow-loader .wheel-ring-stick::before {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 18px;
+  background-color: black;
+  top: -2px;
+  left: 8px;
+  transform: rotate(-20deg);
+}
+
+.bizflow-loader .wheel-ring-stick2 {
+  transform: rotate(82deg);
+  left: 8px;
+  top: 16px;
+}
+
+.bizflow-loader .wheel-ring-stick3 {
+  left: 34px;
+  top: 25px;
+  transform: rotate(-55deg);
+}
+
+.bizflow-loader .wheel-ring-stick4 {
+  top: 2px;
+  left: 17px;
+  transform: rotate(155deg);
+}
+
+.bizflow-loader .wheel-ring-stick5 {
+  top: 7px;
+  left: 36px;
+  transform: rotate(225deg);
+}
+
+@keyframes bizflow-spinning {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.bizflow-loader .wheel-ring1 {
+  animation: bizflow-spinning 1s linear infinite;
+}
+
+.bizflow-loader .wheel-ring2 {
+  animation: bizflow-spinning 1s linear infinite;
+}
+
+.bizflow-loader .container-wheel1 {
+  animation: bizflow-bounce1 3s infinite;
+}
+
+.bizflow-loader .container-wheel2 {
+  animation: bizflow-bounce2 3s infinite;
+}
+
+@keyframes bizflow-bounce1 {
+  0%,
+  50% {
+    transform: translateY(0px);
+  }
+  52% {
+    transform: translateY(-5px);
+  }
+  65% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes bizflow-bounce2 {
+  0%,
+  28% {
+    transform: translateY(0px);
+  }
+  30% {
+    transform: translateY(-5px);
+  }
+  45% {
+    transform: translateY(0px);
+  }
+}
+
+.bizflow-loader .car-container {
+  animation: bizflow-lift 3s infinite cubic-bezier(0.96, 0.5, 0.27, 0.55);
+  transform-origin: center;
+}
+
+@keyframes bizflow-lift {
+  0%,
+  30% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  32% {
+    transform: rotate(-1.5deg) translateY(-2px);
+  }
+  48%,
+  50% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  56.5% {
+    transform: rotate(1deg) translateY(-1px);
+  }
+  68% {
+    transform: rotate(0deg) translateY(0px);
+  }
+}
+
+.bizflow-loader .obstacles {
+  animation: bizflow-displacement 3s linear infinite;
+}
+
+@keyframes bizflow-displacement {
+  0% {
+    left: 110%;
+  }
+  100% {
+    left: -40%;
+  }
+}
+

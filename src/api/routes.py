@@ -27,6 +27,7 @@ from api.controllers.household_controller import owner_bp as owner_household_bp
 from api.controllers.subscription_plan_controller import admin_bp as admin_subscription_plan_bp, public_bp as public_subscription_plan_bp, owner_bp as owner_subscription_plan_bp
 from api.controllers.subscription_controller import admin_bp as admin_subscription_bp, owner_bp as owner_subscription_bp
 from api.controllers.registration_controller import bp as public_registration_bp
+from api.controllers.dashboard_controller import admin_dashboard_bp
 
 def register_routes(app):
     # Todo (sample module)
@@ -39,7 +40,8 @@ def register_routes(app):
     app.register_blueprint(admin_users_bp)
     app.register_blueprint(admin_roles_bp)
     app.register_blueprint(admin_functions_bp)
-    app.register_blueprint(admin_role_functions_bp) 
+    app.register_blueprint(admin_role_functions_bp)
+    app.register_blueprint(admin_dashboard_bp)  # Dashboard stats 
 
     app.register_blueprint(owner_products_bp)
     app.register_blueprint(employee_products_bp)

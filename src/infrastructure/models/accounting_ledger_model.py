@@ -6,7 +6,9 @@ class AccountingLedger(Base):
     __table_args__ = {'extend_existing': True}  # Thêm dòng này
 
     id = Column(Integer, primary_key=True, autoincrement=True) # Cho phép NULL
-    invoice_id=Column(Integer, ForeignKey("invoices.id"),nullable=False,unique=True)
+    # Cho phép nhiều dòng sổ kế toán cho cùng một hóa đơn (mua, bán, thanh toán nhiều lần,...)
+    # Vì vậy KHÔNG được unique theo invoice_id
+    invoice_id=Column(Integer, ForeignKey("invoices.id"), nullable=False)
     transaction_date= Column(DateTime, nullable=False)
     description = Column(String(255), nullable=False)
     debit_amount=Column(Integer, nullable=True) # Chi
