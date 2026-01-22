@@ -158,6 +158,10 @@ export default function EmployeeInvoiceDetailPage() {
 
   const handlePrintInvoice = async () => {
     if (!invoice) return;
+    if (isDraft) {
+      showToast("Vui lòng xác nhận hóa đơn trước khi in", "error");
+      return;
+    }
     try {
       setSaving(true);
       const printData = await employeeService.printInvoice(invoice.id);
@@ -231,7 +235,11 @@ export default function EmployeeInvoiceDetailPage() {
             <button
               type="button"
               onClick={handlePrintInvoice}
-              className="px-4 py-2 bg-[#00897b] text-white rounded-lg text-sm font-bold hover:bg-[#007a6c] transition-colors"
+              disabled={isDraft}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${isDraft
+                ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                : "bg-[#00897b] text-white hover:bg-[#007a6c]"
+                }`}
             >
               In hóa đơn
             </button>
