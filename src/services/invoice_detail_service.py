@@ -4,6 +4,7 @@ from domain.models.iinvoice_repository import IInvoiceRepository
 from domain.models.iinvoice_detail_service import IInvoiceDetailService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 from decimal import Decimal
 
 class InvoiceDetailService(IInvoiceDetailService):
@@ -27,7 +28,7 @@ class InvoiceDetailService(IInvoiceDetailService):
         if invoice.status != 'Draft':
             raise ValueError('Can only add details to Draft invoices')
 
-        now = datetime.utcnow()
+        now = vietnam_now()
         invoice_detail = InvoiceDetail(
             id=None,
             invoice_id=invoice_id,
@@ -70,7 +71,7 @@ class InvoiceDetailService(IInvoiceDetailService):
         if invoice.status != 'Draft':
             raise ValueError('Can only update details of Draft invoices')
 
-        now = datetime.utcnow()
+        now = vietnam_now()
         
         # Cập nhật các field nếu có
         if product_id is not None:

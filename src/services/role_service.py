@@ -3,13 +3,14 @@ from domain.models.irole_repository import IRoleRepository
 from domain.models.irole_service import IRoleService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class RoleService(IRoleService):
     def __init__(self, repository: IRoleRepository):
         self.repository = repository
 
     def create_role(self, role_name: str, description: str = None) -> Role:
-        now = datetime.utcnow()
+        now = vietnam_now()
         role = Role(id=None, role_name=role_name, description=description,
                    created_at=now, updated_at=now)
         return self.repository.add(role)
@@ -21,7 +22,7 @@ class RoleService(IRoleService):
         return self.repository.list()
 
     def update_role(self, role_id: int, role_name: str = None, description: str = None) -> Role:
-        now = datetime.utcnow()
+        now = vietnam_now()
         role = Role(id=role_id, role_name=role_name, description=description, updated_at=now)
         return self.repository.update(role)
 

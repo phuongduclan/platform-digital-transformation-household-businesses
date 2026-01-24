@@ -5,6 +5,7 @@ from domain.models.iauth_service import IAuthService
 from infrastructure.databases.mssql import session
 from infrastructure.models import User as UserModel, Role
 from datetime import datetime, timedelta
+from infrastructure.utils.datetime_utils import vietnam_now
 import jwt
 from flask import current_app
 from config import Config
@@ -65,7 +66,7 @@ class AuthService(IAuthService):
             'user_id': user.id,
             'role_id': user.role_id,
             'household_id': user.household_id,  # None nếu Admin
-            'exp': datetime.utcnow() + timedelta(hours=24)
+            'exp': vietnam_now() + timedelta(hours=24)
         }
         
         # Lấy SECRET_KEY từ current_app hoặc Config

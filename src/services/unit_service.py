@@ -3,13 +3,14 @@ from domain.models.iunit_repository import IUnitRepository
 from domain.models.iunit_service import IUnitService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class UnitService(IUnitService):
     def __init__(self, repository: IUnitRepository):
         self.repository = repository
 
     def create_unit(self, household_id: int, name: str, description: str = None, status: str = None) -> Unit:
-        now = datetime.utcnow()
+        now = vietnam_now()
         unit = Unit(id=None, household_id=household_id, name=name, description=description,
                    status=status, created_at=now, updated_at=now)
         return self.repository.add(unit)
@@ -21,7 +22,7 @@ class UnitService(IUnitService):
         return self.repository.list(household_id)
 
     def update_unit(self, unit_id: int, household_id: int, name: str = None, description: str = None, status: str = None) -> Unit:
-        now = datetime.utcnow()
+        now = vietnam_now()
         unit = Unit(id=unit_id, household_id=household_id, name=name, description=description, status=status, updated_at=now)
         return self.repository.update(unit)
 

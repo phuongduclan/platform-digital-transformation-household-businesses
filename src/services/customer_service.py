@@ -5,6 +5,7 @@ from domain.models.idebt_record_repository import IDebtRecordRepository
 from domain.models.icustomer_service import ICustomerService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 from decimal import Decimal
 
 class CustomerService(ICustomerService):
@@ -18,7 +19,7 @@ class CustomerService(ICustomerService):
     def create_customer(self, household_id: int, tax_code: str = None, name: str = None,
                       phone: str = None, address: str = None, description: str = None,
                       status: str = 'Active', created_by: str = None) -> Customer:
-        now = datetime.utcnow()
+        now = vietnam_now()
         customer = Customer(
             id=None,
             household_id=household_id,
@@ -45,7 +46,7 @@ class CustomerService(ICustomerService):
                        name: str = None, phone: str = None, address: str = None,
                        description: str = None, status: str = None,
                        updated_by: str = None) -> Customer:
-        now = datetime.utcnow()
+        now = vietnam_now()
         customer = Customer(
             id=customer_id,
             household_id=household_id,

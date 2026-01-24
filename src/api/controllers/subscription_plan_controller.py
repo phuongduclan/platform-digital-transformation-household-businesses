@@ -6,6 +6,7 @@ from api.schemas.subscription_plan import SubscriptionPlanRequestSchema, Subscri
 from api.decorators.auth_decorators import require_permission
 from infrastructure.databases.mssql import session
 from datetime import datetime, timezone
+from infrastructure.utils.datetime_utils import vietnam_now
 
 # Admin endpoints (F002: manage_subscription_plans)
 admin_bp = Blueprint('admin_subscription_plan', __name__, url_prefix='/api/admin/subscription-plans')
@@ -238,7 +239,7 @@ def create_plan():
     if errors:
         return jsonify(errors), 400
 
-    now = datetime.now(timezone.utc)
+    now = vietnam_now()
     plan = service.create_plan(
         name=data['name'],
         price=data['price'],

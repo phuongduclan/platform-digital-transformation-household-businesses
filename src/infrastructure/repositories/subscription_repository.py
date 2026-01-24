@@ -5,6 +5,7 @@ from infrastructure.databases.mssql import session
 from infrastructure.models.subscription_model import Subscription as SubscriptionModel
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class SubscriptionRepository(ISubscriptionRepository):
     def __init__(self, session: Session = session):
@@ -60,7 +61,7 @@ class SubscriptionRepository(ISubscriptionRepository):
         sub_model.start_date = subscription.start_date
         sub_model.end_date = subscription.end_date
         sub_model.is_active = subscription.is_active
-        sub_model.updated_at = subscription.updated_at or datetime.now(timezone.utc)
+        sub_model.updated_at = subscription.updated_at or vietnam_now()
 
         # KHÔNG commit ở đây - để controller quản lý transaction
         # self.session.commit()
@@ -82,7 +83,7 @@ class SubscriptionRepository(ISubscriptionRepository):
         """
         Lấy subscription active theo household_id
         """
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = vietnam_now()
         return self.session.query(SubscriptionModel).filter(
             SubscriptionModel.household_id == household_id,
             SubscriptionModel.is_active == True,

@@ -3,6 +3,7 @@ from domain.models.iuser_repository import IUserRepository
 from domain.models.iuser_service import IUserService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 from infrastructure.databases.mssql import session
 from infrastructure.models import Role
 
@@ -57,7 +58,7 @@ class UserService(IUserService):
             self._check_admin_cannot_manage_employee(role_id=role_id, action="create")
         
         from datetime import timezone
-        now = datetime.now(timezone.utc)
+        now = vietnam_now()
         user = User(
             id=None, household_id=household_id, role_id=role_id, user_name=user_name,
             password=password, email=email, description=description, status=status,
@@ -137,7 +138,7 @@ class UserService(IUserService):
             self._check_admin_cannot_manage_employee(user_id=user_id, role_id=role_id, action="update")
         
         from datetime import timezone
-        now = datetime.now(timezone.utc)
+        now = vietnam_now()
         user = User(
             id=user_id, household_id=household_id, role_id=role_id, user_name=user_name,
             password=password, email=email, description=description, status=status,

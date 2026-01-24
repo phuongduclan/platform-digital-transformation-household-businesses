@@ -7,6 +7,7 @@ from api.decorators.auth_decorators import require_permission
 from api.utils.auth_utils import get_current_household_id
 from infrastructure.databases.mssql import session
 from datetime import datetime, timezone
+from infrastructure.utils.datetime_utils import vietnam_now
 
 # Owner endpoints only - Admin không có quyền quản lý Household
 owner_bp = Blueprint('owner_household', __name__, url_prefix='/api/owner/household')
@@ -192,7 +193,7 @@ def update_own_household():
             description=data.get('description'),
             status=data.get('status'),
             updated_by=data.get('updated_by'),
-            updated_at=datetime.now(timezone.utc)
+            updated_at=vietnam_now()
         )
         return jsonify(response_schema.dump(household)), 200
     except ValueError as e:

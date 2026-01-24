@@ -6,6 +6,7 @@ from domain.models.invoice_detail import InvoiceDetail
 from typing import List, Optional
 from datetime import datetime
 from decimal import Decimal
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class InvoiceService(IInvoiceService):
     def __init__(self, repository: IInvoiceRepository, invoice_detail_repository: IInvoiceDetailRepository):
@@ -23,7 +24,7 @@ class InvoiceService(IInvoiceService):
         if not details or len(details) == 0:
             raise ValueError("Invoice must have at least 1 detail")
 
-        now = datetime.utcnow()
+        now = vietnam_now()
         
         # Convert 0 thành None để tránh Foreign Key constraint violation
         # Nếu seller_id hoặc customer_id = 0, thì set thành None (NULL)
@@ -158,7 +159,7 @@ class InvoiceService(IInvoiceService):
         if invoice.status != 'Draft':
             raise ValueError('Only Draft invoices can be updated')
 
-        now = datetime.utcnow()
+        now = vietnam_now()
         
         # Convert 0 thành None để tránh Foreign Key constraint violation
         if seller_id == 0 or seller_id == '0':
@@ -199,6 +200,7 @@ class InvoiceService(IInvoiceService):
     def delete_invoice(self, invoice_id: int, household_id: int) -> None:
         """
         Chỉ được delete khi status='Draft'
+        Xóa invoice details trước, sau đó mới xóa invoice để tránh lỗi foreign key constraint
         """
         invoice = self.repository.get_by_id(invoice_id, household_id)
         if not invoice:
@@ -207,7 +209,26 @@ class InvoiceService(IInvoiceService):
         if invoice.status != 'Draft':
             raise ValueError('Only Draft invoices can be deleted')
 
-        self.repository.delete(invoice_id, household_id)
+        # Lấy session từ repository để quản lý transaction
+        db_session = getattr(self.repository, 'session', None)
+        if not db_session:
+            raise ValueError("Repository must have a session attribute")
+
+        try:
+            # Xóa tất cả invoice details trước
+            invoice_details = self.invoice_detail_repository.list_by_invoice_id(invoice_id, household_id)
+            for detail in invoice_details:
+                self.invoice_detail_repository.delete(detail.id, household_id)
+            
+            # Sau đó mới xóa invoice
+            self.repository.delete(invoice_id, household_id)
+            
+            # Commit transaction
+            db_session.commit()
+        except Exception as e:
+            from infrastructure.databases.session_utils import safe_rollback
+            safe_rollback(db_session)
+            raise ValueError(f'Error deleting invoice: {str(e)}')
 
     def confirm_invoice(self, invoice_id: int, household_id: int, updated_by: str = None,
                        import_receipt_service=None, export_receipt_service=None,
@@ -238,7 +259,7 @@ class InvoiceService(IInvoiceService):
         try:
             # Confirm invoice (chuyển status sang 'Confirm')
             invoice.updated_by = updated_by
-            invoice.updated_at = datetime.utcnow()
+            invoice.updated_at = vietnam_now()
             invoice = self.repository.confirm(invoice_id, household_id, updated_by)
 
             # Lấy invoice details
@@ -356,7 +377,7 @@ class InvoiceService(IInvoiceService):
                 if hasattr(accounting_ledger_service.repository, 'session'):
                     accounting_ledger_service.repository.session = db_session
                 
-                now = datetime.utcnow()
+                now = vietnam_now()
                 
                 # Hóa đơn mua (seller_id != null)
                 if invoice.seller_id:

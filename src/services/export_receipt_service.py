@@ -5,6 +5,7 @@ from domain.models.iexport_receipt_service import IExportReceiptService
 from domain.models.export_detail import ExportDetail
 from typing import List, Optional
 from datetime import datetime, date
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class ExportReceiptService(IExportReceiptService):
     def __init__(self, repository: IExportReceiptRepository, export_detail_repository: IExportDetailRepository):
@@ -27,7 +28,7 @@ class ExportReceiptService(IExportReceiptService):
         if reason is None:
             reason = "Xuất bán hàng"
 
-        now = datetime.utcnow()
+        now = vietnam_now()
 
         # Tạo export receipt
         export_receipt = ExportReceipt(
@@ -102,6 +103,6 @@ class ExportReceiptService(IExportReceiptService):
         if reason is not None:
             export_receipt.reason = reason
         
-        export_receipt.updated_at = datetime.utcnow()
+        export_receipt.updated_at = vietnam_now()
 
         return self.repository.update(export_receipt)

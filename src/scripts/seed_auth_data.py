@@ -10,6 +10,7 @@ import sys
 import os
 import argparse
 from datetime import datetime, timezone
+from infrastructure.utils.datetime_utils import vietnam_now
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -72,7 +73,7 @@ def seed_roles():
     for role_data in roles_data:
         existing = session.query(Role).filter_by(role_name=role_data['role_name']).first()
         if not existing:
-            role = Role(**role_data, created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc))
+            role = Role(**role_data, created_at=vietnam_now(), updated_at=vietnam_now())
             session.add(role)
             print(f"  Created role: {role_data['role_name']}")
         else:
@@ -128,13 +129,14 @@ def seed_functions():
         {'function_code': 'F210', 'function_name': 'confirm_invoice', 'url_pattern': '/api/employee/invoices/*/confirm', 'http_methods': 'U', 'description': 'Confirm invoice (Draft → Confirm, anyone in household can confirm)', 'resource_type': 'Invoice'},
         {'function_code': 'F211', 'function_name': 'record_payment', 'url_pattern': '/api/employee/payments', 'http_methods': 'C,R', 'description': 'Record payment', 'resource_type': 'Payment'},
         {'function_code': 'F212', 'function_name': 'record_debt', 'url_pattern': '/api/employee/debt-records', 'http_methods': 'C,R', 'description': 'Record debt', 'resource_type': 'DebtRecord'},
+        {'function_code': 'F213', 'function_name': 'delete_draft_invoice', 'url_pattern': '/api/employee/invoices/*', 'http_methods': 'D', 'description': 'Delete draft invoice (only when status=Draft)', 'resource_type': 'Invoice'},
         {'function_code': 'F215', 'function_name': 'receive_notifications', 'url_pattern': '/api/employee/notifications', 'http_methods': 'R', 'description': 'Receive notifications', 'resource_type': 'Notification'},
     ]
     
     for func_data in functions_data:
         existing = session.query(Function).filter_by(function_code=func_data['function_code']).first()
         if not existing:
-            func = Function(**func_data, created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc))
+            func = Function(**func_data, created_at=vietnam_now(), updated_at=vietnam_now())
             session.add(func)
             print(f"  Created function: {func_data['function_code']} - {func_data['function_name']}")
         else:
@@ -144,7 +146,7 @@ def seed_functions():
             existing.http_methods = func_data['http_methods']
             existing.description = func_data['description']
             existing.resource_type = func_data['resource_type']
-            existing.updated_at = datetime.now(timezone.utc)
+            existing.updated_at = vietnam_now()
             print(f"  Updated function: {func_data['function_code']} - {func_data['function_name']}")
     
     session.commit()
@@ -169,8 +171,8 @@ def seed_role_functions():
     # Owner Functions
     owner_functions = ['F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111', 'F112', 'F113', 'F114', 'F115', 'F116', 'F117', 'F118']
     
-    # Employee Functions (F213, F214 đã gộp vào F207-F210 - dùng filter status='Draft' để xem draft orders)
-    employee_functions = ['F201', 'F202', 'F203', 'F204', 'F205', 'F206', 'F207', 'F208', 'F209', 'F210', 'F211', 'F212', 'F215', 'F216']
+    # Employee Functions
+    employee_functions = ['F201', 'F202', 'F203', 'F204', 'F205', 'F206', 'F207', 'F208', 'F209', 'F210', 'F211', 'F212', 'F213', 'F215', 'F216']
     
     # Map Admin Functions
     print("  Mapping Admin functions...")
@@ -179,7 +181,7 @@ def seed_role_functions():
         if func:
             existing = session.query(RoleFunction).filter_by(role_id=admin_role.id, function_id=func.id).first()
             if not existing:
-                role_func = RoleFunction(role_id=admin_role.id, function_id=func.id, created_at=datetime.now(timezone.utc))
+                role_func = RoleFunction(role_id=admin_role.id, function_id=func.id, created_at=vietnam_now())
                 session.add(role_func)
                 print(f"    Mapped {func_code} to Admin")
             else:
@@ -194,7 +196,7 @@ def seed_role_functions():
         if func:
             existing = session.query(RoleFunction).filter_by(role_id=owner_role.id, function_id=func.id).first()
             if not existing:
-                role_func = RoleFunction(role_id=owner_role.id, function_id=func.id, created_at=datetime.now(timezone.utc))
+                role_func = RoleFunction(role_id=owner_role.id, function_id=func.id, created_at=vietnam_now())
                 session.add(role_func)
                 print(f"    Mapped {func_code} to Owner")
             else:
@@ -209,7 +211,7 @@ def seed_role_functions():
         if func:
             existing = session.query(RoleFunction).filter_by(role_id=employee_role.id, function_id=func.id).first()
             if not existing:
-                role_func = RoleFunction(role_id=employee_role.id, function_id=func.id, created_at=datetime.now(timezone.utc))
+                role_func = RoleFunction(role_id=employee_role.id, function_id=func.id, created_at=vietnam_now())
                 session.add(role_func)
                 print(f"    Mapped {func_code} to Employee")
             else:

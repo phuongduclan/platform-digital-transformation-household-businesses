@@ -3,6 +3,7 @@ from domain.models.iwarehouse_repository import IWarehouseRepository
 from domain.models.iwarehouse_service import IWarehouseService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 
 class WarehouseService(IWarehouseService):
@@ -11,7 +12,7 @@ class WarehouseService(IWarehouseService):
 
     def create_warehouse(self, household_id: int, name: str,
                          address: str, description: str = None, status: str = None) -> Warehouse:
-        now = datetime.utcnow()
+        now = vietnam_now()
         warehouse = Warehouse(
             household_id=household_id,
             name=name,
@@ -38,7 +39,7 @@ class WarehouseService(IWarehouseService):
         description: str = None,
         status: str = None
     ) -> Warehouse:
-        now = datetime.utcnow()
+        now = vietnam_now()
         warehouse = Warehouse(
             id=warehouse_id,
             household_id=household_id,

@@ -61,8 +61,8 @@ export default function EmployeeCreateInvoicePage() {
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
-          error?.message ||
-          "Lỗi khi tải dữ liệu sản phẩm/đơn vị",
+        error?.message ||
+        "Lỗi khi tải dữ liệu sản phẩm/đơn vị",
         "error"
       );
     }
@@ -101,8 +101,9 @@ export default function EmployeeCreateInvoicePage() {
       const vat = Number(l.vat || 0);
       const lineBase = qty * price;
       const lineDiscount = (lineBase * discount) / 100;
-      const lineVat = (lineBase * vat) / 100;
-      return sum + lineBase - lineDiscount + lineVat;
+      const afterDiscount = lineBase - lineDiscount;
+      const lineVat = (afterDiscount * vat) / 100;
+      return sum + afterDiscount + lineVat;
     }, 0);
   }, [lines]);
 
@@ -327,8 +328,9 @@ export default function EmployeeCreateInvoicePage() {
                   const vat = Number(l.vat || 0);
                   const discount = Number(l.discount || 0);
                   const base = qty * price;
-                  const lineTotal =
-                    base - (base * discount) / 100 + (base * vat) / 100;
+                  const discountAmount = (base * discount) / 100;
+                  const afterDiscount = base - discountAmount;
+                  const lineTotal = afterDiscount + (afterDiscount * vat) / 100;
                   return (
                     <tr key={idx}>
                       <td className="px-3 py-1.5">

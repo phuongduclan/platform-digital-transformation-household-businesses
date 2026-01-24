@@ -5,6 +5,7 @@ from infrastructure.models.inventory_model import Inventory as InventoryModel
 from infrastructure.models.warehouse_model import Warehouse
 from infrastructure.databases.mssql import session
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class InventoryRepository(IInventoryRepository):
     def __init__(self, session=session):
@@ -48,7 +49,7 @@ class InventoryRepository(IInventoryRepository):
             )
             if existing:
                 existing.quantity = inventory.quantity
-                existing.updated_at = datetime.utcnow()
+                existing.updated_at = vietnam_now()
                 return self.update(existing)
             else:
                 inventory_model = InventoryModel(
@@ -56,8 +57,8 @@ class InventoryRepository(IInventoryRepository):
                     unit_id=inventory.unit_id,
                     warehouse_id=inventory.warehouse_id,
                     quantity=inventory.quantity,
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
+                    created_at=vietnam_now(),
+                    updated_at=vietnam_now()
                 )
                 self.session.add(inventory_model)
                 self.session.flush()
@@ -73,7 +74,7 @@ class InventoryRepository(IInventoryRepository):
             existing = self.get_by_product_unit_and_warehouse(product_id, unit_id, warehouse_id, household_id)
             if existing:
                 existing.quantity += quantity
-                existing.updated_at = datetime.utcnow()
+                existing.updated_at = vietnam_now()
                 return self.update(existing)
             else:
                 inventory = Inventory(
@@ -82,8 +83,8 @@ class InventoryRepository(IInventoryRepository):
                     unit_id=unit_id,
                     warehouse_id=warehouse_id,
                     quantity=quantity,
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
+                    created_at=vietnam_now(),
+                    updated_at=vietnam_now()
                 )
                 return self.create_or_update(inventory)
         except Exception as e:
@@ -100,7 +101,7 @@ class InventoryRepository(IInventoryRepository):
                 raise ValueError(f'Insufficient inventory. Available: {existing.quantity}, Required: {quantity}')
             
             existing.quantity -= quantity
-            existing.updated_at = datetime.utcnow()
+            existing.updated_at = vietnam_now()
             return self.update(existing)
         except Exception as e:
             self.session.rollback()

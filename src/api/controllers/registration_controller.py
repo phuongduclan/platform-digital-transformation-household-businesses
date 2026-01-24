@@ -14,6 +14,7 @@ from infrastructure.databases.mssql import session
 from infrastructure.databases.session_utils import safe_rollback
 from infrastructure.models import Role
 from datetime import datetime, timezone, timedelta
+from infrastructure.utils.datetime_utils import vietnam_now
 bp = Blueprint('public_registration', __name__, url_prefix='/api/public')
 
 household_service: IHouseholdService = HouseholdService(HouseholdRepository(session=session))
@@ -163,7 +164,7 @@ def register_owner():
         owner_role_id = owner_role.id
         
         # Bước 3: Tạo Household (chưa commit - sẽ commit cùng lúc với User và Subscription)
-        now = datetime.now(timezone.utc)
+        now = vietnam_now()
         household = household_service.create_household(
             tax_code=household_data.get('tax_code'),
             name=household_data.get('name'),

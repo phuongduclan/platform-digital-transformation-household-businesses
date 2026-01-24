@@ -5,6 +5,7 @@ from domain.models.iimport_receipt_service import IImportReceiptService
 from domain.models.import_detail import ImportDetail
 from typing import List, Optional
 from datetime import datetime, date
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class ImportReceiptService(IImportReceiptService):
     def __init__(self, repository: IImportReceiptRepository, import_detail_repository: IImportDetailRepository):
@@ -23,7 +24,7 @@ class ImportReceiptService(IImportReceiptService):
         if import_date is None:
             import_date = date.today()
 
-        now = datetime.utcnow()
+        now = vietnam_now()
 
         # Tạo import receipt
         import_receipt = ImportReceipt(
@@ -94,6 +95,6 @@ class ImportReceiptService(IImportReceiptService):
         if import_date is not None:
             import_receipt.import_date = import_date
         
-        import_receipt.updated_at = datetime.utcnow()
+        import_receipt.updated_at = vietnam_now()
 
         return self.repository.update(import_receipt)

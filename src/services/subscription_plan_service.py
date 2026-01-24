@@ -3,6 +3,7 @@ from domain.models.isubscription_plan_repository import ISubscriptionPlanReposit
 from domain.models.isubscription_plan_service import ISubscriptionPlanService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class SubscriptionPlanService(ISubscriptionPlanService):
     def __init__(self, repository: ISubscriptionPlanRepository):
@@ -29,8 +30,8 @@ class SubscriptionPlanService(ISubscriptionPlanService):
             status=status,
             created_by=created_by,
             updated_by=updated_by,
-            created_at=created_at or datetime.utcnow(),
-            updated_at=updated_at or datetime.utcnow()
+            created_at=created_at or vietnam_now(),
+            updated_at=updated_at or vietnam_now()
         )
         return self.repository.add(plan)
 
@@ -66,7 +67,7 @@ class SubscriptionPlanService(ISubscriptionPlanService):
             status=status,
             updated_by=updated_by
         )
-        plan.updated_at = updated_at or datetime.utcnow()
+        plan.updated_at = updated_at or vietnam_now()
 
         return self.repository.update(plan)
 

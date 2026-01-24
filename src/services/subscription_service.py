@@ -3,6 +3,7 @@ Subscription Service - Check household có subscription active và CRUD subscrip
 """
 from domain.models.isubscription_service import ISubscriptionService
 from datetime import datetime, timezone
+from infrastructure.utils.datetime_utils import vietnam_now
 from infrastructure.databases.mssql import session
 from infrastructure.models import Subscription  # path đúng với project
 
@@ -49,14 +50,14 @@ class SubscriptionService(ISubscriptionService):
         
         if subscription:
             # Check end_date với timezone-aware datetime
-            now = datetime.now(timezone.utc)
+            now = vietnam_now()
             # Nếu subscription.end_date không có timezone, so sánh trực tiếp
             if hasattr(subscription.end_date, 'tzinfo') and subscription.end_date.tzinfo:
                 if subscription.end_date >= now:
                     return subscription
             else:
-                # Subscription.end_date không có timezone, so sánh với datetime.utcnow() (không timezone)
-                if subscription.end_date >= datetime.utcnow():
+                # Subscription.end_date không có timezone, so sánh với vietnam_now() (không timezone)
+                if subscription.end_date >= vietnam_now():
                     return subscription
         
         return None
@@ -98,8 +99,8 @@ class SubscriptionService(ISubscriptionService):
             start_date=start_date,
             end_date=end_date,
             is_active=is_active,
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),  # SQL Server không support timezone
-            updated_at=datetime.now(timezone.utc).replace(tzinfo=None)  # SQL Server không support timezone
+            created_at=vietnam_now(),  # SQL Server không support timezone
+            updated_at=vietnam_now()  # SQL Server không support timezone
         )
         self.session.add(subscription)
         self.session.commit()
@@ -140,7 +141,7 @@ class SubscriptionService(ISubscriptionService):
             subscription.end_date = end_date
         if is_active is not None:
             subscription.is_active = is_active
-        subscription.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)  # SQL Server không support timezone
+        subscription.updated_at = vietnam_now()  # SQL Server không support timezone
         self.session.commit()
         return subscription
 
@@ -213,7 +214,7 @@ class SubscriptionService(ISubscriptionService):
             raise ValueError(f"Subscription plan with ID {plan_id} is not active")
         
         # Tính start_date và end_date
-        now = datetime.now(timezone.utc).replace(tzinfo=None)  # SQL Server không support timezone
+        now = vietnam_now()  # SQL Server không support timezone
         new_start_date = start_date if start_date else now
         
         # Tính end_date dựa trên billing_cycle của plan mới
@@ -234,7 +235,7 @@ class SubscriptionService(ISubscriptionService):
         subscription.plan_id = plan_id
         subscription.start_date = new_start_date
         subscription.end_date = new_end_date
-        subscription.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        subscription.updated_at = vietnam_now()
         
         self.session.commit()
         self.session.refresh(subscription)

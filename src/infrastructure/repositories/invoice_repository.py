@@ -114,7 +114,8 @@ class InvoiceRepository(IInvoiceRepository):
             if updated_by is not None:
                 invoice_model.updated_by = updated_by
             from datetime import datetime
-            invoice_model.updated_at = datetime.utcnow()
+from infrastructure.utils.datetime_utils import vietnam_now
+            invoice_model.updated_at = vietnam_now()
             self.session.flush()  # Flush, chưa commit
             self.session.refresh(invoice_model)
             return self._to_domain(invoice_model)

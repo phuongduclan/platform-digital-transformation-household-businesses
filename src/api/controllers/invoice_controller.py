@@ -503,7 +503,8 @@ def owner_print_invoice(invoice_id):
         discount = float(detail.discount or 0)
         vat_rate = float(detail.vat or 0)
         subtotal = quantity * price
-        after_discount = subtotal - discount
+        discount_amount = subtotal * discount / 100
+        after_discount = subtotal - discount_amount
         vat_amount = after_discount * vat_rate / 100
         line_total = after_discount + vat_amount
         detail_dict['line_total'] = str(line_total)
@@ -729,7 +730,7 @@ def employee_update_invoice(invoice_id):
         return jsonify({"error": str(e)}), 500
 
 @employee_invoice_bp.route("/<int:invoice_id>", methods=["DELETE"])
-@require_permission("F209", ["DELETE"])
+@require_permission("F213", ["DELETE"])
 def employee_delete_invoice(invoice_id):
     """
     Delete draft invoice (Employee)
@@ -893,7 +894,8 @@ def employee_print_invoice(invoice_id):
         discount = float(detail.discount or 0)
         vat_rate = float(detail.vat or 0)
         subtotal = quantity * price
-        after_discount = subtotal - discount
+        discount_amount = subtotal * discount / 100
+        after_discount = subtotal - discount_amount
         vat_amount = after_discount * vat_rate / 100
         line_total = after_discount + vat_amount
         detail_dict['line_total'] = str(line_total)

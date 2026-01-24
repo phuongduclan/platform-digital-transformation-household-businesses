@@ -3,6 +3,7 @@ from domain.models.ifunction_repository import IFunctionRepository
 from domain.models.ifunction_service import IFunctionService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class FunctionService(IFunctionService):
     def __init__(self, repository: IFunctionRepository):
@@ -10,7 +11,7 @@ class FunctionService(IFunctionService):
 
     def create_function(self, function_code: str, function_name: str, url_pattern: str,
                        http_methods: str, description: str = None, resource_type: str = None) -> Function:
-        now = datetime.utcnow()
+        now = vietnam_now()
         function = Function(
             id=None, function_code=function_code, function_name=function_name,
             url_pattern=url_pattern, http_methods=http_methods, description=description,
@@ -27,7 +28,7 @@ class FunctionService(IFunctionService):
     def update_function(self, function_id: int, function_code: str = None, function_name: str = None,
                        url_pattern: str = None, http_methods: str = None, description: str = None,
                        resource_type: str = None) -> Function:
-        now = datetime.utcnow()
+        now = vietnam_now()
         function = Function(
             id=function_id, function_code=function_code, function_name=function_name,
             url_pattern=url_pattern, http_methods=http_methods, description=description,

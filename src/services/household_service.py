@@ -3,6 +3,7 @@ from domain.models.ihousehold_repository import IHouseholdRepository
 from domain.models.ihousehold_service import IHouseholdService
 from typing import List, Optional
 from datetime import datetime, timezone
+from infrastructure.utils.datetime_utils import vietnam_now
 from infrastructure.databases.mssql import session
 from infrastructure.models.household_model import Household as HouseholdModel
 
@@ -121,7 +122,7 @@ class HouseholdService(IHouseholdService):
             created_by=existing_household.created_by,
             updated_by=updated_by if updated_by is not None else existing_household.updated_by,
             created_at=existing_household.created_at,
-            updated_at=updated_at if updated_at is not None else datetime.utcnow(),
+            updated_at=updated_at if updated_at is not None else vietnam_now(),
         )
         return self.repository.update(household_dto)
 
@@ -165,7 +166,7 @@ class HouseholdService(IHouseholdService):
             created_by=created_by if created_by is not None else existing_household.created_by,
             updated_by=updated_by if updated_by is not None else existing_household.updated_by,
             created_at=created_at if created_at is not None else existing_household.created_at,
-            updated_at=updated_at if updated_at is not None else datetime.now(timezone.utc),
+            updated_at=updated_at if updated_at is not None else vietnam_now(),
         )
         return self.repository.update(household_dto)
 

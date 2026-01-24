@@ -3,13 +3,14 @@ from domain.models.irole_function_repository import IRoleFunctionRepository
 from domain.models.irole_function_service import IRoleFunctionService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class RoleFunctionService(IRoleFunctionService):
     def __init__(self, repository: IRoleFunctionRepository):
         self.repository = repository
 
     def assign_function_to_role(self, role_id: int, function_id: int) -> RoleFunction:
-        now = datetime.utcnow()
+        now = vietnam_now()
         role_function = RoleFunction(
             id=None, role_id=role_id, function_id=function_id, created_at=now
         )

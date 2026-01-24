@@ -3,6 +3,7 @@ from domain.models.iseller_repository import ISellerRepository
 from domain.models.iseller_service import ISellerService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class SellerService(ISellerService):
     def __init__(self, repository: ISellerRepository):
@@ -11,7 +12,7 @@ class SellerService(ISellerService):
     def create_seller(self, household_id: int, tax_code: str = None, name: str = None,
                      phone: str = None, address: str = None, description: str = None,
                      status: str = 'Active', created_by: str = None) -> Seller:
-        now = datetime.utcnow()
+        now = vietnam_now()
         seller = Seller(
             id=None,
             household_id=household_id,
@@ -38,7 +39,7 @@ class SellerService(ISellerService):
                      name: str = None, phone: str = None, address: str = None,
                      description: str = None, status: str = None,
                      updated_by: str = None) -> Seller:
-        now = datetime.utcnow()
+        now = vietnam_now()
         seller = Seller(
             id=seller_id,
             household_id=household_id,

@@ -3,6 +3,7 @@ from domain.models.icategory_repository import ICategoryRepository
 from domain.models.icategory_service import ICategoryService
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class CategoryService(ICategoryService):
     def __init__(self, repository: ICategoryRepository):
@@ -10,7 +11,7 @@ class CategoryService(ICategoryService):
 
     def create_category(self, household_id:int, name: str, description: str = None, 
                         status: str = None) -> Category:
-        now = datetime.utcnow()
+        now = vietnam_now()
         category = Category(household_id=household_id, name=name, description=description,
                            status=status, created_at=now, updated_at=now)
         return self.repository.add(category)
@@ -23,7 +24,7 @@ class CategoryService(ICategoryService):
 
     def update_category(self, category_id: int, household_id: int, name: str = None, description: str = None,
                         status: str = None) -> Category:
-        now = datetime.utcnow()
+        now = vietnam_now()
         category = Category(id=category_id, household_id=household_id, name=name, description=description,
                            status=status, updated_at=now)
         return self.repository.update(category)

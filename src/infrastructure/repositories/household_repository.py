@@ -5,6 +5,7 @@ from infrastructure.models.household_model import Household as HouseholdModel
 from infrastructure.databases.mssql import session
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
+from infrastructure.utils.datetime_utils import vietnam_now
 
 class HouseholdRepository(IHouseholdRepository):
     def __init__(self, session: Session = session):
@@ -25,8 +26,8 @@ class HouseholdRepository(IHouseholdRepository):
                 status=household.status or 'Active',
                 created_by=household.created_by or "SYSTEM",
                 updated_by=household.updated_by or "SYSTEM", 
-                created_at=(household.created_at.replace(tzinfo=None) if household.created_at and household.created_at.tzinfo else household.created_at) if household.created_at else datetime.now(timezone.utc).replace(tzinfo=None),
-                updated_at=(household.updated_at.replace(tzinfo=None) if household.updated_at and household.updated_at.tzinfo else household.updated_at) if household.updated_at else datetime.now(timezone.utc).replace(tzinfo=None)
+                created_at=(household.created_at.replace(tzinfo=None) if household.created_at and household.created_at.tzinfo else household.created_at) if household.created_at else vietnam_now(),
+                updated_at=(household.updated_at.replace(tzinfo=None) if household.updated_at and household.updated_at.tzinfo else household.updated_at) if household.updated_at else vietnam_now()
             )
             self.session.add(household_model)
             # KHÔNG commit ở đây - để controller quản lý transaction
@@ -71,7 +72,7 @@ class HouseholdRepository(IHouseholdRepository):
             updated_at_value = household.updated_at
             if updated_at_value and hasattr(updated_at_value, 'tzinfo') and updated_at_value.tzinfo:
                 updated_at_value = updated_at_value.replace(tzinfo=None)
-            household_model.updated_at = updated_at_value or datetime.utcnow()
+            household_model.updated_at = updated_at_value or vietnam_now()
 
             # KHÔNG commit ở đây - để controller quản lý transaction
             # self.session.commit()

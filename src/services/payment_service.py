@@ -7,6 +7,7 @@ from domain.models.ipayment_service import IPaymentService
 # from domain.models.icustomer_repository import ICustomerRepository  # TODO: Import khi có CustomerRepository
 from typing import List, Optional
 from datetime import datetime
+from infrastructure.utils.datetime_utils import vietnam_now
 from decimal import Decimal
 
 class PaymentService(IPaymentService):
@@ -54,7 +55,7 @@ class PaymentService(IPaymentService):
             self.accounting_ledger_repository.session = db_session
         
         try:
-            now = datetime.utcnow()
+            now = vietnam_now()
             
             # Tạo Payment
             payment = Payment(
@@ -169,7 +170,7 @@ class PaymentService(IPaymentService):
         
         # TODO: Cập nhật DebtRecord và AccountingLedger tương ứng
         # Tạm thời chỉ update payment
-        now = datetime.utcnow()
+        now = vietnam_now()
         if method_id is not None:
             payment.method_id = method_id
         if amount is not None:
@@ -211,7 +212,7 @@ class PaymentService(IPaymentService):
             credit_amount=credit_amount,
             balance=balance,
             description=description,
-            record_at=datetime.utcnow()
+            record_at=vietnam_now()
         )
 
     def _create_accounting_ledger(self, invoice_id: int, transaction_date: datetime,
