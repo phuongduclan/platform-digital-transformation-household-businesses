@@ -18,7 +18,7 @@ class PaymentMethodService(IPaymentMethodService):
     def create_payment_method(self, name: str, status: str = 'Active') -> PaymentMethod:
         """Admin only: Create payment method"""
         from datetime import datetime
-from infrastructure.utils.datetime_utils import vietnam_now
+        from infrastructure.utils.datetime_utils import vietnam_now
         now = vietnam_now()
         payment_method = PaymentMethod(
             id=None,

@@ -32,7 +32,7 @@ class DebtRecordService(IDebtRecordService):
         Được gọi tự động khi Invoice confirm (UNPAID) hoặc Payment được tạo.
         """
         from datetime import datetime
-from infrastructure.utils.datetime_utils import vietnam_now
+        from infrastructure.utils.datetime_utils import vietnam_now
         
         # Ràng buộc: một bản ghi chỉ nợ hoặc chỉ trả
         if invoice_id is not None and payment_id is not None:
