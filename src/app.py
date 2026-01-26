@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO
 from api.swagger import spec
 from api.middleware import middleware
 from infrastructure.databases import init_db
@@ -9,10 +10,22 @@ from config import SwaggerConfig
 from flask_swagger_ui import get_swaggerui_blueprint
 from api.routes import register_routes
 
+# Initialize SocketIO (will be configured in create_app)
+socketio = None
+
 
 def create_app():
+    global socketio
+    
     app = Flask(__name__)
     app.config.from_object(Config)
+    
+    # Initialize SocketIO
+    socketio = SocketIO(
+        app,
+        cors_allowed_origins="*",  # Allow all origins for development
+        async_mode='threading'
+    )
     
     # Enable CORS for all routes (cho phép FE gọi API từ localhost:3000)
     # Flask-CORS will automatically handle OPTIONS preflight requests
@@ -58,9 +71,35 @@ def create_app():
     @app.route("/swagger.json")
     def swagger_json():
         return jsonify(spec.to_dict())
+    
+    # SocketIO event handlers
+    @socketio.on('connect')
+    def handle_connect():
+        print(f'Client connected')
+    
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        print(f'Client disconnected')
+    
+    @socketio.on('join_household')
+    def handle_join_household(data):
+        """Client joins household room to receive notifications"""
+        from services.notification_service import NotificationService
+        household_id = data.get('household_id')
+        if household_id:
+            notification_service = NotificationService(socketio)
+            notification_service.join_household_room(household_id)
+            print(f'Client joined household_{household_id}')
 
     return app
 
+
+def get_socketio():
+    """Get SocketIO instance"""
+    return socketio
+
+
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port=6868, debug=True)
+    # Use socketio.run instead of app.run for WebSocket support
+    socketio.run(app, host='0.0.0.0', port=6868, debug=True)

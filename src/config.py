@@ -19,6 +19,12 @@ class Config:
     DATABASE_URI = os.environ.get('DATABASE_URI') or \
         'postgresql://postgres.xjghpmiupxldgezcrucj:079206043460@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres'
     CORS_HEADERS = 'Content-Type'
+    
+    # Google AI Studio API Configuration
+    GOOGLE_AI_API_KEY = os.environ.get('GOOGLE_AI_API_KEY') or ''
+    GOOGLE_AI_MODEL = os.environ.get('GOOGLE_AI_MODEL') or 'gemini-1.5-flash'
+    GOOGLE_AI_TEMPERATURE = float(os.environ.get('GOOGLE_AI_TEMPERATURE', '0.2'))
+    GOOGLE_AI_MAX_TOKENS = int(os.environ.get('GOOGLE_AI_MAX_TOKENS', '2048'))
 
 
 class DevelopmentConfig(Config):

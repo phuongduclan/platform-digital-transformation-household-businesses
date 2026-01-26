@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { showToast } from "@/components/ui/toast";
 import { ownerService, OwnerInvoice } from "@/services/owner.service";
+import AIInvoiceInput from "@/components/ai-invoice-input";
 
 type InvoiceStatusFilter = "" | "Draft" | "Confirm" | "Delete";
 
@@ -140,6 +141,11 @@ export default function OwnerInvoicesPage() {
             <span>+</span>
             <span>Tạo hóa đơn</span>
           </button>
+        </div>
+
+        {/* AI Invoice Input */}
+        <div className="mb-6">
+          <AIInvoiceInput role="owner" />
         </div>
 
         {/* Filter card */}

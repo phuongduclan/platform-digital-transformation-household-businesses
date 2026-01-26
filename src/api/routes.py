@@ -29,6 +29,9 @@ from api.controllers.subscription_controller import admin_bp as admin_subscripti
 from api.controllers.registration_controller import bp as public_registration_bp
 from api.controllers.dashboard_controller import admin_dashboard_bp
 
+# AI Invoice controllers
+from api.controllers.ai_invoice_controller import owner_ai_invoice_bp, employee_ai_invoice_bp
+
 def register_routes(app):
     # Todo (sample module)
     app.register_blueprint(todo_bp)
@@ -58,6 +61,10 @@ def register_routes(app):
     app.register_blueprint(owner_invoice_bp)
     app.register_blueprint(employee_invoice_bp)
     app.register_blueprint(invoice_detail_bp)
+    
+    # AI Invoice endpoints
+    app.register_blueprint(owner_ai_invoice_bp)
+    app.register_blueprint(employee_ai_invoice_bp)
     
     # Import/Export/Inventory endpoints
     app.register_blueprint(owner_import_receipt_bp)

@@ -8,6 +8,7 @@ import {
   employeeService,
   EmployeeInvoice,
 } from "@/services/employee.service";
+import AIInvoiceInput from "@/components/ai-invoice-input";
 
 type InvoiceStatusFilter = "" | "Draft" | "Confirm" | "Delete";
 
@@ -30,8 +31,8 @@ export default function EmployeeInvoicesPage() {
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
-          error?.message ||
-          "Lỗi khi tải danh sách hóa đơn",
+        error?.message ||
+        "Lỗi khi tải danh sách hóa đơn",
         "error"
       );
     } finally {
@@ -80,8 +81,8 @@ export default function EmployeeInvoicesPage() {
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
-          error?.message ||
-          "Lỗi khi xóa hóa đơn",
+        error?.message ||
+        "Lỗi khi xóa hóa đơn",
         "error"
       );
     }
@@ -102,8 +103,8 @@ export default function EmployeeInvoicesPage() {
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
-          error?.message ||
-          "Lỗi khi xác nhận hóa đơn",
+        error?.message ||
+        "Lỗi khi xác nhận hóa đơn",
         "error"
       );
     }
@@ -142,6 +143,11 @@ export default function EmployeeInvoicesPage() {
             <span>+</span>
             <span>Tạo hóa đơn</span>
           </button>
+        </div>
+
+        {/* AI Invoice Input */}
+        <div className="mb-6">
+          <AIInvoiceInput role="employee" />
         </div>
 
         {/* Filter card */}

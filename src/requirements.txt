@@ -15,3 +15,14 @@ apispec_webframeworks
 flask-swagger-ui
 gunicorn
 PyJWT
+
+# Google AI Studio
+google-generativeai>=0.3.2
+
+# Real-time Notifications
+flask-socketio>=5.3.0
+python-socketio>=5.9.0
+
+# Fuzzy Matching
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.21.0
