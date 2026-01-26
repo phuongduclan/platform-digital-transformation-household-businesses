@@ -25,6 +25,9 @@ class Config:
     GOOGLE_AI_MODEL = os.environ.get('GOOGLE_AI_MODEL') or 'gemini-1.5-flash'
     GOOGLE_AI_TEMPERATURE = float(os.environ.get('GOOGLE_AI_TEMPERATURE', '0.2'))
     GOOGLE_AI_MAX_TOKENS = int(os.environ.get('GOOGLE_AI_MAX_TOKENS', '2048'))
+    
+    # Goong.io API Configuration (Vietnamese address autocomplete)
+    GOONG_API_KEY = os.environ.get('GOONG_API_KEY') or ''
 
 
 class DevelopmentConfig(Config):

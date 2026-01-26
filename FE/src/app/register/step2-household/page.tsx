@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRegistration } from "@/context/registration-context";
 import { showToast } from "@/components/ui/toast";
+import AddressAutocomplete from "@/components/address-autocomplete";
 
 export default function Step2HouseholdPage() {
   const router = useRouter();
@@ -119,17 +120,11 @@ export default function Step2HouseholdPage() {
           >
             Địa chỉ kinh doanh
           </label>
-          <textarea
-            id="address"
-            rows={3}
-            className="block w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900/10"
-            placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+          <AddressAutocomplete
             value={state.household.address ?? ""}
-            onChange={e =>
-              updateHousehold({
-                address: e.target.value
-              })
-            }
+            onChange={(address) => updateHousehold({ address })}
+            placeholder="Nhập địa chỉ (có gợi ý tự động)..."
+            className="block w-full"
           />
         </div>
 

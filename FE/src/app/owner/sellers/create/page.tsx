@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { showToast } from "@/components/ui/toast";
 import { ownerService } from "@/services/owner.service";
+import AddressAutocomplete from "@/components/address-autocomplete";
 
 export default function OwnerCreateSellerPage() {
   const router = useRouter();
@@ -115,11 +116,11 @@ export default function OwnerCreateSellerPage() {
               <label className="block text-sm font-normal text-[#1e3a8a] mb-1.5">
                 Địa chỉ
               </label>
-              <input
-                type="text"
+              <AddressAutocomplete
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
+                onChange={setAddress}
+                placeholder="Nhập địa chỉ (có gợi ý tự động)..."
+                disabled={saving}
               />
             </div>
             <div className="md:col-span-2">

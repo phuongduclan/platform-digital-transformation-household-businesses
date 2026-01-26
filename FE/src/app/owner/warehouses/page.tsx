@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ownerService, OwnerWarehouse, OwnerInventory } from "@/services/owner.service";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { showToast } from "@/components/ui/toast";
+import AddressAutocomplete from "@/components/address-autocomplete";
 
 interface WarehouseFormState {
   id?: number;
@@ -42,8 +43,8 @@ export default function OwnerWarehousesPage() {
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
-          error?.message ||
-          "Lỗi khi tải danh sách kho",
+        error?.message ||
+        "Lỗi khi tải danh sách kho",
         "error"
       );
     } finally {
@@ -93,8 +94,8 @@ export default function OwnerWarehousesPage() {
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
-          error?.message ||
-          "Lỗi khi xóa kho hàng",
+        error?.message ||
+        "Lỗi khi xóa kho hàng",
         "error"
       );
     }
@@ -130,8 +131,8 @@ export default function OwnerWarehousesPage() {
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
-          error?.message ||
-          "Lỗi khi lưu kho hàng",
+        error?.message ||
+        "Lỗi khi lưu kho hàng",
         "error"
       );
     } finally {
@@ -182,9 +183,8 @@ export default function OwnerWarehousesPage() {
                           {w.name}
                         </h2>
                         <span
-                          className={`px-2 py-1 text-xs font-bold italic rounded-full text-white ${
-                            isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
-                          }`}
+                          className={`px-2 py-1 text-xs font-bold italic rounded-full text-white ${isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
+                            }`}
                         >
                           {w.status}
                         </span>
@@ -258,13 +258,13 @@ export default function OwnerWarehousesPage() {
                 <label className="block text-sm font-normal text-[#1e3a8a] mb-1.5">
                   Địa chỉ <span className="text-red-600">*</span>
                 </label>
-                <input
-                  type="text"
+                <AddressAutocomplete
                   value={form.address}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, address: e.target.value }))
+                  onChange={(address) =>
+                    setForm((prev) => ({ ...prev, address }))
                   }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
+                  placeholder="Nhập địa chỉ kho (có gợi ý tự động)..."
+                  disabled={saving}
                 />
               </div>
               <div>

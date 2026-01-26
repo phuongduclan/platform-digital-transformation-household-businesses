@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { showToast } from "@/components/ui/toast";
 import { ownerService, OwnerCustomer } from "@/services/owner.service";
+import AddressAutocomplete from "@/components/address-autocomplete";
 
 export default function OwnerCustomerDetailPage() {
   const params = useParams();
@@ -146,9 +147,8 @@ export default function OwnerCustomerDetailPage() {
           </div>
           <div className="flex items-center gap-3">
             <span
-              className={`px-3 py-1 text-xs font-bold italic rounded-full text-white ${
-                isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
-              }`}
+              className={`px-3 py-1 text-xs font-bold italic rounded-full text-white ${isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
+                }`}
             >
               {customer.status}
             </span>
@@ -215,88 +215,86 @@ export default function OwnerCustomerDetailPage() {
                   )}
                 </div>
               </div>
-              <div>
-                <p className="text-xs text-[#6b7280] mb-1">Địa chỉ</p>
-                {editMode ? (
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
-                  />
-                ) : (
-                  <p className="text-[#1e3a8a]">
-                    {customer.address || "-"}
-                  </p>
-                )}
-              </div>
-              <div>
-                <p className="text-xs text-[#6b7280] mb-1">Ghi chú</p>
-                {editMode ? (
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
-                  />
-                ) : (
-                  <p className="text-[#1e3a8a]">
-                    {customer.description || "-"}
-                  </p>
-                )}
-              </div>
-              <div>
-                <p className="text-xs text-[#6b7280] mb-1">Trạng thái</p>
-                {editMode ? (
-                  <select
-                    value={status}
-                    onChange={(e) =>
-                      setStatus(e.target.value as "Active" | "Inactive")
-                    }
-                    className="w-full max-w-xs px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                ) : (
-                  <span
-                    className={`px-2 py-1 text-xs font-bold italic rounded text-white ${
-                      isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
-                    }`}
-                  >
-                    {customer.status}
-                  </span>
-                )}
-              </div>
-              {editMode && (
-                <div className="pt-2 flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-5 py-2 bg-[#00897b] text-white rounded-lg text-sm font-bold hover:bg-[#007a6c] transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed"
-                  >
-                    {saving ? "Đang lưu..." : "Lưu thay đổi"}
-                  </button>
-                </div>
+              <p className="text-xs text-[#6b7280] mb-1">Địa chỉ</p>
+              {editMode ? (
+                <AddressAutocomplete
+                  value={address}
+                  onChange={setAddress}
+                  placeholder="Nhập địa chỉ (có gợi ý tự động)..."
+                  disabled={saving}
+                />
+              ) : (
+                <p className="text-[#1e3a8a]">
+                  {customer.address || "-"}
+                </p>
               )}
             </div>
-          </div>
-
-          {/* Công nợ & lịch sử mua hàng - placeholder text vì FE hiện tại chưa map API chi tiết */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 className="text-[18px] font-bold italic text-[#1e3a8a] mb-4">
-              Công nợ & lịch sử
-            </h2>
-            <p className="text-sm text-[#6b7280]">
-              Thông tin tổng quan công nợ và lịch sử mua hàng sẽ được hiển thị
-              tại đây khi tích hợp thêm API chi tiết (customer debt & purchase
-              history). Hiện tại, bạn có thể theo dõi công nợ ở các báo cáo và
-              danh sách chứng từ.
-            </p>
+            <div>
+              <p className="text-xs text-[#6b7280] mb-1">Ghi chú</p>
+              {editMode ? (
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
+                />
+              ) : (
+                <p className="text-[#1e3a8a]">
+                  {customer.description || "-"}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-[#6b7280] mb-1">Trạng thái</p>
+              {editMode ? (
+                <select
+                  value={status}
+                  onChange={(e) =>
+                    setStatus(e.target.value as "Active" | "Inactive")
+                  }
+                  className="w-full max-w-xs px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              ) : (
+                <span
+                  className={`px-2 py-1 text-xs font-bold italic rounded text-white ${isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
+                    }`}
+                >
+                  {customer.status}
+                </span>
+              )}
+            </div>
+            {editMode && (
+              <div className="pt-2 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-5 py-2 bg-[#00897b] text-white rounded-lg text-sm font-bold hover:bg-[#007a6c] transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed"
+                >
+                  {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Công nợ & lịch sử mua hàng - placeholder text vì FE hiện tại chưa map API chi tiết */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+          <h2 className="text-[18px] font-bold italic text-[#1e3a8a] mb-4">
+            Công nợ & lịch sử
+          </h2>
+          <p className="text-sm text-[#6b7280]">
+            Thông tin tổng quan công nợ và lịch sử mua hàng sẽ được hiển thị
+            tại đây khi tích hợp thêm API chi tiết (customer debt & purchase
+            history). Hiện tại, bạn có thể theo dõi công nợ ở các báo cáo và
+            danh sách chứng từ.
+          </p>
+        </div>
       </div>
+    </div >
     </>
   );
 }

@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { showToast } from "@/components/ui/toast";
 import { ownerService, OwnerSeller } from "@/services/owner.service";
+import AddressAutocomplete from "@/components/address-autocomplete";
 
 export default function OwnerSellerDetailPage() {
   const params = useParams();
@@ -146,9 +147,8 @@ export default function OwnerSellerDetailPage() {
           </div>
           <div className="flex items-center gap-3">
             <span
-              className={`px-3 py-1 text-xs font-bold italic rounded-full text-white ${
-                isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
-              }`}
+              className={`px-3 py-1 text-xs font-bold italic rounded-full text-white ${isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
+                }`}
             >
               {seller.status}
             </span>
@@ -218,11 +218,11 @@ export default function OwnerSellerDetailPage() {
               <div>
                 <p className="text-xs text-[#6b7280] mb-1">Địa chỉ</p>
                 {editMode ? (
-                  <input
-                    type="text"
+                  <AddressAutocomplete
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00897b] focus:border-transparent"
+                    onChange={setAddress}
+                    placeholder="Nhập địa chỉ (có gợi ý tự động)..."
+                    disabled={saving}
                   />
                 ) : (
                   <p className="text-[#1e3a8a]">
@@ -260,9 +260,8 @@ export default function OwnerSellerDetailPage() {
                   </select>
                 ) : (
                   <span
-                    className={`px-2 py-1 text-xs font-bold italic rounded text-white ${
-                      isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
-                    }`}
+                    className={`px-2 py-1 text-xs font-bold italic rounded text-white ${isActive ? "bg-[#10b981]" : "bg-[#6b7280]"
+                      }`}
                   >
                     {seller.status}
                   </span>
