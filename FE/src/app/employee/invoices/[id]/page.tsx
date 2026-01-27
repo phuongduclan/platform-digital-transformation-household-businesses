@@ -28,6 +28,10 @@ export default function EmployeeInvoiceDetailPage() {
   const [editingDesc, setEditingDesc] = useState("");
   const [editingDetailId, setEditingDetailId] = useState<number | null>(null);
   const [editingPrice, setEditingPrice] = useState<number | string>("");
+  const [editingQuantity, setEditingQuantity] = useState<number | string>("");
+  const [editingVat, setEditingVat] = useState<number | string>("");
+  const [editingDiscount, setEditingDiscount] = useState<number | string>("");
+  const [editingDescription, setEditingDescription] = useState("");
 
   const isDraft = invoice?.status === "Draft";
 
@@ -158,39 +162,84 @@ export default function EmployeeInvoiceDetailPage() {
     }
   };
 
-  const handleEditPrice = (detail: EmployeeInvoiceDetail) => {
+  const handleEditDetail = (detail: EmployeeInvoiceDetail) => {
     setEditingDetailId(detail.id);
     setEditingPrice(detail.price || 0);
+    setEditingQuantity(detail.quantity || 0);
+    setEditingVat(detail.vat || 0);
+    setEditingDiscount(detail.discount || 0);
+    setEditingDescription(detail.description || "");
   };
 
-  const handleSavePrice = async (detailId: number) => {
+  const handleSaveDetail = async (detailId: number) => {
     if (!invoice || !isDraft) return;
-    if (editingPrice === "") {
-      showToast("Vui lòng nhập đơn giá", "error");
-      return;
-    }
 
     try {
       setSaving(true);
       const priceNumber = Number(editingPrice);
+      const quantityNumber = Number(editingQuantity);
+      const vatNumber = Number(editingVat);
+      const discountNumber = Number(editingDiscount);
+
       if (Number.isNaN(priceNumber)) {
         showToast("Đơn giá phải là số", "error");
+        return;
+      }
+      if (Number.isNaN(quantityNumber)) {
+        showToast("Số lượng phải là số", "error");
+        return;
+      }
+      if (Number.isNaN(vatNumber) || vatNumber < 0 || vatNumber > 100) {
+        showToast("VAT phải là số từ 0-100", "error");
+        return;
+      }
+      if (Number.isNaN(discountNumber) || discountNumber < 0 || discountNumber > 100) {
+        showToast("Chiết khấu phải là số từ 0-100", "error");
         return;
       }
 
       await employeeService.updateInvoiceDetail(invoice.id, detailId, {
         price: priceNumber,
+        quantity: quantityNumber,
+        vat: vatNumber,
+        discount: discountNumber,
+        description: editingDescription.trim() || undefined,
       });
 
-      showToast("Cập nhật đơn giá thành công", "success");
+      showToast("Cập nhật dòng chi tiết thành công", "success");
       setEditingDetailId(null);
       setEditingPrice("");
+      setEditingQuantity("");
+      setEditingVat("");
+      setEditingDiscount("");
+      setEditingDescription("");
       fetchData();
     } catch (error: any) {
       showToast(
         error?.response?.data?.error ||
         error?.message ||
-        "Lỗi khi cập nhật đơn giá",
+        "Lỗi khi cập nhật dòng chi tiết",
+        "error"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteDetail = async (detailId: number) => {
+    if (!invoice || !isDraft) return;
+    if (!confirm("Bạn chắc chắn muốn xóa dòng chi tiết này?")) return;
+
+    try {
+      setSaving(true);
+      await employeeService.deleteInvoiceDetail(invoice.id, detailId);
+      showToast("Xóa dòng chi tiết thành công", "success");
+      fetchData();
+    } catch (error: any) {
+      showToast(
+        error?.response?.data?.error ||
+        error?.message ||
+        "Lỗi khi xóa dòng chi tiết",
         "error"
       );
     } finally {
@@ -201,6 +250,10 @@ export default function EmployeeInvoiceDetailPage() {
   const handleCancelEdit = () => {
     setEditingDetailId(null);
     setEditingPrice("");
+    setEditingQuantity("");
+    setEditingVat("");
+    setEditingDiscount("");
+    setEditingDescription("");
   };
 
   const handlePrintInvoice = async () => {
@@ -415,6 +468,9 @@ export default function EmployeeInvoiceDetailPage() {
                   <th className="px-4 py-2 text-left text-xs font-bold italic text-[#4b5563] uppercase">
                     Ghi chú
                   </th>
+                  <th className="px-4 py-2 text-center text-xs font-bold italic text-[#4b5563] uppercase">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -447,21 +503,114 @@ export default function EmployeeInvoiceDetailPage() {
                           {unit?.name || `ĐV #${d.unit_id}`}
                         </td>
                         <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
-                          {qty}
+                          {editingDetailId === d.id ? (
+                            <input
+                              type="number"
+                              value={editingQuantity}
+                              onChange={(e) => setEditingQuantity(e.target.value)}
+                              className="w-16 px-2 py-1 border border-slate-300 rounded text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#00897b]"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleEditDetail(d)}
+                              disabled={!isDraft}
+                              className={isDraft ? "cursor-pointer hover:underline text-[#00897b]" : ""}
+                            >
+                              {qty}
+                            </button>
+                          )}
                         </td>
                         <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
                           {editingDetailId === d.id ? (
-                            <div className="flex gap-1 items-center justify-end">
-                              <input
-                                type="number"
-                                value={editingPrice}
-                                onChange={(e) => setEditingPrice(e.target.value)}
-                                autoFocus
-                                className="w-20 px-2 py-1 border border-slate-300 rounded text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#00897b]"
-                              />
+                            <input
+                              type="number"
+                              value={editingPrice}
+                              onChange={(e) => setEditingPrice(e.target.value)}
+                              className="w-20 px-2 py-1 border border-slate-300 rounded text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#00897b]"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleEditDetail(d)}
+                              disabled={!isDraft}
+                              className={isDraft ? "cursor-pointer hover:underline text-[#00897b]" : ""}
+                            >
+                              {formatCurrency(price)}
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
+                          {editingDetailId === d.id ? (
+                            <input
+                              type="number"
+                              value={editingVat}
+                              onChange={(e) => setEditingVat(e.target.value)}
+                              min="0"
+                              max="100"
+                              className="w-16 px-2 py-1 border border-slate-300 rounded text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#00897b]"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleEditDetail(d)}
+                              disabled={!isDraft}
+                              className={isDraft ? "cursor-pointer hover:underline text-[#00897b]" : ""}
+                            >
+                              {vat}
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
+                          {editingDetailId === d.id ? (
+                            <input
+                              type="number"
+                              value={editingDiscount}
+                              onChange={(e) => setEditingDiscount(e.target.value)}
+                              min="0"
+                              max="100"
+                              className="w-16 px-2 py-1 border border-slate-300 rounded text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#00897b]"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleEditDetail(d)}
+                              disabled={!isDraft}
+                              className={isDraft ? "cursor-pointer hover:underline text-[#00897b]" : ""}
+                            >
+                              {discount}
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
+                          {formatCurrency(total)}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-[#4b5563]">
+                          {editingDetailId === d.id ? (
+                            <input
+                              type="text"
+                              value={editingDescription}
+                              onChange={(e) => setEditingDescription(e.target.value)}
+                              placeholder="Ghi chú"
+                              className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#00897b]"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleEditDetail(d)}
+                              disabled={!isDraft}
+                              className={`text-left ${isDraft ? "cursor-pointer hover:underline text-[#00897b]" : ""}`}
+                            >
+                              {d.description || "-"}
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-[#4b5563] text-center">
+                          {editingDetailId === d.id ? (
+                            <div className="flex gap-1 items-center justify-center">
                               <button
                                 type="button"
-                                onClick={() => handleSavePrice(d.id)}
+                                onClick={() => handleSaveDetail(d.id)}
                                 className="px-2 py-1 text-xs bg-[#00897b] text-white rounded hover:bg-[#007a6c]"
                               >
                                 Lưu
@@ -477,25 +626,16 @@ export default function EmployeeInvoiceDetailPage() {
                           ) : (
                             <button
                               type="button"
-                              onClick={() => handleEditPrice(d)}
+                              onClick={() => handleDeleteDetail(d.id)}
                               disabled={!isDraft}
-                              className={`text-right ${isDraft ? "cursor-pointer hover:underline text-[#00897b]" : "text-[#1e3a8a]"}`}
+                              className={`px-2 py-1 text-xs rounded transition-colors ${isDraft
+                                ? "bg-red-100 text-red-600 hover:bg-red-200"
+                                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                }`}
                             >
-                              {formatCurrency(price)}
+                              Xóa
                             </button>
                           )}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
-                          {vat}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
-                          {discount}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
-                          {formatCurrency(total)}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-[#4b5563]">
-                          {d.description || "-"}
                         </td>
                       </tr>
                     );

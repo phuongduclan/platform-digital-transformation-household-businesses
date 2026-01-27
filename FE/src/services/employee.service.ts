@@ -136,6 +136,13 @@ export const employeeService = {
     return res.data;
   },
 
+  async deleteInvoiceDetail(
+    invoiceId: number,
+    detailId: number
+  ): Promise<void> {
+    await api.delete(`/api/invoices/${invoiceId}/details/${detailId}`);
+  },
+
   // Payments (Employee) - CHỈ có POST và GET detail, KHÔNG có list
   // Employee không có quyền list payments (F211 chỉ cho POST và GET detail)
   // Nếu cần list, phải dùng owner endpoint (F112) hoặc filter từ invoices
