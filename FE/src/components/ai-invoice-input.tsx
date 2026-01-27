@@ -4,6 +4,7 @@ import { useState } from "react";
 import { aiInvoiceService, employeeAIInvoiceService } from "@/services/ai-invoice.service";
 import { showToast } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
+import AIButton from "@/components/ai-button";
 
 interface AIInvoiceInputProps {
     role?: "owner" | "employee";
@@ -102,9 +103,12 @@ export default function AIInvoiceInput({ role = "owner" }: AIInvoiceInputProps) 
     return (
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
             <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#00897b] to-[#00695c] rounded-lg flex items-center justify-center">
-                    <span className="text-white text-xl">🤖</span>
-                </div>
+                <AIButton 
+                    onClick={handleSubmit} 
+                    isLoading={loading} 
+                    disabled={loading || isListening}
+                    size="small"
+                />
                 <div>
                     <h2 className="text-lg font-bold text-[#1e3a8a]">
                         Tạo hóa đơn bằng AI
