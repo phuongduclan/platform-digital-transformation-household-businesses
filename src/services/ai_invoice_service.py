@@ -98,14 +98,22 @@ class AIInvoiceService:
         Returns:
             Context dict with products, customers, units
         """
-        products = self.product_service.list_products(household_id, status='Active')
+        products = self.product_service.list_products(household_id, status='ACTIVE')
+        # Fix: Customers use 'Active' (Title case) in DB, while others use 'ACTIVE'
         customers = self.customer_service.list_customers(household_id, status='Active')
-        units = self.unit_service.list_units(household_id, status='Active')
+        units = self.unit_service.list_units(household_id, status='ACTIVE')
+        
+        # DEBUG: Log customer data
+        print(f"\n=== DEBUG: Loading context for household_id={household_id} ===")
+        print(f"Found {len(customers)} ACTIVE customers:")
+        for c in customers:
+            print(f"  - ID={c.id}: '{c.name}' (phone: {c.phone})")
+        print("===\n")
         
         return {
             'household_id': household_id,
             'products': [
-                {'id': p.id, 'name': p.name, 'price': float(p.price)}
+                {'id': p.id, 'name': p.name}
                 for p in products
             ],
             'customers': [
@@ -146,10 +154,19 @@ class AIInvoiceService:
         # Match customer
         customer_id = None
         if ai_result.get('customer_name'):
+            # DEBUG: Log AI result for customer
+            print(f"\n=== DEBUG: Customer Matching ===")
+            print(f"AI returned customer_name: '{ai_result['customer_name']}'")
+            print(f"Available customers: {[c['name'] for c in context['customers']]}")
+            
             customer_id, match_score = self._match_customer(
                 ai_result['customer_name'],
                 context['customers']
             )
+            
+            print(f"Match result: customer_id={customer_id}, score={match_score}")
+            print("===\n")
+            
             if not customer_id:
                 warnings.append(f"Không tìm thấy khách hàng: {ai_result['customer_name']}")
             elif match_score < FUZZY_MATCH_THRESHOLD_HIGH:
@@ -188,7 +205,7 @@ class AIInvoiceService:
                 'product_id': product_match['id'],
                 'unit_id': unit_id,
                 'quantity': item['quantity'],
-                'price': product_match['price'],
+                'price': 0,  # Price will be entered by user or fetched from inventory
                 'vat': 0,
                 'discount': 0,
                 'description': f"AI: {item['product_name']}"
@@ -228,35 +245,60 @@ class AIInvoiceService:
         if not name or not customers:
             return None, 0
         
+        # Helper to normalize name (remove prefixes)
+        def normalize_name(n: str) -> str:
+            n = n.lower().strip()
+            prefixes = ['anh ', 'chị ', 'cô ', 'chú ', 'bác ', 'ông ', 'bà ', 'em ']
+            for prefix in prefixes:
+                if n.startswith(prefix):
+                    return n[len(prefix):].strip()
+            return n
+
         name_lower = name.lower().strip()
+        name_normalized = normalize_name(name)
         
-        # Exact match first (100% confidence)
+        # 1. Exact match first (100% confidence)
         for c in customers:
-            if c['name'].lower().strip() == name_lower:
+            c_name_lower = c['name'].lower().strip()
+            if c_name_lower == name_lower or c_name_lower == name_normalized:
                 return c['id'], 100
         
         # Use fuzzywuzzy for intelligent matching
         customer_names = {c['name']: c['id'] for c in customers}
         
-        # Try token_set_ratio (handles word order differences)
-        best_match = process.extractOne(
+        # 2. Try match with original name
+        best_match_original = process.extractOne(
             name,
             customer_names.keys(),
             scorer=fuzz.token_set_ratio
         )
         
+        # 3. Try match with normalized name (if different)
+        best_match_normalized = None
+        if name_normalized != name_lower:
+            best_match_normalized = process.extractOne(
+                name_normalized,
+                customer_names.keys(),
+                scorer=fuzz.token_set_ratio
+            )
+        
+        # Compare and pick best match
+        best_match = best_match_original
+        if best_match_normalized and best_match_normalized[1] > (best_match_original[1] if best_match_original else 0):
+            best_match = best_match_normalized
+            
         if best_match and best_match[1] >= FUZZY_MATCH_THRESHOLD_MEDIUM:
             return customer_names[best_match[0]], best_match[1]
         
-        # Try partial_ratio for substring matches
-        best_match = process.extractOne(
-            name,
+        # Try partial_ratio as fallback
+        best_match_partial = process.extractOne(
+            name_normalized,
             customer_names.keys(),
             scorer=fuzz.partial_ratio
         )
         
-        if best_match and best_match[1] >= FUZZY_MATCH_THRESHOLD_HIGH:
-            return customer_names[best_match[0]], best_match[1]
+        if best_match_partial and best_match_partial[1] >= FUZZY_MATCH_THRESHOLD_HIGH:
+            return customer_names[best_match_partial[0]], best_match_partial[1]
         
         return None, 0
     

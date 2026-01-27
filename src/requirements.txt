@@ -16,8 +16,8 @@ flask-swagger-ui
 gunicorn
 PyJWT
 
-# Google AI Studio
-google-generativeai>=0.3.2
+# Google AI Studio - using new google-genai package (google-generativeai is deprecated)
+google-genai>=0.1.0
 
 # Real-time Notifications
 flask-socketio>=5.3.0

@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api';
+import { api } from '@/lib/api';
 
 export interface AddressSuggestion {
     description: string;
@@ -16,7 +16,7 @@ export interface PlaceDetail {
 
 export const goongService = {
     /**
-     * Autocomplete address search using Goong.io API
+     * Autocomplete address search using Goong.io API via backend proxy
      * @param query - Search query (Vietnamese address)
      * @param limit - Maximum number of results (default 5)
      */
@@ -26,28 +26,16 @@ export const goongService = {
         }
 
         try {
-            // Call backend proxy (to keep API key secure)
-            const response = await fetch(
-                `https://rsapi.goong.io/Place/AutoComplete?api_key=GaIfhCGenUAlFHpcKSXDTTPsMMU9lDc6PlezgXl6&input=${encodeURIComponent(query)}&limit=${limit}`,
+            // Call backend proxy - API key is kept secure on server
+            const response = await api.post<AddressSuggestion[]>(
+                '/api/owner/addresses/autocomplete',
                 {
-                    method: 'GET',
+                    query: query.trim(),
+                    limit
                 }
             );
 
-            if (!response.ok) {
-                console.error('Goong API error:', response.statusText);
-                return [];
-            }
-
-            const data = await response.json();
-            const predictions = data.predictions || [];
-
-            return predictions.map((pred: any) => ({
-                description: pred.description || '',
-                place_id: pred.place_id || '',
-                main_text: pred.structured_formatting?.main_text || '',
-                secondary_text: pred.structured_formatting?.secondary_text || '',
-            }));
+            return response.data || [];
         } catch (error) {
             console.error('Error fetching address suggestions:', error);
             return [];
@@ -55,7 +43,7 @@ export const goongService = {
     },
 
     /**
-     * Get detailed place information
+     * Get detailed place information via backend proxy
      * @param placeId - Place ID from autocomplete result
      */
     async getPlaceDetail(placeId: string): Promise<PlaceDetail | null> {
@@ -64,24 +52,15 @@ export const goongService = {
         }
 
         try {
-            const response = await fetch(
-                `https://rsapi.goong.io/Place/Detail?api_key=GaIfhCGenUAlFHpcKSXDTTPsMMU9lDc6PlezgXl6&place_id=${encodeURIComponent(placeId)}`
+            // Call backend proxy - API key is kept secure on server
+            const response = await api.post<PlaceDetail>(
+                '/api/owner/addresses/detail',
+                {
+                    place_id: placeId
+                }
             );
 
-            if (!response.ok) {
-                return null;
-            }
-
-            const data = await response.json();
-            const result = data.result || {};
-            const location = result.geometry?.location || {};
-
-            return {
-                formatted_address: result.formatted_address || '',
-                lat: location.lat || null,
-                lng: location.lng || null,
-                address_components: result.address_components || [],
-            };
+            return response.data || null;
         } catch (error) {
             console.error('Error fetching place detail:', error);
             return null;

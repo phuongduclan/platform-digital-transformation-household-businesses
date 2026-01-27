@@ -4,7 +4,7 @@ Wrapper for Google Generative AI (Gemini) API
 Handles API calls, prompt engineering, and response parsing for invoice creation
 """
 
-import google.generativeai as genai
+import google.genai as genai
 from typing import Dict, Any, Optional, List
 import json
 import re
@@ -31,9 +31,8 @@ class GoogleAIClient:
         if not self.api_key:
             raise ValueError("Google AI API key is required. Set GOOGLE_AI_API_KEY in .env file")
         
-        # Configure API
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel(self.model_name)
+        # Initialize client - google.genai style
+        self.client = genai.Client(api_key=self.api_key)
     
     def generate_content(
         self,
@@ -56,9 +55,10 @@ class GoogleAIClient:
         max_tokens = max_tokens if max_tokens is not None else Config.GOOGLE_AI_MAX_TOKENS
         
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config=genai.GenerationConfig(
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt,
+                config=genai.types.GenerateContentConfig(
                     temperature=temperature,
                     max_output_tokens=max_tokens,
                 )
@@ -119,14 +119,14 @@ class GoogleAIClient:
         """
         # Format products list
         products_list = "\n".join([
-            f"- {p['name']} (Giá: {p['price']:,.0f} VND)"
-            for p in context.get('products', [])[:50]  # Limit to 50 products to avoid token limit
+            f"- {p['name']}"
+            for p in context.get('products', [])[:200]  # Limit to 200 products to avoid token limit
         ])
         
         # Format customers list
         customers_list = "\n".join([
             f"- {c['name']}" + (f" ({c['phone']})" if c.get('phone') else "")
-            for c in context.get('customers', [])[:30]  # Limit to 30 customers
+            for c in context.get('customers', [])[:200]  # Limit to 200 customers
         ])
         
         # Format units list
@@ -156,11 +156,12 @@ QUY TẮC:
 1. Nếu có từ "ghi nợ", "nợ", "chịu", "trả sau" → invoice_type = "UNPAID"
 2. Nếu có từ "tiền mặt", "thanh toán", "trả tiền", "trả ngay" → invoice_type = "PAID"
 3. Mặc định: invoice_type = "PAID"
-4. Tên khách hàng: anh/chị/ông/bà/cô/chú + tên (ví dụ: "anh Ba", "chị Lan")
-5. Số lượng: số + đơn vị đếm (bao, cây, kg, tấn, m3, ...)
-6. Sản phẩm: tìm tên gần đúng nhất trong danh sách sản phẩm có sẵn
-7. Nếu không tìm thấy sản phẩm chính xác, chọn sản phẩm gần nghĩa nhất
-8. Nếu không có đơn vị, để unit_name = null
+4. Tên khách hàng: anh/chị/ông/bà/cô/chú + tên (ví dụ: "anh Nam", "chị Lan")
+5. Nếu không có tên khách hàng, để customer_name = null
+6. Số lượng: số + đơn vị đếm (bao, cây, kg, tấn, m3, ...)
+7. Sản phẩm: tìm tên gần đúng nhất trong danh sách sản phẩm có sẵn
+8. Nếu không tìm thấy sản phẩm chính xác, chọn sản phẩm gần nghĩa nhất
+9. Nếu không có đơn vị, để unit_name = null
 
 DANH SÁCH SẢN PHẨM CÓ SẴN:
 {products_list if products_list else "Không có sản phẩm"}

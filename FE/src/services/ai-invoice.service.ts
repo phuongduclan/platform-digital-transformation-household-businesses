@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api';
+import { api } from '@/lib/api';
 
 export interface AIInvoiceRequest {
     text: string;
@@ -34,8 +34,8 @@ export const aiInvoiceService = {
      * Create draft invoice from natural language text (Owner)
      */
     async createFromText(text: string): Promise<AIInvoiceResponse> {
-        const response = await apiClient.post<AIInvoiceResponse>(
-            '/owner/ai-invoices/create',
+        const response = await api.post<AIInvoiceResponse>(
+            '/api/owner/ai-invoices/create',
             { text }
         );
         return response.data;
@@ -47,8 +47,8 @@ export const employeeAIInvoiceService = {
      * Create draft invoice from natural language text (Employee)
      */
     async createFromText(text: string): Promise<AIInvoiceResponse> {
-        const response = await apiClient.post<AIInvoiceResponse>(
-            '/employee/ai-invoices/create',
+        const response = await api.post<AIInvoiceResponse>(
+            '/api/employee/ai-invoices/create',
             { text }
         );
         return response.data;

@@ -22,7 +22,7 @@ class Config:
     
     # Google AI Studio API Configuration
     GOOGLE_AI_API_KEY = os.environ.get('GOOGLE_AI_API_KEY') or ''
-    GOOGLE_AI_MODEL = os.environ.get('GOOGLE_AI_MODEL') or 'gemini-1.5-flash'
+    GOOGLE_AI_MODEL = os.environ.get('GOOGLE_AI_MODEL') or 'gemini-2.5-flash'
     GOOGLE_AI_TEMPERATURE = float(os.environ.get('GOOGLE_AI_TEMPERATURE', '0.2'))
     GOOGLE_AI_MAX_TOKENS = int(os.environ.get('GOOGLE_AI_MAX_TOKENS', '2048'))
     

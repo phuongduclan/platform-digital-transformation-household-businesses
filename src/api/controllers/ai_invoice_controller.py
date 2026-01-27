@@ -18,7 +18,7 @@ from infrastructure.repositories.product_repository import ProductRepository
 from infrastructure.repositories.customer_repository import CustomerRepository
 from infrastructure.repositories.unit_repository import UnitRepository
 
-from api.middleware.auth import token_required, get_household_id_from_token
+from api.utils.auth_utils import token_required, get_household_id_from_token
 from config import Config
 from infrastructure.databases.session_utils import get_session
 from datetime import datetime
@@ -66,7 +66,7 @@ def get_ai_invoice_service():
     unit_repository.session = session
     
     # Initialize services
-    invoice_detail_service = InvoiceDetailService(invoice_detail_repository)
+    invoice_detail_service = InvoiceDetailService(invoice_detail_repository, invoice_repository)
     invoice_service = InvoiceService(invoice_repository, invoice_detail_repository)
     product_service = ProductService(product_repository)
     customer_service = CustomerService(customer_repository)
@@ -84,22 +84,75 @@ def get_ai_invoice_service():
 
 def invoice_to_dict(invoice):
     """Convert Invoice object to dict"""
-    return {
-        'id': invoice.id,
-        'household_id': invoice.household_id,
-        'seller_id': invoice.seller_id,
-        'customer_id': invoice.customer_id,
-        'invoice_type': invoice.invoice_type,
-        'discount_total': float(invoice.discount_total) if invoice.discount_total else 0,
-        'vat_total': float(invoice.vat_total) if invoice.vat_total else 0,
-        'total_amount': float(invoice.total_amount) if invoice.total_amount else 0,
-        'description': invoice.description,
-        'status': invoice.status,
-        'created_by': invoice.created_by,
-        'updated_by': invoice.updated_by,
-        'created_at': invoice.created_at.isoformat() if invoice.created_at else None,
-        'updated_at': invoice.updated_at.isoformat() if invoice.updated_at else None
-    }
+    try:
+        # Get details - fetch them if not loaded
+        details = []
+        if hasattr(invoice, 'details') and invoice.details:
+            for detail in invoice.details:
+                try:
+                    detail_dict = {
+                        'id': detail.id,
+                        'product_id': detail.product_id,
+                        'unit_id': detail.unit_id,
+                        'quantity': detail.quantity,
+                        'price': float(detail.price) if detail.price is not None else 0,
+                        'vat': detail.vat,
+                        'discount': detail.discount,
+                        'description': detail.description,
+                        'status': detail.status,
+                        'created_at': detail.created_at.isoformat() if detail.created_at else None,
+                        'updated_at': detail.updated_at.isoformat() if detail.updated_at else None
+                    }
+                    details.append(detail_dict)
+                except AttributeError as e:
+                    # Skip details with missing attributes
+                    print(f"Warning: Skipping detail due to missing attribute: {str(e)}")
+                    continue
+        else:
+            # If details are not loaded, try to fetch them from the repository
+            try:
+                session = getattr(invoice, 'session', None)
+                if session and hasattr(invoice, 'id'):
+                    from infrastructure.repositories.invoice_detail_repository import InvoiceDetailRepository
+                    detail_repo = InvoiceDetailRepository()
+                    detail_repo.session = session
+                    invoice_details = detail_repo.list_by_invoice_id(invoice.id)
+                    for detail in invoice_details:
+                        details.append({
+                            'id': detail.id,
+                            'product_id': detail.product_id,
+                            'unit_id': detail.unit_id,
+                            'quantity': detail.quantity,
+                            'price': float(detail.price) if detail.price is not None else 0,
+                            'vat': detail.vat,
+                            'discount': detail.discount,
+                            'description': detail.description,
+                            'status': detail.status,
+                            'created_at': detail.created_at.isoformat() if detail.created_at else None,
+                            'updated_at': detail.updated_at.isoformat() if detail.updated_at else None
+                        })
+            except Exception as fetch_error:
+                print(f"Warning: Could not fetch invoice details: {str(fetch_error)}")
+        
+        return {
+            'id': invoice.id,
+            'household_id': invoice.household_id,
+            'seller_id': invoice.seller_id,
+            'customer_id': invoice.customer_id,
+            'invoice_type': invoice.invoice_type,
+            'discount_total': float(invoice.discount_total) if invoice.discount_total else 0,
+            'vat_total': float(invoice.vat_total) if invoice.vat_total else 0,
+            'total_amount': float(invoice.total_amount) if invoice.total_amount else 0,
+            'description': invoice.description,
+            'status': invoice.status,
+            'created_by': invoice.created_by,
+            'updated_by': invoice.updated_by,
+            'created_at': invoice.created_at.isoformat() if invoice.created_at else None,
+            'updated_at': invoice.updated_at.isoformat() if invoice.updated_at else None,
+            'details': details
+        }
+    except Exception as e:
+        raise Exception(f"Error converting invoice to dict: {str(e)}")
 
 
 @owner_ai_invoice_bp.route('/create', methods=['POST'])
@@ -164,6 +217,22 @@ def owner_create_ai_invoice():
             created_by=created_by
         )
         
+        # Reload invoice with details
+        from infrastructure.repositories.invoice_repository import InvoiceRepository
+        from infrastructure.databases.session_utils import get_session
+        session = get_session()
+        invoice_repo = InvoiceRepository()
+        invoice_repo.session = session
+        invoice_with_details = invoice_repo.get_by_id(result['invoice'].id, household_id)
+        
+        # Load invoice details manually
+        if invoice_with_details and hasattr(invoice_with_details, 'id'):
+            from infrastructure.repositories.invoice_detail_repository import InvoiceDetailRepository
+            detail_repo = InvoiceDetailRepository()
+            detail_repo.session = session
+            details = detail_repo.list_by_invoice_id(invoice_with_details.id, household_id)
+            invoice_with_details.details = details
+        
         # Send real-time notification to household members
         try:
             from app import get_socketio
@@ -174,8 +243,8 @@ def owner_create_ai_invoice():
                 notification_service = NotificationService(socketio)
                 notification_service.notify_ai_draft_created(
                     household_id=household_id,
-                    invoice_id=result['invoice'].id,
-                    invoice_data=invoice_to_dict(result['invoice']),
+                    invoice_id=invoice_with_details.id if invoice_with_details else result['invoice'].id,
+                    invoice_data=invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),
                     confidence=result['confidence'],
                     warnings=result['warnings']
                 )
@@ -184,7 +253,7 @@ def owner_create_ai_invoice():
             print(f"Failed to send notification: {str(e)}")
         
         return jsonify({
-            'invoice': invoice_to_dict(result['invoice']),
+            'invoice': invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),
             'confidence': result['confidence'],
             'warnings': result['warnings'],
             'ai_result': result['ai_result']
@@ -258,6 +327,22 @@ def employee_create_ai_invoice():
             created_by=created_by
         )
         
+        # Reload invoice with details
+        from infrastructure.repositories.invoice_repository import InvoiceRepository
+        from infrastructure.databases.session_utils import get_session
+        session = get_session()
+        invoice_repo = InvoiceRepository()
+        invoice_repo.session = session
+        invoice_with_details = invoice_repo.get_by_id(result['invoice'].id, household_id)
+        
+        # Load invoice details manually
+        if invoice_with_details and hasattr(invoice_with_details, 'id'):
+            from infrastructure.repositories.invoice_detail_repository import InvoiceDetailRepository
+            detail_repo = InvoiceDetailRepository()
+            detail_repo.session = session
+            details = detail_repo.list_by_invoice_id(invoice_with_details.id, household_id)
+            invoice_with_details.details = details
+        
         # Send real-time notification to household members
         try:
             from app import get_socketio
@@ -268,8 +353,8 @@ def employee_create_ai_invoice():
                 notification_service = NotificationService(socketio)
                 notification_service.notify_ai_draft_created(
                     household_id=household_id,
-                    invoice_id=result['invoice'].id,
-                    invoice_data=invoice_to_dict(result['invoice']),
+                    invoice_id=invoice_with_details.id if invoice_with_details else result['invoice'].id,
+                    invoice_data=invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),
                     confidence=result['confidence'],
                     warnings=result['warnings']
                 )
@@ -278,7 +363,7 @@ def employee_create_ai_invoice():
             print(f"Failed to send notification: {str(e)}")
         
         return jsonify({
-            'invoice': invoice_to_dict(result['invoice']),
+            'invoice': invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),
             'confidence': result['confidence'],
             'warnings': result['warnings'],
             'ai_result': result['ai_result']
