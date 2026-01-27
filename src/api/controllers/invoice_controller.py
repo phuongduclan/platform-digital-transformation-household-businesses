@@ -1089,13 +1089,21 @@ def update_invoice_detail(invoice_id, detail_id):
         return jsonify({"error": errors}), 400
 
     try:
+        # Convert price if provided
+        price_value = None
+        if "price" in data and data["price"] is not None:
+            try:
+                price_value = Decimal(str(data["price"]))
+            except (ValueError, TypeError) as e:
+                return jsonify({"error": f"Invalid price format: {str(e)}"}), 400
+        
         detail = invoice_detail_service.update_invoice_detail(
             invoice_detail_id=detail_id,
             household_id=g.household_id,
             product_id=data.get("product_id"),
             unit_id=data.get("unit_id"),
             quantity=data.get("quantity"),
-            price=Decimal(str(data["price"])) if "price" in data and data["price"] is not None else None,
+            price=price_value,
             vat=data.get("vat"),
             discount=data.get("discount"),
             description=data.get("description")
