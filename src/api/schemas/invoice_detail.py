@@ -16,12 +16,12 @@ class InvoiceDetailRequestSchema(Schema):
     )
 
 class InvoiceDetailUpdateSchema(Schema):
-    product_id = fields.Int(required=False)
-    unit_id = fields.Int(required=False)
-    quantity = fields.Int(required=False, validate=validate.Range(min=1))
-    price = fields.Decimal(required=False, as_string=True)
-    vat = fields.Int(required=False, validate=validate.Range(min=0, max=100))
-    discount = fields.Int(required=False, validate=validate.Range(min=0, max=100))
+    product_id = fields.Int(required=False, allow_none=True)
+    unit_id = fields.Int(required=False, allow_none=True)
+    quantity = fields.Int(required=False, validate=validate.Range(min=1), allow_none=True)
+    price = fields.Decimal(required=False, as_string=True, allow_none=True)
+    vat = fields.Int(required=False, validate=validate.Range(min=0, max=100), allow_none=True)
+    discount = fields.Int(required=False, validate=validate.Range(min=0, max=100), allow_none=True)
     description = fields.Str(required=False, allow_none=True)
 
 class InvoiceDetailResponseSchema(Schema):

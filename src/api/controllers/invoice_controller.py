@@ -1101,6 +1101,8 @@ def update_invoice_detail(invoice_id, detail_id):
             description=data.get("description")
         )
         return jsonify(invoice_detail_to_dict(detail)), 200
+    except KeyError as e:
+        return jsonify({"error": f"Missing field: {str(e)}"}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
