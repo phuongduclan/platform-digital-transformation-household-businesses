@@ -26,6 +26,8 @@ export default function EmployeeInvoiceDetailPage() {
   const [saving, setSaving] = useState(false);
 
   const [editingDesc, setEditingDesc] = useState("");
+  const [editingDetailId, setEditingDetailId] = useState<number | null>(null);
+  const [editingPrice, setEditingPrice] = useState<number | string>("");
 
   const isDraft = invoice?.status === "Draft";
 
@@ -154,6 +156,51 @@ export default function EmployeeInvoiceDetailPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleEditPrice = (detail: EmployeeInvoiceDetail) => {
+    setEditingDetailId(detail.id);
+    setEditingPrice(detail.price || 0);
+  };
+
+  const handleSavePrice = async (detailId: number) => {
+    if (!invoice || !isDraft) return;
+    if (editingPrice === "") {
+      showToast("Vui lòng nhập đơn giá", "error");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const priceNumber = Number(editingPrice);
+      if (Number.isNaN(priceNumber)) {
+        showToast("Đơn giá phải là số", "error");
+        return;
+      }
+
+      await employeeService.updateInvoiceDetail(invoice.id, detailId, {
+        price: priceNumber,
+      });
+
+      showToast("Cập nhật đơn giá thành công", "success");
+      setEditingDetailId(null);
+      setEditingPrice("");
+      fetchData();
+    } catch (error: any) {
+      showToast(
+        error?.response?.data?.error ||
+        error?.message ||
+        "Lỗi khi cập nhật đơn giá",
+        "error"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDetailId(null);
+    setEditingPrice("");
   };
 
   const handlePrintInvoice = async () => {
@@ -403,7 +450,40 @@ export default function EmployeeInvoiceDetailPage() {
                           {qty}
                         </td>
                         <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
-                          {formatCurrency(price)}
+                          {editingDetailId === d.id ? (
+                            <div className="flex gap-1 items-center justify-end">
+                              <input
+                                type="number"
+                                value={editingPrice}
+                                onChange={(e) => setEditingPrice(e.target.value)}
+                                autoFocus
+                                className="w-20 px-2 py-1 border border-slate-300 rounded text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#00897b]"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSavePrice(d.id)}
+                                className="px-2 py-1 text-xs bg-[#00897b] text-white rounded hover:bg-[#007a6c]"
+                              >
+                                Lưu
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="px-2 py-1 text-xs bg-slate-300 text-slate-600 rounded hover:bg-slate-400"
+                              >
+                                Hủy
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleEditPrice(d)}
+                              disabled={!isDraft}
+                              className={`text-right ${isDraft ? "cursor-pointer hover:underline text-[#00897b]" : "text-[#1e3a8a]"}`}
+                            >
+                              {formatCurrency(price)}
+                            </button>
+                          )}
                         </td>
                         <td className="px-4 py-2 text-sm text-right text-[#1e3a8a]">
                           {vat}

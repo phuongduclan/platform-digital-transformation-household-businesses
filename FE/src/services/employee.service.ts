@@ -119,6 +119,23 @@ export const employeeService = {
     return res.data || [];
   },
 
+  async updateInvoiceDetail(
+    invoiceId: number,
+    detailId: number,
+    data: {
+      product_id?: number;
+      unit_id?: number;
+      quantity?: number;
+      price?: number;
+      vat?: number;
+      discount?: number;
+      description?: string;
+    }
+  ): Promise<EmployeeInvoiceDetail> {
+    const res = await api.put(`/api/invoices/${invoiceId}/details/${detailId}`, data);
+    return res.data;
+  },
+
   // Payments (Employee) - CHỈ có POST và GET detail, KHÔNG có list
   // Employee không có quyền list payments (F211 chỉ cho POST và GET detail)
   // Nếu cần list, phải dùng owner endpoint (F112) hoặc filter từ invoices
