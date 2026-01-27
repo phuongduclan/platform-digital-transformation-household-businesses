@@ -50,7 +50,9 @@ class NotificationService:
         
         # Emit to household room (all users in same household)
         room = f'household_{household_id}'
+        print(f"DEBUG: Sending notification '{notification['type']}' to room '{room}'")
         self.socketio.emit('notification', notification, room=room)
+        print(f"DEBUG: Notification emitted successfully")
     
     def join_household_room(self, household_id: int):
         """

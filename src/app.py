@@ -74,21 +74,22 @@ def create_app():
     # SocketIO event handlers
     @socketio.on('connect')
     def handle_connect():
-        print(f'Client connected')
+        print(f'DEBUG: Client connected to SocketIO')
     
     @socketio.on('disconnect')
     def handle_disconnect():
-        print(f'Client disconnected')
+        print(f'DEBUG: Client disconnected from SocketIO')
     
     @socketio.on('join_household')
     def handle_join_household(data):
         """Client joins household room to receive notifications"""
         from services.notification_service import NotificationService
         household_id = data.get('household_id')
+        print(f"DEBUG: Received join_household request for household_id: {household_id}")
         if household_id:
             notification_service = NotificationService(socketio)
             notification_service.join_household_room(household_id)
-            print(f'Client joined household_{household_id}')
+            print(f'DEBUG: Client joined household_{household_id} room')
 
     return app
 

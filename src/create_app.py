@@ -1,17 +1,4 @@
-from flask import Flask
-from .config import Config
-from .api.middleware import setup_middleware
-from .api.routes import register_routes
-from .infrastructure.databases import init_db
-from .app_logging import setup_logging
+from .app import create_app
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-
-    setup_logging(app)
-    init_db(app)
-    setup_middleware(app)
-    register_routes(app)
-
-    return app
+# This file is kept for compatibility with scripts that expect create_app here.
+# It redirects to the main implementation in app.py which includes Socket.IO.
