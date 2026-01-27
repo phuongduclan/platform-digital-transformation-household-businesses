@@ -294,6 +294,7 @@ export default function OwnerCustomerDetailPage() {
           </p>
         </div>
       </div>
+    </div >
     </>
   );
 }

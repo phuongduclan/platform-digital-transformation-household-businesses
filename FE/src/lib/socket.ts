@@ -8,7 +8,8 @@ export const initializeSocket = (householdId: number) => {
     }
 
     // Connect to backend WebSocket
-    socket = io('http://localhost:6868', {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6868';
+    socket = io(baseUrl, {
         autoConnect: true
     });
 

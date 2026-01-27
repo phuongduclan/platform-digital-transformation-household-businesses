@@ -67,8 +67,9 @@ export default function LoginPage() {
         err?.message?.includes("Network Error") ||
         err?.message?.includes("kết nối đến máy chủ")
       ) {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6868';
         message =
-          "Không thể kết nối đến máy chủ. Vui lòng đảm bảo backend đang chạy tại http://localhost:6868";
+          `Không thể kết nối đến máy chủ. Vui lòng đảm bảo backend đang chạy tại ${baseUrl}`;
       }
 
       setError(message);
