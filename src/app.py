@@ -24,7 +24,7 @@ def create_app():
     socketio = SocketIO(
         app,
         cors_allowed_origins="*",  # Allow all origins for development
-        async_mode='threading'
+        async_mode='eventlet'
     )
     
     # Enable CORS for all routes (cho phép FE gọi API từ localhost:3000)

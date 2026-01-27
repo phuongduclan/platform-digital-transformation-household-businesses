@@ -21,8 +21,8 @@ class ProductService(IProductService):
     def get_product(self, product_id: int, household_id: int) -> Optional[Product]:
         return self.repository.get_by_id(product_id, household_id)
     
-    def list_products(self, household_id: int) -> List[Product]:
-        return self.repository.list(household_id)
+    def list_products(self, household_id: int, status: str = None) -> List[Product]:
+        return self.repository.list(household_id, status)
     
     def update_product(self, product_id: int, household_id: int, category_id: int = None,
                        name: str = None, image_url: str = None, description: str = None,
@@ -35,4 +35,3 @@ class ProductService(IProductService):
 
     def delete_product(self, product_id: int, household_id: int) -> None:
         self.repository.delete(product_id, household_id)
-    

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { showToast } from "@/components/ui/toast";
+import NotificationBell from "@/components/notification-bell";
 
 
 interface OwnerLayoutProps {
@@ -146,6 +147,12 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
                 </Link>
               </div>
               <div className="flex items-center gap-4">
+                {user && (
+                  <NotificationBell
+                    householdId={user.household_id}
+                    role="owner"
+                  />
+                )}
                 <span className="text-sm text-[#1e3a8a]">
                   Xin chào, {user?.user_name || "Owner"}
                 </span>

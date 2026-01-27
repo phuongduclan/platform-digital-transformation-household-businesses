@@ -30,8 +30,11 @@ class ProductRepository(IProductRepository):
     def get_by_id(self, product_id: int, household_id: int) -> Optional[ProductModel]:
         return self.session.query(ProductModel).filter_by(id=product_id, household_id=household_id).first()
         
-    def list(self, household_id: int) -> List[ProductModel]:
-        return self.session.query(ProductModel).filter_by(household_id=household_id).all()
+    def list(self, household_id: int, status: str = None) -> List[ProductModel]:
+        query = self.session.query(ProductModel).filter_by(household_id=household_id)
+        if status:
+            query = query.filter_by(status=status)
+        return query.all()
         
     def update(self, product: Product) -> ProductModel:
         try:

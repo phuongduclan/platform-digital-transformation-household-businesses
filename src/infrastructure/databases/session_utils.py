@@ -72,5 +72,14 @@ def safe_close(session: Session):
             pass
         # For now, we don't close shared sessions
         # Individual repositories should not close shared sessions
+        pass
     except Exception:
         pass
+
+def get_session():
+    """
+    Get the current database session.
+    Returns the shared session instance.
+    """
+    from infrastructure.databases.mssql import session
+    return session

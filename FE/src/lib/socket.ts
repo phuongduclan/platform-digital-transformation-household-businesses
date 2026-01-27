@@ -9,7 +9,6 @@ export const initializeSocket = (householdId: number) => {
 
     // Connect to backend WebSocket
     socket = io('http://localhost:6868', {
-        transports: ['websocket'],
         autoConnect: true
     });
 

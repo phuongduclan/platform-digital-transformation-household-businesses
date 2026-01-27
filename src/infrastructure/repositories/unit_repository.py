@@ -29,8 +29,11 @@ class UnitRepository(IUnitRepository):
     def get_by_id(self, unit_id: int, household_id: int) -> Optional[UnitModel]:
         return self.session.query(UnitModel).filter_by(id=unit_id, household_id=household_id).first()
 
-    def list(self, household_id: int) -> List[UnitModel]:
-        return self.session.query(UnitModel).filter_by(household_id=household_id).all()
+    def list(self, household_id: int, status: str = None) -> List[UnitModel]:
+        query = self.session.query(UnitModel).filter_by(household_id=household_id)
+        if status:
+            query = query.filter_by(status=status)
+        return query.all()
     
     def update(self, unit: Unit) -> UnitModel:
         try:

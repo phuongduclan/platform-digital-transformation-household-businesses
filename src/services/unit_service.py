@@ -18,8 +18,8 @@ class UnitService(IUnitService):
     def get_unit(self, unit_id: int, household_id: int) -> Optional[Unit]:
         return self.repository.get_by_id(unit_id, household_id)
 
-    def list_units(self, household_id: int) -> List[Unit]:
-        return self.repository.list(household_id)
+    def list_units(self, household_id: int, status: str = None) -> List[Unit]:
+        return self.repository.list(household_id, status)
 
     def update_unit(self, unit_id: int, household_id: int, name: str = None, description: str = None, status: str = None) -> Unit:
         now = vietnam_now()
