@@ -1095,7 +1095,7 @@ def update_invoice_detail(invoice_id, detail_id):
             product_id=data.get("product_id"),
             unit_id=data.get("unit_id"),
             quantity=data.get("quantity"),
-            price=Decimal(str(data["price"])) if data.get("price") is not None else None,
+            price=Decimal(str(data["price"])) if "price" in data and data["price"] is not None else None,
             vat=data.get("vat"),
             discount=data.get("discount"),
             description=data.get("description")
