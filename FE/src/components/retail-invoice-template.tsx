@@ -66,8 +66,11 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
                     <div className="text-gray-700">Ban hành kèm theo</div>
                     <div className="text-gray-700">thông tư số</div>
                     <div className="text-gray-700 mb-2">số/2017/TT-BTC</div>
+                </div>
+
+                <div className="text-right text-[11px] mt-1">
                     <div className="text-red-600 font-bold text-sm">
-                        SỐ:
+                        SỐ: {invoiceNumber}
                     </div>
                 </div>
             </div>
@@ -158,7 +161,7 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
                     </span>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
