@@ -163,17 +163,20 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
             </div>
 
             {/* Footer Section */}
-            <div className="grid grid-cols-2 gap-8 text-center text-xs">
+            <div className="mb-2 text-right text-xs italic text-gray-600">
+                Ngày <span className="font-bold">{date.day}</span> tháng <span className="font-bold">{date.month}</span> năm <span className="font-bold">{date.year}</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 text-center text-xs mb-4">
                 <div>
-                    <div className="mb-2 italic text-gray-500">Người mua hàng</div>
-                    <div className="font-semibold text-gray-400 mt-10">(Ký, ghi rõ họ tên)</div>
+                    <div className="mb-1 font-bold text-gray-900 uppercase">Người mua hàng</div>
+                    <div className="font-normal italic text-gray-500">(Ký, ghi rõ họ tên)</div>
+                    <div className="h-[80px]"></div>
                 </div>
                 <div>
-                    <div className="italic text-gray-600 mb-2">
-                        Ngày <span className="font-bold">{date.day}</span> tháng <span className="font-bold">{date.month}</span> năm <span className="font-bold">{date.year}</span>
-                    </div>
-                    <div className="font-bold text-gray-900 uppercase">Người bán hàng</div>
-                    <div className="font-semibold text-gray-400 mt-10">(Ký, ghi rõ họ tên)</div>
+                    <div className="mb-1 font-bold text-gray-900 uppercase">Người bán hàng</div>
+                    <div className="font-normal italic text-gray-500">(Ký, ghi rõ họ tên)</div>
+                    <div className="h-[80px]"></div>
                 </div>
             </div>
 
