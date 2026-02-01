@@ -1,119 +1,146 @@
-import jsPDF from 'jspdf';
-import { EmployeeInvoice } from '@/services/employee.service';
+import { numberToVietnameseWords } from './number-to-words';
 
 interface InvoicePDFData {
-    invoice: EmployeeInvoice & { total_amount: string };
+    invoice: {
+        id: number;
+        created_at: string;
+        total_amount: string | number;
+    };
     household: {
         name: string | null;
         tax_code: string | null;
         address: string | null;
         phone: string | null;
-        description: string | null;
     } | null;
     customer: {
         name: string | null;
-        tax_code: string | null;
-        address: string | null;
-        phone: string | null;
-    } | null;
-    seller: {
-        name: string | null;
-        tax_code: string | null;
         address: string | null;
         phone: string | null;
     } | null;
     details: Array<{
-        id: number;
         product_name: string;
         unit_name: string;
         quantity: number;
         price: string | null;
-        discount: string | null;
-        vat: number;
         line_total: string;
     }>;
 }
 
 export const generateInvoicePDF = async (data: InvoicePDFData) => {
-    const doc = new jsPDF();
+    // Dynamically import html2pdf
+    const html2pdf = (await import('html2pdf.js')).default;
 
-    // Note: Default jsPDF fonts do not support Vietnamese characters well.
-    // For a production app, we should load a custom font that supports Vietnamese.
+    const createdDate = new Date(data.invoice.created_at);
+    const totalAmount = Number(data.invoice.total_amount);
 
-    doc.setFontSize(20);
-    doc.text('HOA DON / INVOICE', 105, 20, { align: 'center' });
+    // Create HTML string with Vietnamese font
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Be Vietnam Pro', sans-serif; padding: 20px; }
+                .invoice { max-width: 800px; margin: 0 auto; }
+                .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+                .logo { font-size: 24px; font-weight: bold; color: #1e3a8a; }
+                .title { text-align: center; font-size: 20px; font-weight: bold; margin: 20px 0; }
+                .customer { margin: 20px 0; font-size: 12px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 11px; }
+                th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                th { background: #f5f5f5; font-weight: 600; }
+                .total { text-align: right; margin: 20px 0; font-size: 14px; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="invoice">
+                <div class="header">
+                    <div class="logo">BizFlow</div>
+                    <div style="text-align: right; font-size: 11px;">
+                        <div>Mã hóa đơn: ${data.invoice.id}</div>
+                        <div>Ngày: ${createdDate.getDate()}/${createdDate.getMonth() + 1}/${createdDate.getFullYear()}</div>
+                    </div>
+                </div>
+                
+                <div class="title">HÓA ĐƠN BÁN LẺ / INVOICE</div>
+                
+                <div class="customer">
+                    <div><strong>MST:</strong> ${data.household?.tax_code || ''}</div>
+                    <div><strong>Địa chỉ:</strong> ${data.household?.address || ''}</div>
+                    <div><strong>SĐT:</strong> ${data.household?.phone || ''}</div>
+                    <br>
+                    <div><strong>Khách hàng:</strong> ${data.customer?.name || 'Khách lẻ'}</div>
+                    <div><strong>Địa chỉ:</strong> ${data.customer?.address || ''}</div>
+                    <div><strong>Điện thoại:</strong> ${data.customer?.phone || ''}</div>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>ĐVT</th>
+                            <th style="text-align: right;">SL</th>
+                            <th style="text-align: right;">Đơn giá</th>
+                            <th style="text-align: right;">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.details.map((item) => `
+                            <tr>
+                                <td>${item.product_name}</td>
+                                <td>${item.unit_name}</td>
+                                <td style="text-align: right;">${item.quantity}</td>
+                                <td style="text-align: right;">${Number(item.price || 0).toLocaleString('vi-VN')}</td>
+                                <td style="text-align: right;">${Number(item.line_total).toLocaleString('vi-VN')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                
+                <div class="total">
+                    <div>Tổng cộng: ${totalAmount.toLocaleString('vi-VN')} đồng</div>
+                    <div style="font-size: 11px; font-weight: normal; margin-top: 5px;">
+                        Bằng chữ: ${numberToVietnameseWords(totalAmount)}
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
 
-    doc.setFontSize(10);
-    doc.text(`Ma hoa don: ${data.invoice.id}`, 150, 30);
-    doc.text(`Ngay: ${new Date(data.invoice.created_at).toLocaleDateString()}`, 150, 35);
+    // Create temporary element
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    document.body.appendChild(tempDiv);
 
-    let y = 50;
+    // Wait for fonts to load
+    await document.fonts.ready;
 
-    // Household info (Left side)
-    if (data.household) {
-        doc.setFontSize(12);
-        doc.text(data.household.name || 'Household Business', 20, y);
-        y += 5;
-        doc.setFontSize(10);
-        doc.text(`MST: ${data.household.tax_code || ''}`, 20, y);
-        y += 5;
-        doc.text(`Dia chi: ${data.household.address || ''}`, 20, y);
-        y += 5;
-        doc.text(`SDT: ${data.household.phone || ''}`, 20, y);
-        y += 10;
-    }
-
-    // Customer info (Right side - roughly)
-    // Reset y for customer if needed or just place below
-    // For simplicity, placing below household for now
-    if (data.customer) {
-        y += 5;
-        doc.setFontSize(11);
-        doc.text('Khach hang:', 20, y);
-        y += 5;
-        doc.setFontSize(10);
-        doc.text(data.customer.name || 'Guest', 30, y);
-        y += 5;
-        if (data.customer.tax_code) {
-            doc.text(`MST: ${data.customer.tax_code}`, 30, y);
-            y += 5;
+    const options = {
+        margin: 10,
+        filename: `hoa-don-${data.invoice.id}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
         }
-        if (data.customer.address) {
-            doc.text(`Dia chi: ${data.customer.address}`, 30, y);
-            y += 5;
-        }
-        y += 5;
+    };
+
+    try {
+        await html2pdf().set(options).from(tempDiv).save();
+    } finally {
+        document.body.removeChild(tempDiv);
     }
-
-    // Table Header
-    y += 5;
-    doc.line(20, y, 190, y);
-    y += 5;
-    doc.setFontSize(10);
-    doc.text('San pham', 20, y);
-    doc.text('DVT', 80, y);
-    doc.text('SL', 100, y);
-    doc.text('Don gia', 120, y);
-    doc.text('Thanh tien', 160, y);
-    y += 3;
-    doc.line(20, y, 190, y);
-    y += 7;
-
-    // Table Rows
-    data.details.forEach((item) => {
-        doc.text(item.product_name, 20, y);
-        doc.text(item.unit_name, 80, y);
-        doc.text(String(item.quantity), 100, y);
-        doc.text(String(item.price), 120, y);
-        doc.text(item.line_total, 160, y);
-        y += 7;
-    });
-
-    doc.line(20, y, 190, y);
-    y += 10;
-
-    doc.setFontSize(12);
-    doc.text(`Tong cong: ${data.invoice.total_amount}`, 140, y);
-
-    doc.save(`invoice-${data.invoice.id}.pdf`);
 };
