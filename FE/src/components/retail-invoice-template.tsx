@@ -67,7 +67,7 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
                 <div className="w-1/2 text-right">
                     <div className="text-[10px] text-gray-500 italic mb-2 leading-tight">
                         <p>Ban hành kèm theo thông tư số</p>
-                        <p>số .../2017/TT-BTC</p>
+                        <p>88/2021/TT-BTC</p>
                     </div>
                     <div className="mt-2">
                         <div className="text-[#dc2626] font-bold text-base">

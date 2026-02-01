@@ -958,3 +958,61 @@
   }
 }
 
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    background-color: white;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Hide sidebar and navigation */
+  aside, 
+  nav, 
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Hide the specific header in Owner Layout */
+  main > div.bg-white.border-b.border-slate-200 {
+    display: none !important;
+  }
+
+  /* Reset layout constraints for printing */
+  .flex.h-screen {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* Ensure the print container takes full width */
+  .print-page {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  /* Adjust the invoice template for print */
+  .print-page > div {
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+

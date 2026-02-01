@@ -192,7 +192,7 @@ const InvoicePDFDocument: React.FC<InvoicePDFDocumentProps> = ({
                     <View style={styles.headerRight}>
                         <Text style={styles.circularInfo}>Ban hành kèm theo</Text>
                         <Text style={styles.circularInfo}>thông tư số</Text>
-                        <Text style={styles.circularInfo}>số/2017/TT-BTC</Text>
+                        <Text style={styles.circularInfo}>88/2021/TT-BTC</Text>
                         <Text style={styles.invoiceNumber}>SỐ: {invoiceNumber}</Text>
                     </View>
                 </View>
