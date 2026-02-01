@@ -6,7 +6,7 @@ import Link from "next/link";
 
 
 import { showToast } from "@/components/ui/toast";
-import NotificationBell from "@/components/notification-bell";
+
 
 interface EmployeeLayoutProps {
   children: React.ReactNode;
@@ -142,12 +142,7 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
                 </Link>
               </div>
               <div className="flex items-center gap-4">
-                {user && (
-                  <NotificationBell
-                    householdId={user.household_id}
-                    role="employee"
-                  />
-                )}
+
                 <span className="text-sm text-[#1e3a8a]">
                   Xin chào, {user?.user_name || "Employee"}
                 </span>

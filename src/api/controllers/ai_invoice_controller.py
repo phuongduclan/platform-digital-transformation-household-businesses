@@ -233,27 +233,7 @@ def owner_create_ai_invoice():
             details = detail_repo.list_by_invoice_id(invoice_with_details.id, household_id)
             invoice_with_details.details = details
         
-        # Send real-time notification to household members
-        try:
-            from app import get_socketio
-            from services.notification_service import NotificationService
-            
-            socketio = get_socketio()
-            print(f"DEBUG: [Owner] Attempting to send notification. SocketIO instance: {socketio}")
-            if socketio:
-                notification_service = NotificationService(socketio)
-                notification_service.notify_ai_draft_created(
-                    household_id=household_id,
-                    invoice_id=invoice_with_details.id if invoice_with_details else result['invoice'].id,
-                    invoice_data=invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),
-                    confidence=result['confidence'],
-                    warnings=result['warnings']
-                )
-            else:
-                print("DEBUG: [Owner] SocketIO instance is None, notification skipped")
-        except Exception as e:
-            # Don't fail request if notification fails
-            print(f"DEBUG: [Owner] Failed to send notification: {str(e)}")
+
         
         return jsonify({
             'invoice': invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),
@@ -346,27 +326,7 @@ def employee_create_ai_invoice():
             details = detail_repo.list_by_invoice_id(invoice_with_details.id, household_id)
             invoice_with_details.details = details
         
-        # Send real-time notification to household members
-        try:
-            from app import get_socketio
-            from services.notification_service import NotificationService
-            
-            socketio = get_socketio()
-            print(f"DEBUG: [Employee] Attempting to send notification. SocketIO instance: {socketio}")
-            if socketio:
-                notification_service = NotificationService(socketio)
-                notification_service.notify_ai_draft_created(
-                    household_id=household_id,
-                    invoice_id=invoice_with_details.id if invoice_with_details else result['invoice'].id,
-                    invoice_data=invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),
-                    confidence=result['confidence'],
-                    warnings=result['warnings']
-                )
-            else:
-                print("DEBUG: [Employee] SocketIO instance is None, notification skipped")
-        except Exception as e:
-            # Don't fail request if notification fails
-            print(f"DEBUG: [Employee] Failed to send notification: {str(e)}")
+
         
         return jsonify({
             'invoice': invoice_to_dict(invoice_with_details if invoice_with_details else result['invoice']),

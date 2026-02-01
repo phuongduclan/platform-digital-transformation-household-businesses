@@ -20,8 +20,7 @@ PyJWT
 google-genai>=0.1.0
 
 # Real-time Notifications
-flask-socketio>=5.3.0
-python-socketio>=5.9.0
+
 eventlet>=0.33.3
 
 # Fuzzy Matching

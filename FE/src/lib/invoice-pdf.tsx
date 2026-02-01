@@ -10,12 +10,10 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
 
     // Create container for PDF content
     const container = document.createElement('div');
-    container.style.position = 'absolute';
+    container.style.position = 'fixed'; // Changed from absolute to fixed to ensure it doesn't affect flow
     container.style.top = '0';
-    container.style.left = '0';
+    container.style.left = '-10000px'; // Move off-screen instead of opacity: 0
     container.style.width = '210mm'; // A4 width
-    container.style.opacity = '0';
-    container.style.pointerEvents = 'none';
     container.style.zIndex = '-1000';
     container.style.backgroundColor = 'white';
 
@@ -23,6 +21,9 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
     // We add the link tag here to ensure it's in the DOM during capture
     container.innerHTML = `
         <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+            body { font-family: 'Be Vietnam Pro', sans-serif; }
+        </style>
         <div style="background: white;">
             ${htmlContent}
         </div>
@@ -38,7 +39,12 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
     }
 
     // Additional delay to ensure layout is calculated and rendered
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Increased delay slightly to be safe
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Calculate height to ensure no cutting
+    const element = container.firstElementChild as HTMLElement; // Get the wrapper div or the link? actually container has children.
+    // Better to target the content wrapper
 
     const options = {
         margin: [10, 10, 10, 10], // top, right, bottom, left
@@ -51,7 +57,7 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
             letterRendering: true,
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 794, // Standard A4 width in px
+            windowWidth: 794, // Standard A4 width in px at 96dpi
             backgroundColor: '#ffffff'
         },
         jsPDF: {
