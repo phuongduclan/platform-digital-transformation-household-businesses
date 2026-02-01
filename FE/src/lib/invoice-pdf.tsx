@@ -54,27 +54,24 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
 
     // Create container for PDF content
     const container = document.createElement('div');
-    container.style.position = 'fixed';
+    container.style.position = 'absolute';
     container.style.top = '0';
-    container.style.left = '0';
-    container.style.width = '210mm'; // A4 width
-    container.style.zIndex = '-9999';
+    container.style.left = '-10000px'; // Position off-screen explicitly
+    // container.style.zIndex = '-9999'; // Remove negative z-index to avoid html2canvas skipping it
+    container.style.width = '210mm';
     container.style.backgroundColor = '#ffffff';
 
     // Inject font link and HTML content
-    // Note: Tailwind classes need the style to be present. 
-    // Since we are not building CSS, we rely on html2pdf using computed styles 
-    // OR we need to ensure the styles are available.
-    // However, html2pdf renders in a hidden iframe/container usually?
-    // Using `document.body.appendChild(container)` puts it in the main document, 
-    // so it should inherit global styles if they apply.
-    // BUT `RetailInvoiceTemplate` uses specific tailwind utility classes.
-    // If we just dump HTML, those classes might rely on Tailwind stylesheet being present in the page.
-    // Since this runs in the browser where the app is loaded, the Tailwind styles SHOULD be available.
-
+    // Explicitly add Tailwind directives if possible or ensure text color is set
+    // We wrap in a div that enforces black text and white background just in case
     container.innerHTML = `
         <style>
-            .invoice-container { background: white; width: 100%; min-height: 297mm; }
+            .invoice-container { 
+                background: white; 
+                width: 210mm; 
+                min-height: 297mm; 
+                color: black;
+            }
         </style>
         <div class="invoice-container">
             ${htmlContent}
