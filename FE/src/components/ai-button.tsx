@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import styled from 'styled-components';
 
 interface AIButtonProps {
   onClick?: () => void;
@@ -27,18 +26,67 @@ const AIButton: React.FC<AIButtonProps> = ({
   const config = sizeConfig[size];
 
   return (
-    <StyledWrapper $size={size}>
+    <div className="relative group perspective-1000">
+      <style jsx>{`
+        @keyframes spin-and-zoom {
+          0% { transform: rotate(0deg) scale(1); }
+          50% { transform: rotate(180deg) scale(1.1); }
+          100% { transform: rotate(360deg) scale(1); }
+        }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          50% { opacity: 1; }
+          100% { transform: translateX(100%); opacity: 0; }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-spin-and-zoom {
+          animation: spin-and-zoom 2s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+        .animate-fade-in-up {
+          animation: fadeInUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+      `}</style>
+
       <button
-        className="ai-button"
         onClick={onClick}
         disabled={disabled || isLoading}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
+        style={{ width: config.width, height: config.height }}
+        className={`
+          flex flex-col items-center justify-center
+          bg-[#063525] border-[3px] border-[#42c498] rounded-xl
+          text-[#e5dede] font-bold relative cursor-pointer overflow-hidden
+          transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)]
+          shadow-[4px_4px_1px_#000000] p-0
+          disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-[#0a3d2e]
+          hover:disabled:bg-[#0a3d2e] hover:disabled:transform-none hover:disabled:shadow-[4px_4px_1px_#000000] hover:disabled:border-[#42c498]
+          hover:bg-[#1a5c46] hover:border-[#030504]
+          hover:-translate-x-1.5 hover:-translate-y-1.5 hover:rotate-1
+          hover:shadow-[10px_10px_0_#000000,15px_15px_20px_rgba(64,164,122,0.2)]
+          active:translate-x-[-2px] active:translate-y-[-2px]
+        `}
       >
-        <div className="ai-content">
-          <div className="ai-logo-container">
+        <div className="flex flex-col items-center justify-center w-full h-full z-[2] relative">
+          <div
+            className={`
+              flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] text-[#42c498]
+              ${isHovering ? '-translate-y-2 text-[#5cdbab]' : ''}
+              ${isHovering && isLoading ? 'animate-spin-and-zoom' : ''}
+            `}
+          >
             <svg
-              className={`ai-icon ${isLoading ? 'spinning' : ''}`}
+              className={`
+                transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]
+                ${isLoading ? 'animate-spin' : ''}
+                ${isHovering ? 'drop-shadow-[0_4px_8px_rgba(66,196,152,0.4)]' : ''}
+              `}
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
               width={config.iconSize}
@@ -52,198 +100,22 @@ const AIButton: React.FC<AIButtonProps> = ({
           </div>
 
           {isHovering && (
-            <div className="button-text">
-              <span className="text-powered-by">Powered By</span>
-              <span className="text-gpt">GPT-Omni</span>
+            <div className="flex flex-col items-center text-center leading-[1.2] animate-fade-in-up">
+              <span className="text-[10px] font-normal tracking-[0.5px] text-[#a8a8a8] mt-1">
+                Powered By
+              </span>
+              <span className="text-[12px] font-bold tracking-[0.5px] text-[#42c498] mt-[2px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+                GPT-Omni
+              </span>
             </div>
           )}
         </div>
 
         {/* Shine effect pseudo-elements */}
-        <div className="shine-effect" />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.1)] to-transparent pointer-events-none animate-shimmer" />
       </button>
-    </StyledWrapper>
+    </div>
   );
 };
-
-const StyledWrapper = styled.div<{ $size: 'small' | 'medium' | 'large' }>`
-  ${props => {
-    const sizes = {
-      small: { width: 80, height: 80 },
-      medium: { width: 120, height: 120 },
-      large: { width: 142, height: 142 }
-    };
-    const size = sizes[props.$size];
-    return `
-      .ai-button {
-        width: ${size.width}px;
-        height: ${size.height}px;
-      }
-    `;
-  }}
-
-  .ai-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #063525;
-    border: 3px solid #42c498;
-    border-radius: 12px;
-    color: #e5dede;
-    font-weight: bold;
-    position: relative;
-    cursor: pointer;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 4px 4px 1px #000000;
-    padding: 0;
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background-color: #0a3d2e;
-    }
-
-    &:hover:not(:disabled) {
-      background-color: #1a5c46;
-      border-color: #030504;
-      transform: translate(-6px, -6px) rotate(1deg);
-      box-shadow: 10px 10px 0 #000000, 15px 15px 20px rgba(64, 164, 122, 0.2);
-    }
-
-    &:active:not(:disabled) {
-      transform: translate(-2px, -2px);
-    }
-  }
-
-  .ai-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    position: relative;
-  }
-
-  .ai-logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    color: #42c498;
-
-    .ai-button:hover & {
-      transform: translateY(-8px);
-      color: #5cdbab;
-    }
-
-    .ai-button:hover &.spinning {
-      animation: spin-and-zoom 2s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
-    }
-  }
-
-  .ai-icon {
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-
-    .ai-button:hover & {
-      filter: drop-shadow(0 4px 8px rgba(66, 196, 152, 0.4));
-    }
-  }
-
-  .button-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1.2;
-    text-align: center;
-    animation: fadeInUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-  }
-
-  .text-powered-by {
-    font-size: 10px;
-    font-weight: normal;
-    letter-spacing: 0.5px;
-    color: #a8a8a8;
-    margin-top: 4px;
-  }
-
-  .text-gpt {
-    font-size: 12px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-    color: #42c498;
-    margin-top: 2px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  .shine-effect {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent
-    );
-    animation: shimmer 2s infinite;
-    pointer-events: none;
-  }
-
-  @keyframes spin-and-zoom {
-    0% {
-      transform: rotate(0deg) scale(1);
-    }
-    50% {
-      transform: rotate(180deg) scale(1.1);
-    }
-    100% {
-      transform: rotate(360deg) scale(1);
-    }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-  }
-
-  @keyframes spinning {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .spinning {
-    animation: spinning 2s linear infinite !important;
-  }
-`;
 
 export default AIButton;
