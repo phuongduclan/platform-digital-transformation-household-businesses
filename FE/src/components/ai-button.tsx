@@ -70,7 +70,7 @@ const AIButton: React.FC<AIButtonProps> = ({
           hover:bg-[#1a5c46] hover:border-[#030504]
           hover:-translate-x-1.5 hover:-translate-y-1.5 hover:rotate-1
           hover:shadow-[10px_10px_0_#000000,15px_15px_20px_rgba(64,164,122,0.2)]
-          active:translate-x-[-2px] active:translate-y-[-2px]
+          active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-[4px_4px_1px_#000000]
         `}
       >
         <div className="flex flex-col items-center justify-center w-full h-full z-[2] relative">

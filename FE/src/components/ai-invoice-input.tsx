@@ -110,7 +110,7 @@ export default function AIInvoiceInput({ role = "owner" }: AIInvoiceInputProps) 
                         onClick={handleSubmit}
                         isLoading={loading}
                         disabled={loading || isListening}
-                        size="small"
+                        size="large"
                     />
                     <div>
                         <h2 className="text-lg font-bold text-[#1e3a8a]">

@@ -80,35 +80,7 @@ export default function InvoicePrintPage() {
 
     return (
         <div className="print-page">
-            <style jsx global>{`
-                @media print {
-                    @page {
-                        margin: 0;
-                        size: A4;
-                    }
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        background: white;
-                    }
-                    .no-print {
-                        display: none !important;
-                    }
-                }
-                .print-page {
-                    background: white;
-                    min-height: 100vh;
-                    display: flex;
-                    justify-content: center;
-                    padding: 20px;
-                }
-                @media print {
-                    .print-page {
-                        padding: 0;
-                        display: block;
-                    }
-                }
-            `}</style>
+            {/* Styles moved to globals.css */}
 
             <div className="no-print fixed top-4 right-4 flex gap-2">
                 <button
