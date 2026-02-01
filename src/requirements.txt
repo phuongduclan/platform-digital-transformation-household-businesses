@@ -21,7 +21,7 @@ google-genai>=0.1.0
 
 # Real-time Notifications
 
-eventlet>=0.33.3
+
 
 # Fuzzy Matching
 fuzzywuzzy>=0.18.0

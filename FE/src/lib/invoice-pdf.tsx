@@ -10,21 +10,22 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
 
     // Create container for PDF content
     const container = document.createElement('div');
-    container.style.position = 'fixed'; // Changed from absolute to fixed to ensure it doesn't affect flow
+    container.style.position = 'fixed';
     container.style.top = '0';
-    container.style.left = '-10000px'; // Move off-screen instead of opacity: 0
-    container.style.width = '210mm'; // A4 width
-    container.style.zIndex = '-1000';
-    container.style.backgroundColor = 'white';
+    container.style.left = '0';
+    container.style.width = '210mm';
+    container.style.zIndex = '-9999'; // Hide behind everything
+    container.style.backgroundColor = '#ffffff'; // Ensure white background
 
     // Inject font link and HTML content
-    // We add the link tag here to ensure it's in the DOM during capture
     container.innerHTML = `
         <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
             body { font-family: 'Be Vietnam Pro', sans-serif; }
+            /* Ensure the content itself has background */
+            .pdf-content { background: white; width: 100%; min-height: 297mm; }
         </style>
-        <div style="background: white;">
+        <div class="pdf-content">
             ${htmlContent}
         </div>
     `;
@@ -38,26 +39,19 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
         console.warn('Font loading failed or timed out', e);
     }
 
-    // Additional delay to ensure layout is calculated and rendered
-    // Increased delay slightly to be safe
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Calculate height to ensure no cutting
-    const element = container.firstElementChild as HTMLElement; // Get the wrapper div or the link? actually container has children.
-    // Better to target the content wrapper
+    // Delay needs to be sufficient for layout
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     const options = {
-        margin: [10, 10, 10, 10], // top, right, bottom, left
+        margin: [0, 0, 0, 0], // No margin, we handle padding in CSS
         filename: `Hoa_don_${data.invoice.id}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 1.0 },
         html2canvas: {
             scale: 2,
             useCORS: true,
-            logging: true,
+            logging: false, // Turn off logging in prod
             letterRendering: true,
-            scrollX: 0,
-            scrollY: 0,
-            windowWidth: 794, // Standard A4 width in px at 96dpi
+            windowWidth: 794, // A4 width @ 96 DPI
             backgroundColor: '#ffffff'
         },
         jsPDF: {
@@ -66,15 +60,21 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
             orientation: 'portrait'
         }
     };
-
-    try {
-        await html2pdf().set(options).from(container).save();
-    } catch (error) {
-        console.error('PDF Generation Error:', error);
-        alert('Có lỗi xảy ra khi xuất PDF. Vui lòng thử lại.');
-    } finally {
-        if (document.body.contains(container)) {
-            document.body.removeChild(container);
-        }
+    jsPDF: {
+        unit: 'mm',
+            format: 'a4',
+                orientation: 'portrait'
     }
+};
+
+try {
+    await html2pdf().set(options).from(container).save();
+} catch (error) {
+    console.error('PDF Generation Error:', error);
+    alert('Có lỗi xảy ra khi xuất PDF. Vui lòng thử lại.');
+} finally {
+    if (document.body.contains(container)) {
+        document.body.removeChild(container);
+    }
+}
 };
