@@ -4,8 +4,10 @@ from flask import request, jsonify, g, current_app
 import jwt
 
 def log_request_info(app):
-    app.logger.debug('Headers: %s', request.headers)
-    app.logger.debug('Body: %s', request.get_data())
+    # Disabled for performance - was logging every request
+    # app.logger.debug('Headers: %s', request.headers)
+    # app.logger.debug('Body: %s', request.get_data())
+    pass
 
 def handle_options_request():
     return jsonify({'message': 'CORS preflight response'}), 200

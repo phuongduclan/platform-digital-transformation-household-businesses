@@ -103,12 +103,12 @@ class AIInvoiceService:
         customers = self.customer_service.list_customers(household_id, status='Active')
         units = self.unit_service.list_units(household_id, status='ACTIVE')
         
-        # DEBUG: Log customer data
-        print(f"\n=== DEBUG: Loading context for household_id={household_id} ===")
-        print(f"Found {len(customers)} ACTIVE customers:")
-        for c in customers:
-            print(f"  - ID={c.id}: '{c.name}' (phone: {c.phone})")
-        print("===\n")
+        # DEBUG: Log customer data (disabled for performance)
+        # print(f"\n=== DEBUG: Loading context for household_id={household_id} ===")
+        # print(f"Found {len(customers)} ACTIVE customers:")
+        # for c in customers:
+        #     print(f"  - ID={c.id}: '{c.name}' (phone: {c.phone})")
+        # print("===\n")
         
         return {
             'household_id': household_id,
@@ -154,18 +154,18 @@ class AIInvoiceService:
         # Match customer
         customer_id = None
         if ai_result.get('customer_name'):
-            # DEBUG: Log AI result for customer
-            print(f"\n=== DEBUG: Customer Matching ===")
-            print(f"AI returned customer_name: '{ai_result['customer_name']}'")
-            print(f"Available customers: {[c['name'] for c in context['customers']]}")
+            # DEBUG: Log AI result for customer (disabled for performance)
+            # print(f"\n=== DEBUG: Customer Matching ===")
+            # print(f"AI returned customer_name: '{ai_result['customer_name']}'")
+            # print(f"Available customers: {[c['name'] for c in context['customers']]}")
             
             customer_id, match_score = self._match_customer(
                 ai_result['customer_name'],
                 context['customers']
             )
             
-            print(f"Match result: customer_id={customer_id}, score={match_score}")
-            print("===\n")
+            # print(f"Match result: customer_id={customer_id}, score={match_score}")
+            # print("===\n")
             
             if not customer_id:
                 warnings.append(f"Không tìm thấy khách hàng: {ai_result['customer_name']}")
