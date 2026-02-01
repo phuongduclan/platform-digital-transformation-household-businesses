@@ -54,27 +54,22 @@ export const generateInvoicePDF = async (data: InvoicePDFData) => {
             windowWidth: 794, // A4 width @ 96 DPI
             backgroundColor: '#ffffff'
         },
+
         jsPDF: {
             unit: 'mm',
             format: 'a4',
             orientation: 'portrait'
         }
     };
-    jsPDF: {
-        unit: 'mm',
-            format: 'a4',
-                orientation: 'portrait'
-    }
-};
 
-try {
-    await html2pdf().set(options).from(container).save();
-} catch (error) {
-    console.error('PDF Generation Error:', error);
-    alert('Có lỗi xảy ra khi xuất PDF. Vui lòng thử lại.');
-} finally {
-    if (document.body.contains(container)) {
-        document.body.removeChild(container);
+    try {
+        await html2pdf().set(options).from(container).save();
+    } catch (error) {
+        console.error('PDF Generation Error:', error);
+        alert('Có lỗi xảy ra khi xuất PDF. Vui lòng thử lại.');
+    } finally {
+        if (document.body.contains(container)) {
+            document.body.removeChild(container);
+        }
     }
-}
 };
