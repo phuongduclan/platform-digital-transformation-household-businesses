@@ -49,11 +49,11 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
 
     return (
         <div
-            className="w-[210mm] min-h-[297mm] mx-auto bg-white p-[40px] text-sm leading-relaxed"
+            className="w-[210mm] min-h-[297mm] mx-auto bg-white p-[30px] text-sm leading-relaxed"
             style={{ fontFamily: '"Be Vietnam Pro", sans-serif' }}
         >
             {/* Header Section */}
-            <div className="flex justify-between items-start mb-8">
+            <div className="flex justify-between items-start mb-6">
                 {/* Left: BizFlow Logo & Info */}
                 <div className="w-1/2">
                     <h1 className="text-[#1e3a8a] font-bold text-3xl mb-2 tracking-tight">BizFlow</h1>
@@ -78,13 +78,13 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
             </div>
 
             {/* Title */}
-            <div className="text-center mb-8 relative">
+            <div className="text-center mb-6 relative">
                 <h2 className="text-2xl font-bold text-gray-900 uppercase tracking-wide">HÓA ĐƠN BÁN LẺ</h2>
                 <div className="absolute w-32 h-1 bg-[#1e3a8a] bottom-[-10px] left-1/2 transform -translate-x-1/2 opacity-20"></div>
             </div>
 
             {/* Customer Info */}
-            <div className="mb-8 space-y-3 px-2">
+            <div className="mb-6 space-y-3 px-2">
                 <div className="flex items-end">
                     <span className="font-semibold min-w-[120px] text-gray-700">Tên khách hàng:</span>
                     <div className="flex-1 border-b border-gray-300 pb-1 font-medium text-gray-900 ml-2">
@@ -146,7 +146,7 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
             </div>
 
             {/* Total Section */}
-            <div className="mb-10 px-2">
+            <div className="mb-6 px-2">
                 <div className="flex justify-end items-end mb-3">
                     <span className="font-bold text-gray-900 mr-4 text-base">Tổng cộng:</span>
                     <div className="min-w-[150px] border-b-2 border-gray-400 pb-1 text-right font-bold text-lg text-[#1e3a8a]">
@@ -177,7 +177,7 @@ const RetailInvoiceTemplate: React.FC<RetailInvoiceTemplateProps> = ({
                 </div>
             </div>
 
-            <div className="mt-12 text-[10px] text-gray-400 text-center italic border-t border-gray-100 pt-4">
+            <div className="mt-4 text-[10px] text-gray-400 text-center italic border-t border-gray-100 pt-4">
                 Sản phẩm được bảo hành theo chính sách tiêu chuẩn của nhà sản xuất.
             </div>
         </div >
