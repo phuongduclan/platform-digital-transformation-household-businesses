@@ -67,19 +67,40 @@ export const InvoiceTemplate: React.FC<{ data: InvoicePDFData }> = ({ data }) =>
             </div>
 
             <div style={{ fontSize: '13px', lineHeight: '1.8', marginBottom: '30px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '5px' }}>
-                    <strong>Đơn vị bán hàng:</strong> <span>{data.household?.name || 'Hộ Kinh Doanh'}</span>
-                    <strong>MST:</strong> <span>{data.household?.tax_code || '---'}</span>
-                    <strong>Địa chỉ:</strong> <span>{data.household?.address || '---'}</span>
-                    <strong>SĐT:</strong> <span>{data.household?.phone || '---'}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex' }}>
+                        <strong style={{ width: '130px', flexShrink: 0 }}>Đơn vị bán hàng:</strong>
+                        <span>{data.household?.name || 'Hộ Kinh Doanh'}</span>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                        <strong style={{ width: '130px', flexShrink: 0 }}>MST:</strong>
+                        <span>{data.household?.tax_code || '---'}</span>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                        <strong style={{ width: '130px', flexShrink: 0 }}>Địa chỉ:</strong>
+                        <span>{data.household?.address || '---'}</span>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                        <strong style={{ width: '130px', flexShrink: 0 }}>SĐT:</strong>
+                        <span>{data.household?.phone || '---'}</span>
+                    </div>
                 </div>
 
                 <div style={{ borderTop: '1px dashed #ccc', margin: '15px 0' }}></div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '5px' }}>
-                    <strong>Khách hàng:</strong> <span>{data.customer?.name || 'Khách lẻ'}</span>
-                    <strong>Địa chỉ:</strong> <span>{data.customer?.address || '---'}</span>
-                    <strong>SĐT:</strong> <span>{data.customer?.phone || '---'}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex' }}>
+                        <strong style={{ width: '130px', flexShrink: 0 }}>Khách hàng:</strong>
+                        <span>{data.customer?.name || 'Khách lẻ'}</span>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                        <strong style={{ width: '130px', flexShrink: 0 }}>Địa chỉ:</strong>
+                        <span>{data.customer?.address || '---'}</span>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                        <strong style={{ width: '130px', flexShrink: 0 }}>SĐT:</strong>
+                        <span>{data.customer?.phone || '---'}</span>
+                    </div>
                 </div>
             </div>
 
