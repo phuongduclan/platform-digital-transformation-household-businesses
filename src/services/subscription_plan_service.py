@@ -59,14 +59,19 @@ class SubscriptionPlanService(ISubscriptionPlanService):
         if not plan:
             raise ValueError("Subscription plan not found")
 
-        plan.update(
-            name=name,
-            price=price,
-            billing_cycle=billing_cycle,
-            description=description,
-            status=status,
-            updated_by=updated_by
-        )
+        # Update ORM model attributes directly (không gọi plan.update() vì đây là ORM model)
+        if name is not None:
+            plan.name = name
+        if price is not None:
+            plan.price = price
+        if billing_cycle is not None:
+            plan.billing_cycle = billing_cycle
+        if description is not None:
+            plan.description = description
+        if status is not None:
+            plan.status = status
+        if updated_by is not None:
+            plan.updated_by = updated_by
         plan.updated_at = updated_at or vietnam_now()
 
         return self.repository.update(plan)
